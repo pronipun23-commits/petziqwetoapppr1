@@ -160,7 +160,7 @@ export function PetziqAI() {
       <button
         onClick={() => setOpen((value) => !value)}
         aria-label={open ? 'Close Petziq AI' : 'Open Petziq AI chat assistant'}
-        className={`focus-ring fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 text-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-blue ${
+        className={`focus-ring fixed bottom-20 sm:bottom-6 left-4 sm:left-auto sm:right-6 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 text-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-blue ${
           open
             ? 'bg-ink-800 border border-white/20'
             : 'bg-gradient-to-r from-brand-500 via-teal-400 to-ocean-500 ring-2 ring-white/20 shadow-glow'
@@ -191,7 +191,7 @@ export function PetziqAI() {
       {open && (
         <section
           aria-label="Petziq AI chat"
-          className="fixed bottom-24 right-3 z-50 flex max-h-[calc(100dvh-7rem)] w-[calc(100vw-1.5rem)] max-w-md flex-col overflow-hidden rounded-[1.75rem] border border-cyan-200/15 bg-ink-900/95 shadow-2xl backdrop-blur-2xl animate-scale-in origin-bottom-right sm:right-6 sm:w-[25rem]"
+          className="fixed bottom-24 left-3 sm:left-auto right-3 sm:right-6 z-50 flex max-h-[calc(100dvh-7rem)] w-[calc(100vw-1.5rem)] max-w-md flex-col overflow-hidden rounded-[1.75rem] border border-cyan-200/15 bg-ink-900/95 shadow-2xl backdrop-blur-2xl animate-scale-in origin-bottom-left sm:origin-bottom-right sm:w-[25rem]"
         >
           <header className="relative overflow-hidden border-b border-white/[0.08] bg-gradient-to-br from-ocean-950/80 via-ink-900 to-iris-950/50 px-4 py-4">
             <div className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-cyan-300/10 blur-3xl" />
