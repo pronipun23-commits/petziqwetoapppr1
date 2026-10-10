@@ -33,6 +33,7 @@ const NAV_ITEMS = [
 const MOBILE_NAV = [
   { label: 'Home', path: '/dashboard', icon: Home },
   { label: 'Pets', path: '/my-pets', icon: PawPrint },
+  { label: 'Smart Tags', path: '/smart-tags', icon: Tag },
   { label: 'Plants', path: '/my-plants', icon: Sprout },
   { label: 'Explore', path: '/explore', icon: Compass },
   { label: 'More', path: '#more', icon: Menu },
@@ -230,7 +231,7 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
       )}
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-white/[0.08] glass px-2 py-1.5 backdrop-blur-xl lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-white/[0.08] glass px-1 py-1 backdrop-blur-xl lg:hidden">
         {MOBILE_NAV.map((item) => {
           const active = isActive(item.path) && item.path !== '#more';
           if (item.path === '#more') {
@@ -238,11 +239,11 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
               <button
                 key="more"
                 onClick={() => setMoreOpen(true)}
-                className="flex flex-col items-center gap-0.5 rounded-xl px-4 py-2 text-ink-300 transition hover:text-ink-50"
+                className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-ink-300 transition hover:text-ink-50"
                 aria-label="More"
               >
                 <item.icon className="h-5 w-5" />
-                <span className="text-[10px] font-medium">More</span>
+                <span className="text-[10px] font-medium leading-none">More</span>
               </button>
             );
           }
@@ -250,13 +251,13 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
             <button
               key={item.path}
               onClick={() => onNavigate(item.path)}
-              className={`flex flex-col items-center gap-0.5 rounded-xl px-4 py-2 transition ${
+              className={`flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 transition ${
                 active ? 'text-brand-300' : 'text-ink-300 hover:text-ink-50'
               }`}
               aria-label={item.label}
             >
               <item.icon className="h-5 w-5" />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium leading-none whitespace-nowrap">{item.label}</span>
             </button>
           );
         })}
