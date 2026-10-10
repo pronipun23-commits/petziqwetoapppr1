@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Home, PawPrint, Sprout, Trophy, Bell,
   Heart, User, LogOut, Menu, X, Search,
-  BookOpen, Compass, Apple, Tag, HelpCircle, Mail, Shield,
+  BookOpen, Compass, Apple, Tag, HelpCircle, Mail, Shield, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -143,6 +143,16 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
         </button>
 
         <div className="flex items-center gap-2">
+          {/* Docked AI Assistant Button */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('toggle-petziq-ai'))}
+            className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-brand-500/20 via-teal-500/20 to-ocean-500/20 px-2.5 py-1.5 text-cyan-200 transition hover:bg-cyan-500/25"
+            aria-label="Petziq AI Assistant"
+          >
+            <Sparkles className="h-4 w-4 text-cyan-300 animate-pulse" />
+            <span className="text-xs font-semibold tracking-wide text-white">AI</span>
+          </button>
+
           <button
             onClick={() => setSearchOpen((v) => !v)}
             className="grid h-9 w-9 place-items-center rounded-xl border border-white/[0.08] text-ink-200 transition hover:bg-white/[0.06]"
