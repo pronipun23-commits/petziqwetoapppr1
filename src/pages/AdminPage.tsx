@@ -696,31 +696,101 @@ function OrdersTab() {
   const [selectedOrder, setSelectedOrder] = useState<typeof orders[0] | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const fetchOrders = () => {
-    supabase
-      .from('smart_tag_orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100)
-      .then(({ data, error: err }) => {
-        let list: any[] = [];
-        if (data && data.length > 0) {
-          list = data;
+  const fetchOrders = async () => {
+    try {
+      let list: any[] = [];
+
+      // 1. Fetch from smart_tag_orders table
+      try {
+        const { data: orderData } = await supabase
+          .from('smart_tag_orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (orderData && orderData.length > 0) {
+          list = [...orderData];
         }
-        // Seamless fallback to local storage orders so admin always sees customer orders
-        try {
-          const local = JSON.parse(localStorage.getItem('petziq_smart_tag_orders') || '[]');
-          if (local && local.length > 0) {
-            const existingIds = new Set(list.map((o) => o.order_number || o.id));
-            const unmerged = local.filter((o: any) => !existingIds.has(o.order_number || o.id));
-            list = [...list, ...unmerged];
-          }
-        } catch {
-          // ignore
+      } catch (e) {
+        console.warn('Could not query smart_tag_orders directly:', e);
+      }
+
+      // 2. Fallback / merge local storage orders
+      try {
+        const local = JSON.parse(localStorage.getItem('petziq_smart_tag_orders') || '[]');
+        if (local && local.length > 0) {
+          const existingIds = new Set(list.map((o) => o.order_number || o.id));
+          const unmerged = local.filter((o: any) => !existingIds.has(o.order_number || o.id));
+          list = [...list, ...unmerged];
         }
-        setOrders(list);
-        setLoading(false);
-      });
+      } catch {
+        // ignore
+      }
+
+      // 3. ALSO fetch all Smart Tags from Supabase & localStorage and synthesize order entries for any tag
+      let tagList: any[] = [];
+      try {
+        const { data: tagsData } = await supabase
+          .from('smart_tags')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (tagsData && tagsData.length > 0) {
+          tagList = [...tagsData];
+        }
+      } catch (e) {
+        console.warn('Could not query smart_tags directly:', e);
+      }
+
+      try {
+        const localTags = JSON.parse(localStorage.getItem('petziqq_smart_tags') || '[]');
+        if (localTags && localTags.length > 0) {
+          const existingTagIds = new Set(tagList.map((t) => t.tag_id || t.id));
+          const unmergedTags = localTags.filter((t: any) => !existingTagIds.has(t.tag_id || t.id));
+          tagList = [...tagList, ...unmergedTags];
+        }
+      } catch {
+        // ignore
+      }
+
+      // Track existing tag IDs or order numbers already in list
+      const existingRefs = new Set(list.map((o) => o.tag_id || o.order_number || o.id));
+
+      // Synthesize order representation for tags that don't yet have a standalone checkout order
+      for (const tag of tagList) {
+        const tagRef = tag.tag_id || tag.id;
+        if (!existingRefs.has(tagRef) && !existingRefs.has(`PZO-${tagRef}`)) {
+          list.push({
+            id: tag.id || tagRef,
+            order_number: tag.tag_id || `PZO-${tag.id?.slice(0, 8) || 'TAG'}`,
+            customer_name: tag.owner_info?.owner_name || tag.name || 'Pet Owner',
+            phone: tag.owner_info?.emergency_contact || tag.owner_info?.contact_phone || '',
+            email: tag.owner_info?.contact_email || '',
+            shipping_name: tag.owner_info?.owner_name || '',
+            address: tag.tag_details?.address || tag.owner_info?.address || 'India',
+            city: '',
+            state: '',
+            postal_code: '',
+            quantity: 1,
+            amount: 648,
+            payment_status: tag.status === 'active' ? 'paid' : 'pending',
+            shipping_status: tag.status === 'active' ? 'shipped' : 'processing',
+            notes: `${tag.name || 'Pet'} (${tag.tag_details?.species || tag.tag_type || 'Smart Tag'}${tag.tag_details?.breed ? ' - ' + tag.tag_details.breed : ''})`,
+            tag_id: tag.tag_id || tag.id,
+            created_at: tag.created_at || new Date().toISOString(),
+          });
+        }
+      }
+
+      // Sort newest first
+      list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setOrders(list);
+    } catch (err: any) {
+      console.error('Error fetching orders:', err);
+      setError(err?.message || 'Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -734,29 +804,44 @@ function OrdersTab() {
   ) => {
     setUpdatingId(orderId);
     try {
-      const { error: updErr } = await supabase
-        .from('smart_tag_orders')
-        .update({
-          payment_status: newPaymentStatus,
-          shipping_status: newShippingStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', orderId);
+      // 1. Try smart_tag_orders update
+      try {
+        const { error: updErr } = await supabase
+          .from('smart_tag_orders')
+          .update({
+            payment_status: newPaymentStatus,
+            shipping_status: newShippingStatus,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
 
-      if (updErr) {
-        // Fallback to update_order_status RPC if direct update has policy restriction
-        try {
+        if (updErr) {
           await supabase.rpc('update_order_status', {
             p_order_id: orderId,
             p_payment_status: newPaymentStatus,
             p_shipping_status: newShippingStatus,
           });
-        } catch {
-          // ignore
         }
+      } catch {
+        // ignore
       }
 
-      // Also persist to localStorage backup
+      // 2. Also update corresponding smart_tags record status if applicable
+      try {
+        const targetTagStatus = newPaymentStatus === 'paid' || newShippingStatus === 'delivered' ? 'active' : 'pending';
+        await supabase.from('smart_tags').update({ status: targetTagStatus, updated_at: new Date().toISOString() }).eq('tag_id', orderId);
+        await supabase.from('smart_tags').update({ status: targetTagStatus, updated_at: new Date().toISOString() }).eq('id', orderId);
+
+        const localTags = JSON.parse(localStorage.getItem('petziqq_smart_tags') || '[]');
+        const updatedTags = localTags.map((t: any) =>
+          t.id === orderId || t.tag_id === orderId ? { ...t, status: targetTagStatus, updated_at: new Date().toISOString() } : t
+        );
+        localStorage.setItem('petziqq_smart_tags', JSON.stringify(updatedTags));
+      } catch {
+        // ignore
+      }
+
+      // 3. Also persist to localStorage backup for orders
       try {
         const local = JSON.parse(localStorage.getItem('petziq_smart_tag_orders') || '[]');
         const updatedLocal = local.map((o: any) =>
