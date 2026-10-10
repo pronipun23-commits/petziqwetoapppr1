@@ -158,7 +158,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
                   className="btn-primary text-base shadow-glow-blue transition-transform hover:scale-[1.02]"
                 >
                   <Tag className="h-4 w-4" />
-                  Order Smart Tag (₹399)
+                  Order Smart Tag (₹599)
                 </button>
                 <button
                   onClick={() => onNavigate('/explore')}
