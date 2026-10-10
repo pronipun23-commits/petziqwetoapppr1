@@ -160,7 +160,7 @@ export function PetziqAI() {
       <button
         onClick={() => setOpen((value) => !value)}
         aria-label={open ? 'Close Petziq AI' : 'Open Petziq AI chat assistant'}
-        className={`focus-ring fixed bottom-20 sm:bottom-6 left-4 sm:left-auto sm:right-6 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 text-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-blue ${
+        className={`focus-ring fixed bottom-28 sm:bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2 rounded-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-blue ${
           open
             ? 'bg-ink-800 border border-white/20'
             : 'bg-gradient-to-r from-brand-500 via-teal-400 to-ocean-500 ring-2 ring-white/20 shadow-glow'
@@ -169,20 +169,20 @@ export function PetziqAI() {
         {open ? (
           <>
             <X className="h-5 w-5" strokeWidth={2.5} />
-            <span className="text-xs font-bold uppercase tracking-wider">Close Chat</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Close</span>
           </>
         ) : (
           <>
             <div className="relative flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-amber-200 animate-pulse" />
+              <Sparkles className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-amber-200 animate-pulse" />
               <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-cyan-300 ring-2 ring-brand-500" />
             </div>
             <div className="flex flex-col text-left">
               <span className="text-xs font-bold tracking-wide flex items-center gap-1">
-                Ask Petziq AI
+                Petziq AI
                 <span className="rounded bg-white/20 px-1 py-0.2 text-[9px] font-semibold text-white">Assistant</span>
               </span>
-              <span className="text-[10px] text-white/80 hidden xs:inline">Instant Vet & Care Help</span>
+              <span className="text-[10px] text-white/80 hidden xs:inline">Vet & Care Help</span>
             </div>
           </>
         )}
@@ -191,7 +191,7 @@ export function PetziqAI() {
       {open && (
         <section
           aria-label="Petziq AI chat"
-          className="fixed bottom-24 left-3 sm:left-auto right-3 sm:right-6 z-50 flex max-h-[calc(100dvh-7rem)] w-[calc(100vw-1.5rem)] max-w-md flex-col overflow-hidden rounded-[1.75rem] border border-cyan-200/15 bg-ink-900/95 shadow-2xl backdrop-blur-2xl animate-scale-in origin-bottom-left sm:origin-bottom-right sm:w-[25rem]"
+          className="fixed bottom-36 sm:bottom-24 right-3 sm:right-6 z-50 flex max-h-[calc(100dvh-10rem)] sm:max-h-[calc(100dvh-7rem)] w-[calc(100vw-1.5rem)] max-w-md flex-col overflow-hidden rounded-[1.75rem] border border-cyan-200/15 bg-ink-900/95 shadow-2xl backdrop-blur-2xl animate-scale-in origin-bottom-right sm:w-[25rem]"
         >
           <header className="relative overflow-hidden border-b border-white/[0.08] bg-gradient-to-br from-ocean-950/80 via-ink-900 to-iris-950/50 px-4 py-4">
             <div className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-cyan-300/10 blur-3xl" />
