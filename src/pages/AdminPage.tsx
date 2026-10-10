@@ -752,6 +752,21 @@ function OrdersTab() {
         // ignore
       }
 
+      // Check locally saved order overrides so admin status changes stick immediately
+      let savedOrdersMap: Record<string, any> = {};
+      try {
+        const local = JSON.parse(localStorage.getItem('petziq_smart_tag_orders') || '[]');
+        if (Array.isArray(local)) {
+          for (const o of local) {
+            if (o.id) savedOrdersMap[o.id] = o;
+            if (o.order_number) savedOrdersMap[o.order_number] = o;
+            if (o.tag_id) savedOrdersMap[o.tag_id] = o;
+          }
+        }
+      } catch {
+        // ignore
+      }
+
       // Track existing tag IDs or order numbers already in list
       const existingRefs = new Set(list.map((o) => o.tag_id || o.order_number || o.id));
 
@@ -759,6 +774,9 @@ function OrdersTab() {
       for (const tag of tagList) {
         const tagRef = tag.tag_id || tag.id;
         if (!existingRefs.has(tagRef) && !existingRefs.has(`PZO-${tagRef}`)) {
+          // If admin has previously updated this order status in local storage, respect that!
+          const override = savedOrdersMap[tagRef] || savedOrdersMap[tag.id] || savedOrdersMap[tag.tag_id];
+
           list.push({
             id: tag.id || tagRef,
             order_number: tag.tag_id || `PZO-${tag.id?.slice(0, 8) || 'TAG'}`,
@@ -772,8 +790,8 @@ function OrdersTab() {
             postal_code: '',
             quantity: 1,
             amount: 648,
-            payment_status: tag.status === 'active' ? 'paid' : 'pending',
-            shipping_status: tag.status === 'active' ? 'shipped' : 'processing',
+            payment_status: override?.payment_status || 'pending',
+            shipping_status: override?.shipping_status || 'pending',
             notes: `${tag.name || 'Pet'} (${tag.tag_details?.species || tag.tag_type || 'Smart Tag'}${tag.tag_details?.breed ? ' - ' + tag.tag_details.breed : ''})`,
             tag_id: tag.tag_id || tag.id,
             created_at: tag.created_at || new Date().toISOString(),
@@ -804,7 +822,7 @@ function OrdersTab() {
   ) => {
     setUpdatingId(orderId);
     try {
-      // 1. Try smart_tag_orders update
+      // 1. Try smart_tag_orders update in Supabase
       try {
         const { error: updErr } = await supabase
           .from('smart_tag_orders')
@@ -826,9 +844,9 @@ function OrdersTab() {
         // ignore
       }
 
-      // 2. Also update corresponding smart_tags record status if applicable
+      // 2. Also update corresponding smart_tags record status in Supabase & localStorage
       try {
-        const targetTagStatus = newPaymentStatus === 'paid' || newShippingStatus === 'delivered' ? 'active' : 'pending';
+        const targetTagStatus = newPaymentStatus === 'paid' ? 'active' : 'pending';
         await supabase.from('smart_tags').update({ status: targetTagStatus, updated_at: new Date().toISOString() }).eq('tag_id', orderId);
         await supabase.from('smart_tags').update({ status: targetTagStatus, updated_at: new Date().toISOString() }).eq('id', orderId);
 
@@ -841,28 +859,45 @@ function OrdersTab() {
         // ignore
       }
 
-      // 3. Also persist to localStorage backup for orders
+      // 3. Persist to localStorage orders queue
       try {
         const local = JSON.parse(localStorage.getItem('petziq_smart_tag_orders') || '[]');
-        const updatedLocal = local.map((o: any) =>
-          o.id === orderId || o.order_number === orderId
-            ? { ...o, payment_status: newPaymentStatus, shipping_status: newShippingStatus, updated_at: new Date().toISOString() }
-            : o
-        );
+        let found = false;
+        const updatedLocal = local.map((o: any) => {
+          if (o.id === orderId || o.order_number === orderId || o.tag_id === orderId) {
+            found = true;
+            return { ...o, payment_status: newPaymentStatus, shipping_status: newShippingStatus, updated_at: new Date().toISOString() };
+          }
+          return o;
+        });
+
+        if (!found) {
+          // If it was a synthesized tag order, save it so the status change persists across reloads
+          const matchingOrder = orders.find((o) => o.id === orderId || o.order_number === orderId || o.tag_id === orderId);
+          if (matchingOrder) {
+            updatedLocal.push({
+              ...matchingOrder,
+              payment_status: newPaymentStatus,
+              shipping_status: newShippingStatus,
+              updated_at: new Date().toISOString(),
+            });
+          }
+        }
         localStorage.setItem('petziq_smart_tag_orders', JSON.stringify(updatedLocal));
       } catch {
         // ignore
       }
 
+      // 4. Update local state
       setOrders((prev) =>
         prev.map((o) =>
-          o.id === orderId
+          o.id === orderId || o.order_number === orderId || o.tag_id === orderId
             ? { ...o, payment_status: newPaymentStatus, shipping_status: newShippingStatus }
             : o
         )
       );
 
-      if (selectedOrder?.id === orderId) {
+      if (selectedOrder?.id === orderId || selectedOrder?.order_number === orderId || selectedOrder?.tag_id === orderId) {
         setSelectedOrder((prev) =>
           prev ? { ...prev, payment_status: newPaymentStatus, shipping_status: newShippingStatus } : null
         );
