@@ -1,0 +1,75 @@
+{
+  "results": [
+    {
+      "title": "Pexels",
+      "url": "https://en.wikipedia.org/wiki/Pexels",
+      "content": "Pexels originally offered photos under the CC0 Creative Commons license. Instead, it has their own set of rules for the use of their photos and footage. Their license does not permit the user to sell unaltered copies of a photo or video or to resell the content on other stock platforms. It is not allowed to suggest that the people or brands in the images or footage endorse a product or a brand. The photos or videos downloaded from Pexels cannot be used in trademarks, business names, or service [...] Pexels provides media for online download, maintaining a library that contains over 3.2 million photos and videos, growing each month by roughly 200,000 files. The content is uploaded by the users and reviewed manually. Using and downloading the media is free, the website generates income through advertisements for paid content databases. There is also a donation option for users, and while attribution of the content creator is not required, it is appreciated. Through the merger with Canva, [...] Pexels is a provider of stock photography and stock footage. It was founded in Germany in 2014 and maintains a library with over 3.2 million free stock photos and videos.[citation needed]\n\n## History\n\n[edit]\n\nPexels was founded by twin brothers Ingo and Bruno Joseph in Fuldabrück, Hesse. The brothers started the platform in 2014 with around 800 photos. Daniel Frese joined the team in 2015. The graphic design platform Canva acquired Pexels in 2018 for an undisclosed amount.\n\n## Business model",
+      "rawContent": null,
+      "score": 0.21075045
+    },
+    {
+      "title": "Pexels - App Store - Apple",
+      "url": "https://apps.apple.com/us/app/pexels/id1434330413",
+      "content": "The Pexels app gives you unlimited access to over 3 million free, high-resolution photos and videos. Our beautiful library is donated by a global community of talented photographers who share their work for everyone to use freely. And you can be part of that community. Use Pexels photos and videos as wallpapers, in presentations, on social media, or wherever you choose! The most diverse free photos and videos Powered by an algorithm and curated by our team, you’ll find inclusive, diverse and [...] diverse and true photography with every search. We’re constantly improving our results and library, so if we missed the mark, let us know and we’ll fix it. A daily dose of inspiration With fresh, new photos and videos added every day, find your inspiration by browsing the top trending images or curated collections. Pexels is for everyone Grab your phone or camera and join us. Upload your photos to reach millions and see the positive impact your work can have. Not only can you track your success [...] media. Create a collection Organize and share your favorite photos and videos with the collect tool. With a Pexels account, you can save your work on both mobile and desktop.",
+      "rawContent": null,
+      "score": 0.18347688
+    },
+    {
+      "title": "Pexels Honest Review – Free Stock Photos & Videos Worth Using? My User Experience",
+      "url": "https://www.youtube.com/watch?v=ftN6WUCnuQk",
+      "content": "pixels is one of the most well-known websites for free stock photos and videos offering a vast library of high quality visuals that can be used for personal and Commercial projects in this review I will take you through the platform's features usability and overall value providing my honest opinion based on my experience the homepage of pixels is clean and userfriendly with a prominent search bar that allows you to quickly find images or videos related to any topic you could also o Browse by [...] is simple you can choose from different resolutions and file sizes making it easy to optimize media for your needs there's also an option to create an account and save your favorite content for later access the only downside here is that pixels does not offer advanced search filters like color selection or image orientation which could be useful for refining searches if you are looking for the best royalty-free images videos Beckers illustration and music deposit photo website is perfect for [...] quality images fortunately the pels team curates the library well so the overall quality remains High the licensing on pixels is one of its biggest advantages all content is free to use even for commercial purposes without attribution however it's always a good idea to check the specific terms of use before using an image or video in a commercial project as some content may contain recognizable brands or people that require additional permissions downloading images and videos is simple you can",
+      "rawContent": null,
+      "score": 0.17158835
+    },
+    {
+      "title": "YSK about Pexels, a website that provides free stock images licensed under Creative Commons. They can be used for both commercial and non-commercial purposes.",
+      "url": "https://www.reddit.com/r/YouShouldKnow/comments/dedcfe/ysk_about_pexels_a_website_that_provides_free",
+      "content": "## Content [...] Services like Shutterstock and Adobe Stock charge you money to use their images. On Pexels, you don't need to buy a license or even credit the photographer (but it's appreciated!). Visit them at www.pexels.com Edit: there's a mistake in the title. As u/prikaz_da points out, the images aren't licensed under creative commons but under Pexels' own simple license that doesn't require attribution. Second edit: I've complied a list of great websites similar to Pexels shared by commenters Useful free [...] a model release. I use public domain images all the time for my sheet music cover art. It's a great resource, but be careful of images that are listed as CC0 but the person uploading it may not have the actual rights to place the intellectual property in the public domain, making that CC0 invalid, and making you potentially liable.",
+      "rawContent": null,
+      "score": 0.15870851
+    },
+    {
+      "title": "Pexels (@pexels) • Instagram photos and videos",
+      "url": "https://www.instagram.com/pexels?hl=en",
+      "content": "Photo by Pexels on July 20, 2026. May be an image of text.\n\nPhoto by Pexels on July 18, 2026. May be an image of text.\n\nPhoto by Pexels on July 17, 2026.\n\nPhoto by Pexels on July 14, 2026.\n\nPhoto by Pexels on July 13, 2026.\n\nPhoto by Pexels on July 10, 2026.\n\nPhoto by Pexels on July 08, 2026. [...] Photo by Pexels on July 01, 2026. May be an image of football, camera and text that says 'pexels FOCAL LENGTH CHAMPIONSHIP ROUND1 1 1 35mm ROUND 2 50mm 35mm 85mm 85mm 135mm FINAL MATCH ROUND3 24mm 16mm 24mm 70-200mm 70-200mm 200mm f1.8'.\n\nPhoto by Pexels on June 26, 2026.\n\nPhoto by Pexels on June 25, 2026.\n\nShow more posts from pexels [...] Log In\n\nSign Up\n\n## pexels\n\n 142K followers\n 3,197 following\n\nPexels\n\npexels\n\nYou make cool stuff, people download it  \n600K+ creators already doing the thing  \nORIGINAL SERIES 'THE LEVEL UP' OUT NOW ⬇️\n\nlinktr.ee/pexels\n\nVideo by Pexels on June 11, 2026. May be an image of standing, lantern and text.\n\nVideo by Pexels on July 22, 2026. May be an image of one or more people, beard, microphone and text that says 'LevelUp The Level Up pah Levelup'.",
+      "rawContent": null,
+      "score": 0.15637554
+    },
+    {
+      "title": "Free Stock Photos, Royalty Free Stock Images & Copyright ...",
+      "url": "https://www.pexels.com",
+      "content": "Popular\n\nSee more\n\nImage 4: wallpaper wallpaper 69KImage 5: background background 583KImage 6: flowers flowers 318KImage 7: landscape landscape 1MImage 8: dog dog 4KImage 9: sunset sunset 188KImage 10: beach beach 158KImage 11: mountain mountain 233KImage 12: texture texture 423KImage 13: cat cat 8K\n\nTrending\n\nSee more [...] Load More\n\n  \n\n[object Object] has been selected.\n\nImage 42: Pexels Logo\n\n## Manage cookies\n\nCookies and similar technologies collect certain information about how you’re using our website. Some of them are essential, and without them you wouldn’t be able to use Pexels. But others are optional, and you get to choose whether we use them or not. Hungry for more? \n\nRead our full Cookie Policy\n\nAllow All\n### Manage Consent Preferences\n\n#### Strictly Necessary Cookies\n\nAlways Active [...] These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites. They do not store directly personal information, but are based on uniquely identifying your browser and internet device. If you do not allow these cookies, you will experience less targeted advertising.\n\n### Performance Cookies\n\nClear\n\n- [x] checkbox label label\n\nApply Cancel\n\nConsent Leg.Interest",
+      "rawContent": null,
+      "score": 0.14067852
+    },
+    {
+      "title": "Pexels",
+      "url": "https://pixabay.com/users/pexels-2286921",
+      "content": "Language\n\nČeštinaDanskDeutschEnglishEspañolFrançaisIndonesiaItalianoMagyarNederlandsNorskPolskiPortuguêsRomânăSlovenčinaSuomiSvenskaTürkçeViệtไทยБългарскиРусскийΕλληνική日本語한국어简体中文\n\n[](\n\nLog in\n\nJoin\n\nUpload\n\nImage 1\n\nImage 2\n\n# Pexels\n\nFollow\n\n37,660 Followers 0 Following\n\nEnglish Joined March 26, 2016\n\n591k Likes\n\n256.62M Views\n\n175.99M Downloads\n\n1,513 Editor's Choice\n\nAll 9,149\n\nPhotos 9,132\n\nIllustrations 4\n\nVideos 13\n\nMilestones\n\nLatest\n\nImage 3: Free Golf Golf Ball photo and picture\n\n97 [...] Pexels\n\nEdit image\n\nImage 15: Free Art Black-And-White photo and picture\n\n60\n\nImage 16\n\nPexels\n\nEdit image\n\nImage 17: Free Art Black-And-White photo and picture\n\n346\n\nImage 18\n\nPexels\n\nEdit image\n\nImage 19: Free Art Black-And-White photo and picture\n\n76\n\nImage 20\n\nPexels\n\nEdit image\n\nImage 21: Free Art Black-And-White photo and picture\n\n154\n\nImage 22\n\nPexels\n\nEdit image\n\nImage 23: Free Art Black-And-White photo and picture\n\n26\n\nImage 24\n\nPexels\n\nEdit image [...] Pexels\n\nEdit image\n\nImage 121: Free Art Black-And-White photo and picture\n\n231\n\nImage 122\n\nPexels\n\nEdit image\n\n1-60 of 9,149 results\n\nNext page\n\n/153\n\n[](\n\nOver 6.2 million+ high quality stock images, videos and music shared by our talented community.\n\n[](\n\nDiscover\n\nEditor's ChoiceCurated CollectionsPixabay RadioPopular ImagesPopular VideosPopular MusicPopular Searches\n\nCommunity\n\nContests LiveCreatorsAmbassadors NewForumBlog\n\nAbout",
+      "rawContent": null,
+      "score": 0.13313346
+    },
+    {
+      "title": "Pexels: HD+ videos & photos - Apps on Google Play",
+      "url": "https://play.google.com/store/apps/details?id=com.pexels.app&hl=en_US",
+      "content": "Icon image\n\nIcon image\n\n# Pexels: HD+ videos & photos\n\nContent rating\nContent rating\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\nScreenshot image\n\n## About this app\n\n## Data safety\n\nIcon image\nIcon image\nIcon image\nIcon image\n\n## Ratings and reviews\n\n## What’s new\n\nContent rating\n\n## App support [...] ## App support\n\n## Similar apps\n\nThumbnail image\nThumbnail image\nThumbnail image\nThumbnail image\nThumbnail image\nThumbnail image\n\nPlay Pass\n\nPlay Points\n\nGift cards\n\nRedeem\n\nRefund policy\n\nParent Guide\n\nFamily sharing\n\nTerms of Service\n\nPrivacy\n\nAbout Google Play\n\nDevelopers\n\nGoogle Store",
+      "rawContent": null,
+      "score": 0.11347172
+    },
+    {
+      "title": "Pexels",
+      "url": "https://www.facebook.com/pexels",
+      "content": "600K+ community. Every episode unlocks when you do something on Pexels — upload your photos, enter a challenge, build your highlights.",
+      "rawContent": null,
+      "score": 0.09912977
+    },
+    {
+      "title": "550+ Pexels Pictures | Download Free Images on Unsplash",
+      "url": "https://unsplash.com/s/photos/pexels",
+      "content": "Photos 694\n Illustrations 22\n\n# Pexels\n\nvideos\n\nfree images\n\nwallpaper\n\nbackground\n\nnature\n\npexel\n\nphotography\n\nvideo\n\npixel\n\nanime\n\nunsplash\n\npixabay\n\na blue and orange pattern with a black background\n\nbrown wooden tunnel with glass roof\n\na lamp that is on in a room\n\nan abstract image of a hexagonal structure\n\na bunch of orange cubes floating in the air\n\na group of people playing in a fountain\n\nman in black jacket standing on brown grass field\n\na road going through a valley [...] red flower in tilt shift lens\n\n## Browse premium images on iStock | Claim your discount now\n\nMake something awesome\n\nToday\nImages\nBackgrounds\nWallpapers [...] green leaves with water droplets\n\ngreen pine trees near mountain during daytime\n\ngreen plant with water droplets\n\na close up of a flower with a blurry background\n\naerial view of city near body of water during daytime\n\ngreen plant in tilt shift lens\n\na black and white photo of a circular object\n\nman in gray long sleeve shirt standing on forest during daytime\n\nblue yellow and red abstract painting\n\nwoman in gray button up shirt\n\na blurry image of an orange and red background",
+      "rawContent": null,
+      "score": 0.093620166
+    }
+  ],
+  "images": []
+}
