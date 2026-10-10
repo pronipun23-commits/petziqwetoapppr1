@@ -397,21 +397,21 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
       )}
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        {/* Sidebar tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-x-visible lg:pb-0">
+        {/* Sidebar tabs with mobile horizontal pill scrolling */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none lg:flex-col lg:overflow-x-visible lg:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
           {tabs.map((t) => {
             const Icon = t.icon;
             return (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+                className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium transition ${
                   activeTab === t.id
-                    ? 'bg-brand-500/15 text-brand-500 ring-1 ring-brand-500/20'
-                    : 'text-ink-300 hover:bg-white/[0.06] hover:text-ink-50'
+                    ? 'bg-brand-500/20 text-brand-300 ring-1 ring-brand-500/30 font-semibold'
+                    : 'text-ink-300 hover:bg-white/[0.06] hover:text-ink-50 bg-white/[0.02] border border-white/[0.04]'
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 shrink-0" />
                 {t.label}
               </button>
             );
@@ -1090,24 +1090,86 @@ function PlantsTab() {
 
 /* ── Tags Tab ── */
 function TagsTab() {
-  const [tags, setTags] = useState<{ id: string; name: string | null; tag_id: string; tag_type: string; status: string }[]>([]);
+  const [tags, setTags] = useState<{
+    id: string;
+    name: string | null;
+    tag_id: string;
+    tag_type: string;
+    status: string;
+    owner_info?: any;
+    tag_details?: any;
+    visibility?: any;
+    created_at?: string;
+  }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const [updatingTagId, setUpdatingTagId] = useState<string | null>(null);
 
-  useEffect(() => {
-    supabase.from('smart_tags').select('id, name, tag_id, tag_type, status').order('created_at', { ascending: false }).limit(100)
+  const fetchTags = () => {
+    supabase.from('smart_tags').select('*').order('created_at', { ascending: false }).limit(100)
       .then(({ data, error: err }) => {
-        if (err) setError(err.message);
-        else if (data) setTags(data);
+        let list: any[] = [];
+        if (data && data.length > 0) list = data;
+
+        // Also merge local storage tags
+        try {
+          const local = JSON.parse(localStorage.getItem('petziqq_smart_tags') || '[]');
+          if (local && local.length > 0) {
+            const existingIds = new Set(list.map((t) => t.tag_id || t.id));
+            const unmerged = local.filter((t: any) => !existingIds.has(t.tag_id || t.id));
+            list = [...list, ...unmerged];
+          }
+        } catch {
+          // ignore
+        }
+        setTags(list);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchTags();
   }, []);
+
+  const handleUpdateTagStatus = async (tagId: string, newStatus: string) => {
+    setUpdatingTagId(tagId);
+    try {
+      // 1. Try Supabase update
+      await supabase.from('smart_tags').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('tag_id', tagId);
+      await supabase.from('smart_tags').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', tagId);
+
+      // 2. Sync localStorage
+      try {
+        const local = JSON.parse(localStorage.getItem('petziqq_smart_tags') || '[]');
+        const updated = local.map((t: any) =>
+          t.id === tagId || t.tag_id === tagId ? { ...t, status: newStatus, updated_at: new Date().toISOString() } : t
+        );
+        localStorage.setItem('petziqq_smart_tags', JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+
+      setTags((prev) =>
+        prev.map((t) => (t.id === tagId || t.tag_id === tagId ? { ...t, status: newStatus } : t))
+      );
+    } catch (e) {
+      console.error('Failed to update tag status:', e);
+    } finally {
+      setUpdatingTagId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-xl font-semibold text-ink-50">Smart Tags</h2>
-        <span className="text-sm text-ink-400">{tags.length} tags</span>
+        <div>
+          <h2 className="font-display text-xl font-semibold text-ink-50">Smart Tags</h2>
+          <p className="mt-1 text-sm text-ink-400">Click any tag to view emergency details, QR profile link, and change tag status.</p>
+        </div>
+        <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-300 border border-purple-500/20">
+          {tags.length} tag{tags.length === 1 ? '' : 's'}
+        </span>
       </div>
       <div className="card-surface overflow-hidden">
         {loading ? (
@@ -1122,39 +1184,135 @@ function TagsTab() {
           <div className="p-6 text-center text-sm text-ink-400">No smart tags found.</div>
         ) : (
           <div className="divide-y divide-white/[0.06]">
-            {tags.map((t) => (
-              <div key={t.id} className="flex flex-wrap items-center justify-between gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition">
-                <div className="flex items-center gap-4 min-w-0">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-300">
-                    <Tag className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-ink-50">{t.name || 'Untitled'}</p>
-                    <p className="font-mono text-xs text-ink-400">
-                      {t.tag_id} &middot; {t.tag_type}
-                    </p>
+            {tags.map((t) => {
+              const isSelected = selectedTagId === t.id || selectedTagId === t.tag_id;
+              const details = t.tag_details || {};
+              const owner = t.owner_info || {};
+
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTagId(isSelected ? null : t.id)}
+                  className="cursor-pointer px-4 sm:px-5 py-4 transition hover:bg-white/[0.02]"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-purple-500/10 text-purple-300">
+                        <Tag className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-semibold text-ink-50">{t.name || 'Untitled'}</p>
+                          <span className="text-xs text-ink-500 font-mono">({t.tag_id})</span>
+                        </div>
+                        <p className="text-xs text-ink-400 truncate">
+                          {details.breed ? `${details.breed} • ` : ''}
+                          {details.species || t.tag_type}
+                          {owner.owner_name ? ` • Owner: ${owner.owner_name}` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                        t.status === 'active' || t.status === 'activated' ? 'bg-green-500/15 text-green-300 border border-green-500/30' :
+                        t.status === 'ready' ? 'bg-brand-500/15 text-brand-300 border border-brand-500/30' :
+                        'bg-white/[0.06] text-ink-400'
+                      }`}>
+                        {t.status}
+                      </span>
+
+                      <QRCodeDisplay
+                        value={getTagPublicUrl(t.tag_id)}
+                        size={40}
+                        downloadable
+                        filename={`tag-qr-${t.tag_id}`}
+                        className="p-1 rounded-lg shrink-0"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                    t.status === 'active' || t.status === 'activated' ? 'bg-green-500/10 text-green-300' :
-                    t.status === 'ready' ? 'bg-brand-500/10 text-brand-300' :
-                    'bg-white/[0.06] text-ink-400'
-                  }`}>
-                    {t.status}
-                  </span>
+                  {/* Expanded Tag Info & Admin Controls */}
+                  {isSelected && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-4 rounded-2xl border border-white/[0.08] bg-ink-950/80 p-4 sm:p-5 text-xs space-y-4 animate-fade-in"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <span className="text-ink-400 uppercase tracking-wider text-[10px] block font-semibold">Pet Information</span>
+                          <p className="text-ink-100 font-bold text-sm">{t.name || 'Pet'}</p>
+                          <p className="text-ink-300">Species: {details.species || '—'}</p>
+                          <p className="text-ink-300">Breed: {details.breed || '—'}</p>
+                          <p className="text-ink-400">Gender: {details.gender || '—'}</p>
+                        </div>
 
-                  <QRCodeDisplay
-                    value={getTagPublicUrl(t.tag_id)}
-                    size={40}
-                    downloadable
-                    filename={`tag-qr-${t.tag_id}`}
-                    className="p-1 rounded-lg"
-                  />
+                        <div className="space-y-1">
+                          <span className="text-ink-400 uppercase tracking-wider text-[10px] block font-semibold">Emergency Contacts</span>
+                          <p className="text-ink-200 font-semibold">{owner.owner_name || 'Owner not specified'}</p>
+                          <p className="text-ink-100 font-mono">{owner.emergency_contact || owner.contact_phone || 'No phone'}</p>
+                          <p className="text-ink-400">{owner.contact_email || 'No email'}</p>
+                          {(owner.emergency_contact || owner.contact_phone) && (
+                            <div className="pt-1 flex gap-2">
+                              <a
+                                href={`tel:${owner.emergency_contact || owner.contact_phone}`}
+                                className="inline-flex items-center gap-1 rounded-md bg-green-500/15 border border-green-500/30 px-2 py-0.5 text-[11px] text-green-300 font-semibold"
+                              >
+                                Call
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <span className="text-ink-400 uppercase tracking-wider text-[10px] block font-semibold">Medical & ID</span>
+                          <p className="text-ink-300 leading-relaxed">{details.identification_notes || 'No special medical notes provided.'}</p>
+                          <p className="text-ink-500 pt-1 text-[11px] font-mono">
+                            Public URL:{' '}
+                            <a
+                              href={getTagPublicUrl(t.tag_id)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-brand-300 underline hover:text-brand-200"
+                            >
+                              {getTagPublicUrl(t.tag_id)}
+                            </a>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Admin Status Controls */}
+                      <div className="border-t border-white/[0.08] pt-3.5 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <label className="text-ink-300 text-xs font-medium">Change Status:</label>
+                          <select
+                            value={t.status}
+                            disabled={updatingTagId === t.id || updatingTagId === t.tag_id}
+                            onChange={(e) => handleUpdateTagStatus(t.id, e.target.value)}
+                            className="rounded-lg border border-white/10 bg-ink-900 px-3 py-1.5 text-xs text-ink-100 focus:border-brand-500 focus:outline-none"
+                          >
+                            <option value="active">Active (QR profile publicly accessible)</option>
+                            <option value="ready">Ready (Configured but pending dispatch)</option>
+                            <option value="draft">Draft (Incomplete profile)</option>
+                            <option value="disabled">Disabled (Suspended tag)</option>
+                          </select>
+                        </div>
+
+                        <a
+                          href={getTagPublicUrl(t.tag_id)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-ghost py-1 px-3 text-xs inline-flex items-center gap-1.5"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          View Live Profile
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -1286,7 +1444,7 @@ function TeamTab() {
     { name: 'Nipun Menon', role: 'CEO, Founder, Developer', adminRole: 'Full Admin', email: 'pronipun23@gmail.com', color: 'from-brand-400 to-ocean-500' },
     { name: 'Mithun (Naruto)', role: 'Senior Software Developer', adminRole: 'Full Admin', email: 'narutomithun28@gmail.com', color: 'from-amber-400 to-orange-500' },
     { name: 'Shashwath Shyam Sundar', role: 'Co Software Developer', adminRole: 'Full Admin', email: 'shashwathshyamsundar499@gmail.com', color: 'from-cyan-400 to-blue-500' },
-    { name: 'Ruhan R', role: 'Security Manager', adminRole: 'Full Admin', email: 'ruhanr5623@gmail.com', color: 'from-emerald-400 to-teal-500' },
+    { name: 'Ruhan pranith michael', role: 'Security Manager', adminRole: 'Full Admin', email: 'ruhanr5623@gmail.com', color: 'from-emerald-400 to-teal-500' },
     { name: 'Gavish Varun', role: 'Manager of Marketing', adminRole: 'Marketing Manager', email: 'gavishvarun@gmail.com', color: 'from-purple-400 to-ocean-500' },
   ];
 

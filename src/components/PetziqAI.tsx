@@ -20,6 +20,7 @@ import {
   Tag,
   Trash2,
   X,
+  MessageSquare,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -158,11 +159,33 @@ export function PetziqAI() {
     <>
       <button
         onClick={() => setOpen((value) => !value)}
-        aria-label={open ? 'Close Petziq AI' : 'Open Petziq AI chat'}
-        className="focus-ring fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 via-teal-400 to-ocean-400 text-white shadow-glow transition duration-300 hover:-translate-y-1 hover:shadow-glow-blue sm:bottom-6 sm:right-6"
+        aria-label={open ? 'Close Petziq AI' : 'Open Petziq AI chat assistant'}
+        className={`focus-ring fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2.5 rounded-full px-4 py-3 text-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-blue ${
+          open
+            ? 'bg-ink-800 border border-white/20'
+            : 'bg-gradient-to-r from-brand-500 via-teal-400 to-ocean-500 ring-2 ring-white/20 shadow-glow'
+        }`}
       >
-        {open ? <X className="h-6 w-6" strokeWidth={2.5} /> : <PawPrint className="h-7 w-7" strokeWidth={2.5} />}
-        {!open && <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-ink-950 bg-cyan-300" />}
+        {open ? (
+          <>
+            <X className="h-5 w-5" strokeWidth={2.5} />
+            <span className="text-xs font-bold uppercase tracking-wider">Close Chat</span>
+          </>
+        ) : (
+          <>
+            <div className="relative flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-amber-200 animate-pulse" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-cyan-300 ring-2 ring-brand-500" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-bold tracking-wide flex items-center gap-1">
+                Ask Petziq AI
+                <span className="rounded bg-white/20 px-1 py-0.2 text-[9px] font-semibold text-white">Assistant</span>
+              </span>
+              <span className="text-[10px] text-white/80 hidden xs:inline">Instant Vet & Care Help</span>
+            </div>
+          </>
+        )}
       </button>
 
       {open && (

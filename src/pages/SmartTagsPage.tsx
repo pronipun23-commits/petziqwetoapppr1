@@ -82,7 +82,7 @@ const STEPS = [
   { num: '04', title: 'Protected', description: 'Your pet or plant profile is accessible via QR scan.' },
 ];
 
-const TAG_PRICE = 399;
+const TAG_PRICE = 599;
 const SHIPPING_FEE = 49;
 
 /**
@@ -776,7 +776,7 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
                   Original Price
                 </p>
-                <p className="mt-0.5 font-display text-sm line-through text-ink-400">₹470</p>
+                <p className="mt-0.5 font-display text-sm line-through text-ink-400">₹705</p>
                 <p className="font-display text-2xl font-bold text-ink-50">₹{TAG_PRICE}</p>
                 <p className="text-[11px] font-semibold text-amber-300">15% OFF Applied</p>
               </div>

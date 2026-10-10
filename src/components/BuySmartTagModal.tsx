@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   X, CheckCircle2, Shield, PawPrint, Phone, Mail, MapPin, User,
-  FileText, Sparkles, Loader2, AlertCircle, QrCode, Tag
+  FileText, Sparkles, Loader2, AlertCircle, QrCode, Tag, Camera, Image as ImageIcon
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { generateTagId, getTagPublicUrl } from '@/lib/tagUtils';
@@ -54,6 +54,9 @@ export function BuySmartTagModal({
   const [contactEmail, setContactEmail] = useState(userEmail || '');
   const [microchipNumber, setMicrochipNumber] = useState('');
   const [allergiesNotes, setAllergiesNotes] = useState('');
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Shipping information state
   const [shippingName, setShippingName] = useState('');
@@ -180,6 +183,7 @@ export function BuySmartTagModal({
         tag_type: 'pet',
         status: 'active', // Activated so anyone scanning the tag immediately sees the pet's profile
         qr_url: publicUrl,
+        photo_url: photoPreview || null,
         user_id: userId || null,
         owner_id: userId || null,
         order_id: orderId,
@@ -226,6 +230,7 @@ export function BuySmartTagModal({
           name: petName.trim(),
           tag_type: 'pet',
           status: 'active',
+          photo_url: photoPreview || null,
           user_id: userId || '',
           tag_details: tagDetails,
           visibility: visibility,
@@ -379,6 +384,82 @@ export function BuySmartTagModal({
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Pet Photo Upload Section */}
+              <div className="mt-4 border-t border-white/[0.06] pt-3.5">
+                <label className="block text-xs font-medium text-ink-200 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Camera className="h-3.5 w-3.5 text-brand-400" />
+                    Pet Photo (For QR Public Profile)
+                  </span>
+                  <span className="text-[10px] text-ink-400">Optional · Max 5MB</span>
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="group relative flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/20 bg-white/[0.03] transition hover:border-brand-400 hover:bg-brand-500/10"
+                  >
+                    {photoPreview ? (
+                      <>
+                        <img src={photoPreview} alt="Pet preview" className="h-full w-full object-cover" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
+                          <Camera className="h-5 w-5 text-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center text-ink-400 transition group-hover:text-brand-300">
+                        <Camera className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) {
+                          setError('Photo must be under 5MB');
+                          return;
+                        }
+                        setPhotoFile(file);
+                        const reader = new FileReader();
+                        reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="btn-ghost py-1.5 px-3 text-xs inline-flex items-center gap-1.5"
+                    >
+                      <ImageIcon className="h-3.5 w-3.5" />
+                      {photoPreview ? 'Change Photo' : 'Upload Pet Photo'}
+                    </button>
+                    {photoPreview && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhotoPreview(null);
+                          setPhotoFile(null);
+                          if (fileInputRef.current) fileInputRef.current.value = '';
+                        }}
+                        className="ml-2 text-xs text-red-400 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <p className="mt-1 text-[11px] text-ink-400">
+                      {photoPreview ? "Photo selected and will appear on your pet's scan profile!" : "Uploaded photo is shown to anyone scanning your smart tag."}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -554,11 +635,11 @@ export function BuySmartTagModal({
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-xs space-y-2">
               <div className="flex justify-between text-ink-300">
                 <span>1x Petziq Smart Tag ({shape}, {color}) for {petName}</span>
-                <span className="text-ink-400 line-through">₹470</span>
+                <span className="text-ink-400 line-through">₹705</span>
               </div>
               <div className="flex justify-between text-amber-300">
                 <span>Launch Discount (15% OFF)</span>
-                <span className="font-semibold">-₹71 (₹{tagPrice})</span>
+                <span className="font-semibold">-₹106 (₹{tagPrice})</span>
               </div>
               <div className="flex justify-between text-ink-300">
                 <span>Delivery & Handling Fee</span>
