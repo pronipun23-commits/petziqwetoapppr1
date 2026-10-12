@@ -245,11 +245,15 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
               paidOrders,
               revenue,
             });
+            // Direct table calculation succeeded, clear any error banner
+            setStatsError(null);
           } catch (directErr) {
+            // Only set stats error if even direct queries failed
             setStatsError(friendlyError(statsRes.error.message));
           }
         } else if (statsRes.data && typeof statsRes.data === 'object') {
           setStats(mapStats(statsRes.data as Record<string, unknown>));
+          setStatsError(null);
         }
 
         if (activityRes.error) {
@@ -288,35 +292,58 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
 
           // Also merge locally registered profiles if present
           try {
-            const localRegistered = JSON.parse(localStorage.getItem('petziq_registered_profiles') || '{}');
-            Object.entries(localRegistered).forEach(([userId, val]: [string, any]) => {
-              const existingIdx = mergedUsers.findIndex(u => u.id === userId);
-              if (existingIdx >= 0) {
-                mergedUsers[existingIdx] = {
-                  ...mergedUsers[existingIdx],
-                  phone: mergedUsers[existingIdx].phone || val.phone,
-                  date_of_birth: mergedUsers[existingIdx].date_of_birth || val.dateOfBirth,
-                  full_name: mergedUsers[existingIdx].full_name || val.fullName,
-                  pet_name: mergedUsers[existingIdx].pet_name || val.petName,
-                };
-              } else {
-                mergedUsers.unshift({
-                  id: userId,
-                  full_name: val.fullName || 'Registered User',
-                  pet_name: val.petName || null,
-                  phone: val.phone || null,
-                  date_of_birth: val.dateOfBirth || null,
-                  role: 'user',
-                  created_at: val.createdAt || new Date().toISOString(),
-                  pet_count: 1,
-                  plant_count: 0,
-                  tag_count: 0,
-                });
-              }
-            });
+            const rawStored = localStorage.getItem('petziq_registered_profiles');
+            if (rawStored) {
+              const parsed = JSON.parse(rawStored);
+              const entries: Array<{ id?: string; [key: string]: any }> = Array.isArray(parsed)
+                ? parsed
+                : Object.entries(parsed).map(([id, data]: [string, any]) => ({ id, ...data }));
+
+              entries.forEach((val) => {
+                const userId = val.id || val.userId || `local-${Date.now()}`;
+                const existingIdx = mergedUsers.findIndex(u => u.id === userId);
+                const resolvedName = val.full_name || val.fullName || val.name || (val.pet_name || val.petName ? `${val.pet_name || val.petName}'s Parent` : (profile?.full_name || 'Pet Owner'));
+
+                if (existingIdx >= 0) {
+                  mergedUsers[existingIdx] = {
+                    ...mergedUsers[existingIdx],
+                    phone: mergedUsers[existingIdx].phone || val.phone,
+                    date_of_birth: mergedUsers[existingIdx].date_of_birth || val.dateOfBirth || val.date_of_birth,
+                    full_name: (mergedUsers[existingIdx].full_name && mergedUsers[existingIdx].full_name !== 'Registered User') 
+                      ? mergedUsers[existingIdx].full_name 
+                      : resolvedName,
+                    pet_name: mergedUsers[existingIdx].pet_name || val.petName || val.pet_name,
+                  };
+                } else {
+                  mergedUsers.unshift({
+                    id: userId,
+                    full_name: resolvedName,
+                    pet_name: val.petName || val.pet_name || null,
+                    phone: val.phone || null,
+                    date_of_birth: val.dateOfBirth || val.date_of_birth || null,
+                    role: val.role || 'user',
+                    created_at: val.createdAt || val.created_at || new Date().toISOString(),
+                    pet_count: 1,
+                    plant_count: 0,
+                    tag_count: 0,
+                  });
+                }
+              });
+            }
           } catch {
             // ignore
           }
+
+          // Clean up any remaining "Registered User" or "U" placeholders
+          mergedUsers = mergedUsers.map((u) => {
+            if (!u.full_name || u.full_name.trim() === '' || u.full_name === 'Registered User' || u.full_name === 'User') {
+              return {
+                ...u,
+                full_name: u.pet_name ? `${u.pet_name}'s Parent` : (profile?.full_name || 'Pet Owner'),
+              };
+            }
+            return u;
+          });
 
           setUsers(mergedUsers);
         }
