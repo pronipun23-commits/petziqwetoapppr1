@@ -371,6 +371,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const signOut = useCallback(async () => {
+    try {
+      if (isSupabaseConfigured) {
+        await supabase.auth.signOut();
+      }
+      localStorage.removeItem('petziq_local_auth');
+      setState({
+        session: null,
+        user: null,
+        profile: null,
+        loading: false,
+      });
+    } catch (e) {
+      console.error('signOut threw:', e);
+    }
+  }, []);
+
   const updateProfile = useCallback(
     async (updates: Partial<Profile>): Promise<{ error: string | null }> => {
       try {
