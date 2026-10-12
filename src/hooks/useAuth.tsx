@@ -49,18 +49,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(
     async (userId: string): Promise<Profile | null> => {
-      const { data, error } = await supabase
+      // First attempt query with full fields
+      let res = await supabase
         .from('profiles')
         .select('id, full_name, pet_name, created_at, role, phone, date_of_birth')
         .eq('id', userId)
         .maybeSingle();
 
-      if (error) {
-        console.error('Failed to load profile:', error.message);
+      // If schema is missing phone or date_of_birth in Supabase, gracefully fallback to core profile
+      if (res.error && (res.error.message.includes('column') || res.error.message.includes('phone') || res.error.code === '42703')) {
+        res = await supabase
+          .from('profiles')
+          .select('id, full_name, pet_name, created_at, role')
+          .eq('id', userId)
+          .maybeSingle();
+      }
+
+      if (res.error) {
+        console.warn('Failed to load profile from Supabase:', res.error.message);
         return null;
       }
 
-      return data as Profile | null;
+      const prof = res.data as Profile | null;
+      if (!prof) return null;
+
+      // Augment with locally stored phone / date_of_birth if Supabase database schema has not migrated yet
+      try {
+        const localRegistered = JSON.parse(localStorage.getItem('petziq_registered_profiles') || '{}');
+        const localData = localRegistered[userId];
+        if (localData) {
+          if (!prof.phone && localData.phone) prof.phone = localData.phone;
+          if (!prof.date_of_birth && localData.dateOfBirth) prof.date_of_birth = localData.dateOfBirth;
+        }
+      } catch {
+        // ignore
+      }
+
+      return prof;
     },
     [],
   );

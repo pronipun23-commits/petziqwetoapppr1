@@ -168,11 +168,11 @@ export function PetziqAI() {
 
   return (
     <>
-      {/* Desktop Floating Pill (Mobile triggers via docked header button) */}
+      {/* Desktop Floating Pill (Completely hidden on mobile; mobile triggers via top header) */}
       <button
         onClick={() => setOpen((value) => !value)}
         aria-label={open ? 'Close Petziq AI' : 'Open Petziq AI chat assistant'}
-        className={`focus-ring fixed bottom-6 right-6 z-50 hidden sm:flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-blue ${
+        className={`focus-ring fixed bottom-6 right-6 z-50 hidden md:flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-blue ${
           open
             ? 'bg-ink-800 border border-white/20'
             : 'bg-gradient-to-r from-brand-500 via-teal-400 to-ocean-500 ring-2 ring-white/20 shadow-glow'

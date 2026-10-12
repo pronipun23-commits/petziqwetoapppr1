@@ -184,14 +184,20 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
           // If the custom RPC function isn't created in Supabase yet, fallback gracefully to querying tables directly
           console.warn('get_admin_stats RPC unavailable, querying tables directly:', statsRes.error.message);
           try {
-            const [usersCount, petsCount, plantsCount, tagsCount, remindersCount, ordersRes] = await Promise.all([
-              supabase.from('profiles').select('*', { count: 'exact', head: true }),
-              supabase.from('pets').select('*', { count: 'exact', head: true }),
-              supabase.from('user_plants').select('*', { count: 'exact', head: true }),
-              supabase.from('smart_tags').select('*', { count: 'exact', head: true }),
-              supabase.from('reminders').select('*', { count: 'exact', head: true }),
-              supabase.from('smart_tag_orders').select('amount, payment_status'),
+            const [usersCount, petsCount, plantsCount, tagsCount, remindersCount] = await Promise.all([
+              supabase.from('profiles').select('*', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
+              supabase.from('pets').select('*', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
+              supabase.from('user_plants').select('*', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
+              supabase.from('smart_tags').select('*', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
+              supabase.from('reminders').select('*', { count: 'exact', head: true }).catch(() => ({ count: 0 })),
             ]);
+
+            let ordersRes: { data: any[] | null } = { data: null };
+            try {
+              ordersRes = await supabase.from('smart_tag_orders').select('amount, payment_status');
+            } catch {
+              // ignore table not found
+            }
 
             let totalOrders = 0;
             let pendingOrders = 0;
@@ -260,14 +266,17 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
             mergedUsers = usersRes.data as AdminUser[];
           } else {
             // Fallback to profiles table query
-            const { data: profs } = await supabase.from('profiles').select('id, full_name, pet_name, phone, date_of_birth, role, created_at').limit(100);
-            if (profs) {
-              mergedUsers = profs.map((p) => ({
+            let profsRes = await supabase.from('profiles').select('id, full_name, pet_name, phone, date_of_birth, role, created_at').limit(100);
+            if (profsRes.error && (profsRes.error.message.includes('column') || profsRes.error.message.includes('phone') || profsRes.error.code === '42703')) {
+              profsRes = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
+            }
+            if (profsRes.data) {
+              mergedUsers = profsRes.data.map((p: any) => ({
                 id: p.id,
                 full_name: p.full_name,
                 pet_name: p.pet_name,
-                phone: p.phone,
-                date_of_birth: p.date_of_birth,
+                phone: p.phone || null,
+                date_of_birth: p.date_of_birth || null,
                 role: p.role,
                 created_at: p.created_at,
                 pet_count: 0,
