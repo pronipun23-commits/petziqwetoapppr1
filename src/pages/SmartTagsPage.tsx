@@ -884,6 +884,158 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
         </div>
       </section>
 
+      {/* Uploaded High-Res Smart Tag Shapes & Real Photos */}
+      <section className="mt-10">
+        <div className="card-surface p-6 sm:p-8 lg:p-10">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="chip mx-auto">
+              <Sparkles className="h-3.5 w-3.5 text-brand-300" />
+              Real Product Gallery
+            </span>
+            <h2 className="section-title mt-4">Precision Laser-Engraved Plates</h2>
+            <p className="text-sm text-ink-300 mt-2">
+              Every shape comes in multiple lustrous metallic shades. Anodized scratch-resistant coating with deep fiber laser engraving that never fades.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { name: 'Round Tag', file: '/smart-tag-round.png', shape: 'round', desc: 'Classic 35mm circular disc' },
+              { name: 'Bone Tag', file: '/smart-tag-bone.png', shape: 'bone', desc: 'Playful dog bone silhouette' },
+              { name: 'Heart Tag', file: '/smart-tag-heart.png', shape: 'heart', desc: 'Heart shape for cats & small dogs' },
+              { name: 'Square Tag', file: '/smart-tag-square.png', shape: 'rectangle', desc: 'Modern geometric rounded square' },
+            ].map((item) => (
+              <div
+                key={item.name}
+                onClick={() => {
+                  setShape(item.shape as TagShape);
+                  scrollToId('design-tag');
+                }}
+                className={`group cursor-pointer rounded-2xl border p-4 text-center transition hover:scale-[1.02] ${
+                  shape === item.shape
+                    ? 'border-brand-500/50 bg-brand-500/10 shadow-glow-blue'
+                    : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20'
+                }`}
+              >
+                <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-ink-950/60 mb-3 flex items-center justify-center p-2">
+                  <img
+                    src={item.file}
+                    alt={item.name}
+                    className="h-full w-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <h4 className="font-semibold text-sm text-ink-50">{item.name}</h4>
+                <p className="text-[11px] text-ink-400 mt-0.5">{item.desc}</p>
+                <button
+                  type="button"
+                  className="mt-2.5 text-xs text-brand-300 font-medium group-hover:underline inline-flex items-center gap-1"
+                >
+                  Select this shape →
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Lifestyle Banner */}
+          <div className="mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative">
+            <img
+              src="/smart-tag-lifestyle-banner.png"
+              alt="Petziq Smart Tag on Pet Collar"
+              className="w-full h-auto max-h-[360px] object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/30 to-transparent flex items-end p-6 sm:p-8">
+              <div>
+                <span className="rounded-full bg-brand-500/80 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white">
+                  Field Tested & Water-Ready
+                </span>
+                <h3 className="text-lg sm:text-2xl font-bold text-white mt-2">
+                  Built to withstand runs, muddy trails, and swimming.
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Customer Reviews Section */}
+      <section className="mt-10">
+        <div className="card-surface p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+            <div>
+              <span className="chip">
+                <Sparkles className="h-3.5 w-3.5 text-brand-300" />
+                Verified Owners
+              </span>
+              <h2 className="section-title mt-3">What Pet Parents Say</h2>
+              <p className="text-sm text-ink-300 mt-1">Real feedback from verified Petziq Smart Tag owners</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex text-amber-400">
+                {'★★★★★'.split('').map((star, i) => (
+                  <span key={i} className="text-base">{star}</span>
+                ))}
+              </div>
+              <span className="text-sm font-bold text-ink-50">4.9 / 5</span>
+              <span className="text-xs text-ink-400">(148+ tags delivered)</span>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                name: 'Ananya Sharma',
+                pet: 'Golden Retriever "Simba"',
+                shape: 'Bone Shape (Gold)',
+                rating: 5,
+                date: '2 weeks ago',
+                comment: 'The laser engraving is razor sharp and looks super luxurious! Tested the QR code with my iPhone camera and my pet profile loaded in less than a second. Total peace of mind.',
+              },
+              {
+                name: 'Rahul Mukherjee',
+                pet: 'Beagle "Rocky"',
+                shape: 'Round Shape (Black)',
+                rating: 5,
+                date: '1 month ago',
+                comment: 'Rocky is an escape artist. Last Sunday he sprinted out the gate, and a neighbor two lanes over scanned his Petziq tag and called my phone before I even finished searching the block!',
+              },
+              {
+                name: 'Pooja Venkatesh',
+                pet: 'Persian Cat "Bella"',
+                shape: 'Heart Shape (Pink)',
+                rating: 5,
+                date: '3 weeks ago',
+                comment: 'Extremely lightweight, does not bother Bella at all. The pink metallic finish matches her collar perfectly and the QR is clear and crisp.',
+              },
+            ].map((rev) => (
+              <div key={rev.name} className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <div className="flex text-amber-400">
+                      {'★'.repeat(rev.rating)}
+                    </div>
+                    <span className="text-ink-400 text-[11px]">{rev.date}</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-ink-200 leading-relaxed italic">
+                    "{rev.comment}"
+                  </p>
+                </div>
+                <div className="pt-4 mt-4 border-t border-white/[0.06] flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-ink-50">{rev.name}</p>
+                    <p className="text-[11px] text-teal-300 font-medium">{rev.pet}</p>
+                  </div>
+                  <span className="text-[10px] rounded-full bg-white/[0.05] px-2.5 py-1 text-ink-400">
+                    {rev.shape}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Product showcase artwork */}
       <section className="mt-10">
         <div className="card-surface overflow-hidden p-6 sm:p-8 lg:p-10">

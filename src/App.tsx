@@ -34,6 +34,8 @@ import { SmartTagsPage } from '@/pages/SmartTagsPage';
 import { SmartTagCreatePage } from '@/pages/SmartTagCreatePage';
 import { TagProfilePage } from '@/pages/TagProfilePage';
 import { AdminPage, type AdminTab } from '@/pages/AdminPage';
+import { MissingPhoneModal } from '@/components/MissingPhoneModal';
+import { LegalModal, CookieConsentBanner, type LegalModalType } from '@/components/LegalModals';
 import type { CategoryId } from '@/data/types';
 
 const PROTECTED_PAGES = new Set([
@@ -128,11 +130,17 @@ function App() {
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authFeatureLabel, setAuthFeatureLabel] = useState<string | undefined>();
+  const [legalModal, setLegalModal] = useState<LegalModalType>(null);
 
   const { page, params } = useMemo(() => parseRoute(path), [path]);
 
   const navigateWithAuth = useCallback(
     (target: string) => {
+      const clean = target.replace(/^\//, '');
+      if (['privacy', 'terms', 'refund', 'cookies', 'deletion', 'contact', 'help'].includes(clean)) {
+        setLegalModal(clean as LegalModalType);
+        return;
+      }
       const parsed = parseRoute(target);
       if (PROTECTED_PAGES.has(parsed.page) && !session) {
         setPendingRedirect(target);
@@ -366,6 +374,12 @@ function App() {
         onClose={handleAuthClose}
         featureLabel={authFeatureLabel}
       />
+
+      <MissingPhoneModal />
+
+      <LegalModal type={legalModal} onClose={() => setLegalModal(null)} />
+
+      <CookieConsentBanner onOpenModal={(t) => setLegalModal(t)} />
 
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
 

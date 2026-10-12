@@ -224,33 +224,54 @@ export function Navbar({ currentPath, favoritesCount, onNavigate }: NavbarProps)
           </div>
         </div>
 
+        {/* Apple-grade Fullscreen Mobile Menu Overlay */}
         {mobileOpen && (
-          <div className="space-y-3 pb-4 lg:hidden animate-fade-in">
-            <SearchBar onNavigate={onNavigate} />
-            <div className="grid grid-cols-2 gap-2">
-              {LINKS.map((link) => (
-                <button
-                  key={link.path}
-                  onClick={() => onNavigate(link.path)}
-                  className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
-                    isActive(link.path)
-                      ? 'bg-brand-500/15 text-brand-200 ring-1 ring-brand-400/20'
-                      : 'text-ink-300 hover:bg-white/[0.06] hover:text-ink-50'
-                  }`}
-                >
-                  {link.label}
-                </button>
-              ))}
+          <div className="fixed inset-0 top-16 z-50 flex flex-col bg-ink-950/95 backdrop-blur-2xl p-6 lg:hidden animate-fade-in overflow-y-auto pb-24">
+            <div className="mb-6">
+              <SearchBar onNavigate={(p) => { setMobileOpen(false); onNavigate(p); }} />
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => onNavigate('/dashboard')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">My Petziq</button>
-              <button onClick={() => onNavigate('/favorites')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">Favorites</button>
-              <button onClick={() => onNavigate('/my-pets')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">My Pets</button>
-              <button onClick={() => onNavigate('/food')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">Food Guide</button>
-              <button onClick={() => onNavigate('/care')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">Care Guides</button>
-              <button onClick={() => onNavigate('/progress')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">Progress</button>
-              <button onClick={() => onNavigate('/contact')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">Contact</button>
-              <button onClick={() => onNavigate('/help')} className="rounded-xl px-4 py-3 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50">Help</button>
+
+            <div className="space-y-6">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400 mb-3">
+                  Main Navigation
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  {LINKS.map((link) => (
+                    <button
+                      key={link.path}
+                      onClick={() => { setMobileOpen(false); onNavigate(link.path); }}
+                      className={`flex items-center justify-between rounded-2xl px-5 py-3.5 text-base font-medium transition ${
+                        isActive(link.path)
+                          ? 'bg-brand-500/15 text-brand-300 ring-1 ring-brand-400/30 font-semibold'
+                          : 'text-ink-200 hover:bg-white/[0.05] hover:text-ink-50'
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <span className="text-ink-500 text-xs">→</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400 mb-3">
+                  Quick Actions & Care
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button onClick={() => { setMobileOpen(false); onNavigate('/dashboard'); }} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-left text-sm font-medium text-ink-200 transition hover:bg-white/[0.06]">🐾 My Petziq</button>
+                  <button onClick={() => { setMobileOpen(false); onNavigate('/smart-tags'); }} className="rounded-xl border border-brand-500/20 bg-brand-500/10 p-3 text-left text-sm font-semibold text-brand-300 transition hover:bg-brand-500/15">🏷️ Smart Tags</button>
+                  <button onClick={() => { setMobileOpen(false); onNavigate('/favorites'); }} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-left text-sm font-medium text-ink-200 transition hover:bg-white/[0.06]">❤️ Favorites</button>
+                  <button onClick={() => { setMobileOpen(false); onNavigate('/food'); }} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-left text-sm font-medium text-ink-200 transition hover:bg-white/[0.06]">🥗 Food Guide</button>
+                  <button onClick={() => { setMobileOpen(false); onNavigate('/care'); }} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-left text-sm font-medium text-ink-200 transition hover:bg-white/[0.06]">📖 Care Guides</button>
+                  <button onClick={() => { setMobileOpen(false); onNavigate('/problems'); }} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-left text-sm font-medium text-ink-200 transition hover:bg-white/[0.06]">⚡ Problem Solver</button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs text-ink-400">
+                <a href="tel:+919876543210" className="text-teal-300 hover:underline">📞 +91 98765 43210</a>
+                <a href="mailto:petziq.team@gmail.com" className="text-brand-300 hover:underline">✉️ Email Support</a>
+              </div>
             </div>
           </div>
         )}

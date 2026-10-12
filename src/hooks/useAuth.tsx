@@ -17,13 +17,17 @@ interface AuthContextValue extends AuthState {
     email: string,
     password: string,
     fullName: string,
-    petName: string
+    petName: string,
+    phone?: string,
+    dateOfBirth?: string
   ) => Promise<{ error: string | null }>;
   signIn: (
     email: string,
     password: string
   ) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<{ error: string | null }>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -47,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (userId: string): Promise<Profile | null> => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, pet_name, created_at, role')
+        .select('id, full_name, pet_name, created_at, role, phone, date_of_birth')
         .eq('id', userId)
         .maybeSingle();
 
@@ -155,6 +159,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: string,
       fullName: string,
       petName: string,
+      phone?: string,
+      dateOfBirth?: string,
     ): Promise<{ error: string | null }> => {
       if (!isSupabaseConfigured) {
         // Fallback local registration so users can register and use Petziq seamlessly without missing env keys
@@ -165,12 +171,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           pet_name: petName,
           created_at: new Date().toISOString(),
           role: email.toLowerCase().includes('admin') || email.toLowerCase().includes('petziq') ? 'admin' : 'user',
+          phone,
+          date_of_birth: dateOfBirth,
         };
 
         const mockUser: User = {
           id: mockUserId,
           app_metadata: {},
-          user_metadata: { full_name: fullName, pet_name: petName },
+          user_metadata: { full_name: fullName, pet_name: petName, phone, date_of_birth: dateOfBirth },
           aud: 'authenticated',
           created_at: new Date().toISOString(),
           email,
@@ -186,6 +194,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         try {
           localStorage.setItem('petziq_local_auth', JSON.stringify({ session: mockSession, profile: newProfile, password }));
+          // Also persist to customer profiles list for Admin visibility
+          const localProfiles = JSON.parse(localStorage.getItem('petziq_registered_profiles') || '[]');
+          localProfiles.push(newProfile);
+          localStorage.setItem('petziq_registered_profiles', JSON.stringify(localProfiles));
         } catch {
           // ignore
         }
@@ -208,6 +220,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             data: {
               full_name: fullName,
               pet_name: petName,
+              phone,
+              date_of_birth: dateOfBirth,
             },
           },
         });
@@ -220,7 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: 'Registration failed — no user returned.' };
         }
 
-        // Best-effort profile creation; ignore errors (RLS may block if anon)
+        // Best-effort profile creation
         await supabase
           .from('profiles')
           .upsert(
@@ -228,9 +242,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               id: data.user.id,
               full_name: fullName,
               pet_name: petName,
+              phone,
+              date_of_birth: dateOfBirth,
             },
             { onConflict: 'id' },
           );
+
+        // Also save to registered profiles backup
+        try {
+          const localProfiles = JSON.parse(localStorage.getItem('petziq_registered_profiles') || '[]');
+          localProfiles.push({
+            id: data.user.id,
+            full_name: fullName,
+            pet_name: petName,
+            created_at: new Date().toISOString(),
+            role: 'user',
+            phone,
+            date_of_birth: dateOfBirth,
+          });
+          localStorage.setItem('petziq_registered_profiles', JSON.stringify(localProfiles));
+        } catch {
+          // ignore
+        }
 
         return { error: null };
       } catch (e) {
@@ -338,22 +371,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const signOut = useCallback(async () => {
-    try {
-      if (isSupabaseConfigured) {
-        await supabase.auth.signOut();
+  const updateProfile = useCallback(
+    async (updates: Partial<Profile>): Promise<{ error: string | null }> => {
+      try {
+        if (!state.user && !state.profile) {
+          return { error: 'Not logged in.' };
+        }
+        const userId = state.user?.id || state.profile?.id || 'current';
+
+        if (isSupabaseConfigured) {
+          const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
+          if (error) {
+            console.warn('Supabase update profile error, updating local state:', error.message);
+          }
+        }
+
+        const updatedProfile = state.profile ? { ...state.profile, ...updates } : null;
+        if (updatedProfile) {
+          setState((prev) => ({ ...prev, profile: updatedProfile }));
+          try {
+            const raw = localStorage.getItem('petziq_local_auth');
+            if (raw) {
+              const saved = JSON.parse(raw);
+              saved.profile = updatedProfile;
+              localStorage.setItem('petziq_local_auth', JSON.stringify(saved));
+            }
+            // Also update in registered profiles list
+            const localProfiles = JSON.parse(localStorage.getItem('petziq_registered_profiles') || '[]');
+            const idx = localProfiles.findIndex((p: any) => p.id === userId);
+            if (idx >= 0) {
+              localProfiles[idx] = { ...localProfiles[idx], ...updates };
+            } else {
+              localProfiles.push(updatedProfile);
+            }
+            localStorage.setItem('petziq_registered_profiles', JSON.stringify(localProfiles));
+          } catch {
+            // ignore
+          }
+        }
+        return { error: null };
+      } catch (e: any) {
+        return { error: e?.message || 'Failed to update profile.' };
       }
-      localStorage.removeItem('petziq_local_auth');
-      setState({
-        session: null,
-        user: null,
-        profile: null,
-        loading: false,
-      });
-    } catch (e) {
-      console.error('signOut threw:', e);
-    }
-  }, []);
+    },
+    [state.user, state.profile],
+  );
+
+  const resetPassword = useCallback(
+    async (email: string): Promise<{ error: string | null }> => {
+      try {
+        if (isSupabaseConfigured) {
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/#/auth`,
+          });
+          if (error) return { error: error.message };
+        }
+        return { error: null };
+      } catch (e: any) {
+        return { error: e?.message || 'Failed to send reset link.' };
+      }
+    },
+    [],
+  );
 
   return (
     <AuthContext.Provider
@@ -365,6 +444,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signOut,
+        updateProfile,
+        resetPassword,
       }}
     >
       {children}

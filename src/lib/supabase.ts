@@ -32,6 +32,8 @@ export interface Profile {
   pet_name: string;
   created_at: string;
   role: UserRole;
+  phone?: string;
+  date_of_birth?: string;
 }
 
 /**

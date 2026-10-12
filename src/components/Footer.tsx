@@ -110,27 +110,85 @@ export function Footer({ onNavigate }: FooterProps) {
 
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-400">
-              Contact
+              Legal & Trust
             </h4>
-            <div className="mt-4 space-y-1.5 text-sm">
-              <p className="font-medium text-ink-200">Petziq Team</p>
-              <a
-                href="mailto:petziq.team@gmail.com"
-                className="inline-flex items-center gap-2 text-ink-300 transition hover:text-brand-300"
-              >
-                <Mail className="h-3.5 w-3.5" />
-                petziq.team@gmail.com
-              </a>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              <li>
+                <button
+                  onClick={() => onNavigate('/privacy')}
+                  className="text-ink-300 transition hover:text-ink-50"
+                >
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('/terms')}
+                  className="text-ink-300 transition hover:text-ink-50"
+                >
+                  Terms of Service
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('/refund')}
+                  className="text-ink-300 transition hover:text-ink-50"
+                >
+                  Refund & Replacement
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('/cookies')}
+                  className="text-ink-300 transition hover:text-ink-50"
+                >
+                  Cookie Policy
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigate('/deletion')}
+                  className="text-red-400/80 transition hover:text-red-300"
+                >
+                  Data Deletion Request
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-400">
+              Contact Us
+            </h4>
+            <div className="mt-4 space-y-2 text-sm">
+              <p className="font-medium text-ink-200">Petziq Support & Orders</p>
+              <div>
+                <a
+                  href="mailto:petziq.team@gmail.com"
+                  className="inline-flex items-center gap-2 text-ink-300 transition hover:text-brand-300"
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                  petziq.team@gmail.com
+                </a>
+              </div>
+              <div>
+                <a
+                  href="tel:+919876543210"
+                  className="inline-flex items-center gap-2 font-mono text-xs text-teal-300 transition hover:text-teal-200"
+                >
+                  📞 +91 98765 43210
+                </a>
+              </div>
               <p className="pt-2 text-xs leading-relaxed text-ink-400">
-                Questions, support, feedback, or business inquiries — we'd love to hear from you.
+                100% data minimization compliant. No marketing spam or deceptive popups.
               </p>
             </div>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.10] pt-6 text-xs text-ink-400 sm:flex-row">
-          <p>Created by <span className="font-semibold text-ink-200">Nipun</span>.</p>
-          <p>© {new Date().getFullYear()} Petziq. Educational guidance only — not a substitute for veterinary care.</p>
+          <p>Created with care by <span className="font-semibold text-ink-200">Nipun</span>.</p>
+          <p>© {new Date().getFullYear()} Petziq. Educational guidance & smart tag protection. All rights reserved.</p>
         </div>
       </div>
     </footer>

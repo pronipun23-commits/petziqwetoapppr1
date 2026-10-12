@@ -76,6 +76,9 @@ interface AdminUser {
   id: string;
   full_name: string | null;
   pet_name: string | null;
+  email?: string | null;
+  phone?: string | null;
+  date_of_birth?: string | null;
   role: string | null;
   created_at: string;
   pet_count: number;
@@ -251,27 +254,62 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
         }
 
         if (isFullAdmin) {
+          let mergedUsers: AdminUser[] = [];
           const usersRes = await supabase.rpc('get_admin_users', { p_limit: 100 });
           if (!usersRes.error && Array.isArray(usersRes.data)) {
-            setUsers(usersRes.data as AdminUser[]);
+            mergedUsers = usersRes.data as AdminUser[];
           } else {
             // Fallback to profiles table query
-            const { data: profs } = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
+            const { data: profs } = await supabase.from('profiles').select('id, full_name, pet_name, phone, date_of_birth, role, created_at').limit(100);
             if (profs) {
-              setUsers(
-                profs.map((p) => ({
-                  id: p.id,
-                  full_name: p.full_name,
-                  pet_name: p.pet_name,
-                  role: p.role,
-                  created_at: p.created_at,
-                  pet_count: 0,
-                  plant_count: 0,
-                  tag_count: 0,
-                }))
-              );
+              mergedUsers = profs.map((p) => ({
+                id: p.id,
+                full_name: p.full_name,
+                pet_name: p.pet_name,
+                phone: p.phone,
+                date_of_birth: p.date_of_birth,
+                role: p.role,
+                created_at: p.created_at,
+                pet_count: 0,
+                plant_count: 0,
+                tag_count: 0,
+              }));
             }
           }
+
+          // Also merge locally registered profiles if present
+          try {
+            const localRegistered = JSON.parse(localStorage.getItem('petziq_registered_profiles') || '{}');
+            Object.entries(localRegistered).forEach(([userId, val]: [string, any]) => {
+              const existingIdx = mergedUsers.findIndex(u => u.id === userId);
+              if (existingIdx >= 0) {
+                mergedUsers[existingIdx] = {
+                  ...mergedUsers[existingIdx],
+                  phone: mergedUsers[existingIdx].phone || val.phone,
+                  date_of_birth: mergedUsers[existingIdx].date_of_birth || val.dateOfBirth,
+                  full_name: mergedUsers[existingIdx].full_name || val.fullName,
+                  pet_name: mergedUsers[existingIdx].pet_name || val.petName,
+                };
+              } else {
+                mergedUsers.unshift({
+                  id: userId,
+                  full_name: val.fullName || 'Registered User',
+                  pet_name: val.petName || null,
+                  phone: val.phone || null,
+                  date_of_birth: val.dateOfBirth || null,
+                  role: 'user',
+                  created_at: val.createdAt || new Date().toISOString(),
+                  pet_count: 1,
+                  plant_count: 0,
+                  tag_count: 0,
+                });
+              }
+            });
+          } catch {
+            // ignore
+          }
+
+          setUsers(mergedUsers);
         }
       } catch (e) {
         setStatsError(
@@ -633,35 +671,64 @@ function UsersTab({ users, loading }: { users: AdminUser[]; loading: boolean }) 
         ) : (
           <div className="divide-y divide-white/[0.06]">
             {users.map((u) => (
-              <div key={u.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-ocean-500 text-xs font-bold text-white">
-                  {(u.full_name ?? 'U').charAt(0).toUpperCase()}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink-50">{u.full_name ?? 'Unknown'}</p>
-                  <p className="text-xs text-ink-400">
-                    {u.pet_name ? `${u.pet_name}'s human` : 'Pet owner'} &middot; {u.id.slice(0, 8)}…
-                  </p>
+              <div key={u.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 hover:bg-white/[0.02] transition">
+                <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-ocean-500 text-sm font-bold text-white shadow-glow">
+                    {(u.full_name ?? 'U').charAt(0).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="truncate text-sm font-semibold text-ink-50">{u.full_name ?? 'Petziq Customer'}</p>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          ['admin', 'full_admin', 'owner'].includes(u.role ?? '')
+                            ? 'bg-brand-500/10 text-brand-300 ring-1 ring-brand-500/20'
+                            : ['marketing_admin', 'marketing_manager'].includes(u.role ?? '')
+                              ? 'bg-ocean-500/10 text-ocean-300 ring-1 ring-ocean-500/20'
+                              : 'bg-white/[0.06] text-ink-300'
+                        }`}
+                      >
+                        {u.role ?? 'user'}
+                      </span>
+                    </div>
+
+                    <div className="mt-1 flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-ink-300">
+                      {u.phone ? (
+                        <a
+                          href={`tel:${u.phone}`}
+                          className="inline-flex items-center gap-1 font-mono text-teal-300 hover:text-teal-200 transition"
+                          title="Call customer"
+                        >
+                          📞 {u.phone}
+                        </a>
+                      ) : (
+                        <span className="text-ink-500 italic">No phone added</span>
+                      )}
+
+                      {u.date_of_birth && (
+                        <span className="inline-flex items-center gap-1 text-ink-400">
+                          🎂 DOB: {u.date_of_birth}
+                        </span>
+                      )}
+
+                      {u.pet_name && (
+                        <span className="text-ink-400">
+                          🐾 Pet: <strong className="text-ink-200">{u.pet_name}</strong>
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-ink-400">
-                  <span title="Pets">{u.pet_count} pets</span>
-                  <span title="Plants">{u.plant_count} plants</span>
-                  <span title="Smart Tags">{u.tag_count} tags</span>
+
+                <div className="flex items-center justify-between sm:justify-end gap-4 text-xs text-ink-400 pt-2 sm:pt-0 border-t border-white/[0.04] sm:border-0">
+                  <div className="flex items-center gap-2.5">
+                    <span className="rounded-md bg-white/[0.04] px-2 py-1 text-[11px]" title="Pets">{u.pet_count} pets</span>
+                    <span className="rounded-md bg-white/[0.04] px-2 py-1 text-[11px]" title="Smart Tags">{u.tag_count} tags</span>
+                  </div>
+                  <span className="shrink-0 text-[11px] text-ink-500">
+                    Joined {new Date(u.created_at).toLocaleDateString()}
+                  </span>
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-                    ['admin', 'full_admin', 'owner'].includes(u.role ?? '')
-                      ? 'bg-brand-500/10 text-brand-300'
-                      : ['marketing_admin', 'marketing_manager'].includes(u.role ?? '')
-                        ? 'bg-ocean-500/10 text-ocean-300'
-                        : 'bg-white/[0.06] text-ink-400'
-                  }`}
-                >
-                  {u.role ?? 'user'}
-                </span>
-                <span className="text-xs text-ink-400">
-                  {new Date(u.created_at).toLocaleDateString()}
-                </span>
               </div>
             ))}
           </div>

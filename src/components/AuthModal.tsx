@@ -10,6 +10,9 @@ import {
   ArrowRight,
   X,
   ArrowLeft,
+  Phone,
+  Calendar,
+  CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -20,31 +23,62 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
-  const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const { signIn, signUp, resetPassword } = useAuth();
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [fullName, setFullName] = useState('');
   const [petName, setPetName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
 
-  const switchMode = (next: 'login' | 'register') => {
+  const switchMode = (next: 'login' | 'register' | 'forgot') => {
     setMode(next);
     setError(null);
+    setSuccess(null);
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
     setLoading(true);
 
     try {
+      if (mode === 'forgot') {
+        if (!email.trim()) {
+          setError('Please enter your email to reset password.');
+          setLoading(false);
+          return;
+        }
+        const { error: resetErr } = await resetPassword(email);
+        if (resetErr) {
+          setError(resetErr);
+        } else {
+          setSuccess('Password reset link sent! Check your email inbox.');
+        }
+        setLoading(false);
+        return;
+      }
+
       if (mode === 'register') {
         if (!fullName.trim() || !petName.trim()) {
           setError('Please fill in your name and your pet\u2019s name.');
+          setLoading(false);
+          return;
+        }
+        if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
+          setError('Please enter a valid 10-digit mobile number for order and security updates.');
+          setLoading(false);
+          return;
+        }
+        if (!dateOfBirth) {
+          setError('Please enter your Date of Birth.');
           setLoading(false);
           return;
         }
@@ -58,6 +92,8 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
           password,
           fullName.trim(),
           petName.trim(),
+          phone.trim(),
+          dateOfBirth
         );
         if (signUpError) {
           setError(signUpError);
@@ -183,6 +219,48 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
               </div>
             )}
 
+            {mode === 'register' && (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-300">
+                      Mobile Number
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="e.g. 9876543210"
+                        disabled={loading}
+                        required
+                        className="input-field pl-11 font-mono"
+                        autoComplete="tel"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-300">
+                      Date of Birth
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+                      <input
+                        type="date"
+                        value={dateOfBirth}
+                        onChange={(e) => setDateOfBirth(e.target.value)}
+                        disabled={loading}
+                        required
+                        max={new Date().toISOString().split('T')[0]}
+                        className="input-field pl-11 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-300">
                 Email
@@ -202,29 +280,49 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
               </div>
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-300">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={mode === 'register' ? 'At least 6 characters' : 'Your password'}
-                  disabled={loading}
-                  required
-                  className="input-field pl-11"
-                  autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-                />
+            {mode !== 'forgot' && (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-ink-300">
+                    Password
+                  </label>
+                  {mode === 'login' && (
+                    <button
+                      type="button"
+                      onClick={() => switchMode('forgot')}
+                      className="text-xs text-brand-300 hover:text-brand-200 transition"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={mode === 'register' ? 'At least 6 characters' : 'Your password'}
+                    disabled={loading}
+                    required
+                    className="input-field pl-11"
+                    autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {error && (
-              <div className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 animate-fade-in">
+              <div className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400 animate-fade-in">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-300 animate-fade-in">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{success}</span>
               </div>
             )}
 
@@ -233,7 +331,9 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <>
-                  {mode === 'login' ? 'Sign In' : 'Create Account'}
+                  {mode === 'login' && 'Sign In'}
+                  {mode === 'register' && 'Create Account'}
+                  {mode === 'forgot' && 'Send Reset Link'}
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
@@ -241,7 +341,7 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
           </form>
 
           <p className="mt-6 text-center text-sm text-ink-300">
-            {mode === 'login' ? (
+            {mode === 'login' && (
               <>
                 Don't have an account?{' '}
                 <button
@@ -252,7 +352,8 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
                   Register here
                 </button>
               </>
-            ) : (
+            )}
+            {mode === 'register' && (
               <>
                 Already have an account?{' '}
                 <button
@@ -261,6 +362,18 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
                   disabled={loading}
                 >
                   Sign in
+                </button>
+              </>
+            )}
+            {mode === 'forgot' && (
+              <>
+                Remembered your password?{' '}
+                <button
+                  onClick={() => switchMode('login')}
+                  className="font-semibold text-brand-300 transition hover:text-brand-500 link-underline"
+                  disabled={loading}
+                >
+                  Back to Sign In
                 </button>
               </>
             )}
