@@ -1,29 +1,31 @@
-import { useRef, useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   PawPrint,
-  ArrowRight,
   Sprout,
+  ArrowRight,
+  Shield,
   Bell,
   Heart,
-  Sparkles,
+  Droplet,
+  Sun,
+  Activity,
   CheckCircle2,
-  LogIn,
-  UserPlus,
-  Clock,
+  Sparkles,
   Zap,
-  Shield,
-  Globe,
-  Scan,
   Tag,
+  Clock,
+  Scan,
+  AlertTriangle,
+  ChevronRight,
+  Layers,
+  ThermometerSun
 } from 'lucide-react';
+import { Logo } from '@/components/Logo';
+import { AntigravityHero } from '@/components/AntigravityHero';
+import { InteractivePetDashboardDemo } from '@/components/InteractivePetDashboardDemo';
 import { BREEDS } from '@/data/breeds';
 import { PLANTS } from '@/data/plants';
-import { PLANT_CATEGORY_MAP } from '@/data/plants/types';
 import { BLOG_POSTS } from '@/data/blog';
-import { TagProductPreview } from '@/components/TagProductPreview';
-import { InteractivePetDashboardDemo } from '@/components/InteractivePetDashboardDemo';
-import { PetTag3DViewer } from '@/components/PetTag3DViewer';
-import { AntigravityHero } from '@/components/AntigravityHero';
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -31,561 +33,406 @@ interface LandingPageProps {
   onSignUp: () => void;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  pets: 'border-brand-500/30 bg-brand-500/10 text-brand-300',
-  plants: 'border-brand-400/30 bg-brand-400/10 text-brand-500',
-  care: 'border-accent-500/30 bg-accent-500/10 text-accent-400',
-  general: 'border-white/[0.08] bg-white/[0.05] text-ink-200',
-};
+export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps) {
+  // Global Smart Switcher state ("Pet Mode" vs "Plant Mode")
+  const [activeMode, setActiveMode] = useState<'pets' | 'plants'>('pets');
 
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  // Floating Header dynamic shrink & glassmorphic opacity state on scroll
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Subscription billing toggle
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -60px 0px' },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  return { ref, visible };
-}
-
-function ScrollRevealSection({
-  children,
-  className = '',
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  const { ref, visible } = useScrollReveal();
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(24px)',
-        transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+    <div className="relative min-h-screen bg-ink-950 text-ink-100 selection:bg-brand-400/30 selection:text-white">
+      {/* =========================================================================
+          1. GLOBAL FLOATING NAVIGATION & SMART SWITCHER (Apple x Google Hybrid)
+          ========================================================================= */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+          isScrolled
+            ? 'py-2.5 bg-ink-950/80 backdrop-blur-2xl border-b border-white/[0.08] shadow-2xl'
+            : 'py-5 bg-transparent'
+        }`}
+      >
+        <div className="container-px flex items-center justify-between gap-4">
+          {/* Logo with Brand Wordmark */}
+          <button
+            onClick={() => onNavigate('/')}
+            className="flex items-center gap-2.5 transition-transform hover:scale-[1.02] focus:outline-none"
+            aria-label="Petziq Home"
+          >
+            <Logo size={36} withWordmark />
+          </button>
 
-export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps) {
-  const featuredPets = BREEDS.slice(0, 4);
-  const featuredPlants = PLANTS.slice(0, 4);
-  const blogPosts = BLOG_POSTS.slice(0, 3);
-
-  return (
-    <div className="relative">
-      {/* Navbar */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.08] glass">
-        <div className="container-px">
-          <div className="flex h-16 items-center justify-between">
-            <button onClick={() => onNavigate('/')} className="flex items-center gap-2.5 transition hover:opacity-90">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 via-teal-400 to-ocean-400 text-white shadow-glow">
-                <PawPrint className="h-5 w-5" strokeWidth={2.5} />
-              </span>
-              <span className="font-display text-lg font-semibold tracking-tight text-ink-50">
-                Petziq
-              </span>
+          {/* Central Smart Switcher Toggle: Pet Mode <-> Plant Mode */}
+          <div className="hidden md:flex items-center rounded-full border border-white/[0.12] bg-ink-900/80 p-1 backdrop-blur-xl shadow-inner">
+            <button
+              onClick={() => setActiveMode('pets')}
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                activeMode === 'pets'
+                  ? 'bg-gradient-to-r from-amber-500/20 to-brand-500/20 text-white border border-white/20 shadow-sm'
+                  : 'text-ink-400 hover:text-ink-200'
+              }`}
+            >
+              <PawPrint className="h-3.5 w-3.5 text-amber-300" />
+              Pet Ecosystem
             </button>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={() => onNavigate('/blog')}
-                className="hidden rounded-full px-4 py-2 text-sm font-medium text-ink-300 transition hover:text-ink-50 sm:inline-flex"
-              >
-                Blog
-              </button>
-              <button
-                onClick={() => onNavigate('/explore')}
-                className="hidden rounded-full px-4 py-2 text-sm font-medium text-ink-300 transition hover:text-ink-50 sm:inline-flex"
-              >
-                Explore
-              </button>
-              <button onClick={onLogin} className="btn-subtle">
-                Log In
-              </button>
-              <button onClick={onSignUp} className="btn-primary">
-                Sign Up
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
+            <button
+              onClick={() => setActiveMode('plants')}
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                activeMode === 'plants'
+                  ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-white border border-white/20 shadow-sm'
+                  : 'text-ink-400 hover:text-ink-200'
+              }`}
+            >
+              <Sprout className="h-3.5 w-3.5 text-emerald-300" />
+              Plant Sanctuary
+            </button>
+          </div>
+
+          {/* Action CTAs */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => onNavigate('/blog')}
+              className="hidden lg:inline-flex text-xs font-semibold text-ink-300 hover:text-white px-3 py-1.5 transition"
+            >
+              Journal
+            </button>
+            <button
+              onClick={() => onNavigate('/smart-tags')}
+              className="hidden sm:inline-flex text-xs font-semibold text-ink-300 hover:text-white px-3 py-1.5 transition"
+            >
+              Smart Tags
+            </button>
+            <button
+              onClick={onLogin}
+              className="btn-ghost text-xs px-4 py-2 border border-white/[0.12] hover:bg-white/[0.06]"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={onSignUp}
+              className="btn-primary text-xs px-4 py-2 shadow-glow hover:scale-[1.02]"
+            >
+              Join Companion
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* 250vh Immersive Antigravity 3D Parallax Hero Container */}
+      {/* =========================================================================
+          2. 250vh HERO SECTION & 3D PARALLAX CANVAS (The Hook)
+          ========================================================================= */}
       <AntigravityHero
         onNavigate={onNavigate}
         onOrderTag={() => onNavigate('/smart-tags')}
       />
 
-      {/* Trust & Capability Strip */}
-      <ScrollRevealSection className="container-px">
-        <div className="flex flex-wrap items-center justify-center gap-3 py-6 border-y border-white/[0.06]">
-          {[
-            { icon: Shield, label: 'Owner-controlled privacy settings' },
-            { icon: Zap, label: 'Instant QR routing with no app download needed' },
-            { icon: Globe, label: 'Husbandry guides & toxic plant alerts' },
-            { icon: Scan, label: 'Durable laser-engraved acrylic hardware' },
-          ].map((badge) => (
-            <div
-              key={badge.label}
-              className="flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.02] px-4 py-2 text-xs text-ink-300"
-            >
-              <badge.icon className="h-3.5 w-3.5 text-brand-400" />
-              {badge.label}
+      {/* =========================================================================
+          3. RESPONSIVE BENTO GRID WITH SPRING PHYSICS & HOVER GLOWS
+          ========================================================================= */}
+      <section className="container-px mt-28 relative z-20">
+        <div className="mx-auto max-w-2xl text-center mb-14">
+          <span className="eyebrow text-brand-300">Biophilic Cyber-Minimalism</span>
+          <h2 className="mt-3 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Designed for living things.
+          </h2>
+          <p className="mt-3 text-base text-ink-300 leading-relaxed">
+            A cohesive hardware and software ecosystem bridging biometric pet profiles, clinical medication schedules, and botanical moisture telemetry.
+          </p>
+        </div>
+
+        {/* Bento Grid layout: 3-column desktop -> 2-column tablet -> 1-column mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Bento Card 1: 330 Pet Breeds Deep Intelligence (Span 2 col on Desktop) */}
+          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl">
+            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-brand-400/10 blur-3xl transition group-hover:bg-brand-400/20" />
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-brand-300 uppercase tracking-widest">
+              <PawPrint className="h-4 w-4" />
+              <span>Taxonomic Database</span>
             </div>
-          ))}
-        </div>
-      </ScrollRevealSection>
-
-      {/* Three pillars with 3D glass depth */}
-      <section className="container-px mt-24 section-glow">
-        <ScrollRevealSection>
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Three companions, one app</p>
-            <h2 className="mt-3 section-title text-balance text-gradient">
-              Everything you care for, organized beautifully
-            </h2>
-            <p className="mt-3 text-base leading-relaxed text-ink-300">
-              Whether you have a dog, a monstera, or a whole zoo at home, Petziq
-              keeps the knowledge and schedules you need in one calm, friendly place.
+            <h3 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white">
+              330 Verified Pet Breed Encyclopedias
+            </h3>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-300">
+              Structured temperaments, genetic predispositions, exercise quotients, and coat maintenance schedules across dogs, cats, reptiles, and exotic species.
             </p>
-          </div>
-        </ScrollRevealSection>
-
-        <div className="mt-10 grid gap-4 lg:grid-cols-3" style={{ perspective: '1200px' }}>
-          {/* Pets */}
-          <ScrollRevealSection delay={0}>
-            <button
-              onClick={() => onNavigate('/explore')}
-              className="group glass-depth card-3d relative overflow-hidden p-6 text-left transition-all w-full"
-            >
-              <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-brand-500/10 blur-2xl transition group-hover:bg-brand-500/20" />
-              <div className="relative depth-layer-2">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-500/15 text-brand-300">
-                    <PawPrint className="h-6 w-6" />
-                  </span>
-                  <div>
-                    <h3 className="font-display text-xl font-semibold text-ink-50">
-                      Pets
-                    </h3>
-                    <p className="text-xs text-brand-300">Explore 330 pet breeds</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-ink-300">
-                  Deep, structured profiles for dogs, cats, birds, reptiles, small
-                  mammals, and exotic pets. Compare temperament, care needs, and
-                  find the right companion for your lifestyle.
-                </p>
-                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand-300">
-                  Browse pets
-                  <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
+            <div className="mt-7 flex flex-wrap gap-2.5">
+              {['14 Categorical Taxonomy', 'Lifespan & Energy Metrics', 'Nutritional Restrictions'].map((pill) => (
+                <span key={pill} className="rounded-full bg-white/[0.04] border border-white/[0.08] px-3 py-1 text-xs text-ink-200">
+                  {pill}
                 </span>
-              </div>
-            </button>
-          </ScrollRevealSection>
-
-          {/* Plants */}
-          <ScrollRevealSection delay={60}>
-            <button
-              onClick={() => onNavigate('/plants')}
-              className="group glass-depth card-3d relative overflow-hidden p-6 text-left transition-all w-full"
-            >
-              <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-brand-400/10 blur-2xl transition group-hover:bg-brand-400/20" />
-              <div className="relative depth-layer-2">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-400/15 text-brand-300">
-                    <Sprout className="h-6 w-6" />
-                  </span>
-                  <div>
-                    <h3 className="font-display text-xl font-semibold text-ink-50">
-                      Plants
-                    </h3>
-                    <p className="text-xs text-brand-300">99 species profiles</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-ink-300">
-                  From hardy succulents to statement fiddle leaf figs. Learn
-                  sunlight, watering, soil, and temperature needs for every plant,
-                  with care tips and difficulty ratings.
-                </p>
-                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand-300">
-                  Browse plants
-                  <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
-                </span>
-              </div>
-            </button>
-          </ScrollRevealSection>
-
-          {/* Reminders */}
-          <ScrollRevealSection delay={120}>
-            <button
-              onClick={() => onNavigate('/reminders')}
-              className="group glass-depth card-3d relative overflow-hidden p-6 text-left transition-all w-full"
-            >
-              <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-accent-500/10 blur-2xl transition group-hover:bg-accent-500/20" />
-              <div className="relative depth-layer-2">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent-500/15 text-accent-400">
-                    <Bell className="h-6 w-6" />
-                  </span>
-                  <div>
-                    <h3 className="font-display text-xl font-semibold text-ink-50">
-                      Reminders
-                    </h3>
-                    <p className="text-xs text-accent-400">Never miss care</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-ink-300">
-                  Set one-time or repeating reminders for watering, feeding, vet
-                  appointments, and custom tasks. A clean dashboard shows what is
-                  due today, upcoming, and completed.
-                </p>
-                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-accent-400">
-                  Set reminders
-                  <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
-                </span>
-              </div>
-            </button>
-          </ScrollRevealSection>
-        </div>
-      </section>
-
-      {/* Pets preview with enhanced depth */}
-      <section className="container-px mt-24 section-glow">
-        <ScrollRevealSection>
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="eyebrow">Pets</p>
-              <h2 className="mt-3 section-title">Meet the animals</h2>
+              ))}
             </div>
             <button
               onClick={() => onNavigate('/explore')}
-              className="btn-subtle hidden sm:inline-flex"
+              className="mt-8 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-brand-300 transition"
             >
-              View all pets
-              <ArrowRight className="h-4 w-4" />
+              Explore 330 Breeds <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
-        </ScrollRevealSection>
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4" style={{ perspective: '1000px' }}>
-          {featuredPets.map((b, i) => (
-            <ScrollRevealSection key={b.id} delay={i * 60}>
-              <button
-                onClick={() => onNavigate(`/breed/${b.id}`)}
-                className="group relative aspect-square overflow-hidden rounded-2xl border border-white/[0.08] card-3d w-full"
-              >
-                <img
-                  src={b.image}
-                  alt={b.name}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 to-transparent" />
-                <div className="absolute bottom-3 left-3 text-left depth-layer-1">
-                  <div className="text-xs text-white/80">{b.origin}</div>
-                  <div className="font-display text-sm font-semibold text-white">
-                    {b.name}
-                  </div>
-                </div>
-              </button>
-            </ScrollRevealSection>
-          ))}
-        </div>
-      </section>
 
-      {/* Plants preview with enhanced depth */}
-      <section className="container-px mt-24 section-glow">
-        <ScrollRevealSection>
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="eyebrow">Plants</p>
-              <h2 className="mt-3 section-title">Meet the plants</h2>
+          {/* Bento Card 2: Botanical 99 Plant Hydration Guard */}
+          <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-2xl">
+            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-emerald-500/10 blur-3xl transition group-hover:bg-emerald-500/20" />
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400 uppercase tracking-widest">
+              <Sprout className="h-4 w-4" />
+              <span>Flora Sanctuary</span>
+            </div>
+            <h3 className="mt-4 font-display text-xl font-bold text-white">
+              99 Safe Botanical Guides
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-ink-300">
+              Photoperiod lux ranges, soil moisture thresholds, and pet toxicity filters across succulents, monsteras, and ficus trees.
+            </p>
+            <div className="mt-6 flex items-center justify-between rounded-2xl bg-white/[0.03] border border-white/[0.06] p-3.5 text-xs">
+              <div className="flex items-center gap-2 text-ink-200">
+                <Droplet className="h-4 w-4 text-cyan-400" />
+                <span>Hydration Telemetry</span>
+              </div>
+              <span className="font-mono text-emerald-400 font-bold">Optimal</span>
             </div>
             <button
               onClick={() => onNavigate('/plants')}
-              className="btn-subtle hidden sm:inline-flex"
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-emerald-300 transition"
             >
-              View all plants
-              <ArrowRight className="h-4 w-4" />
+              Browse Plants <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
-        </ScrollRevealSection>
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4" style={{ perspective: '1000px' }}>
-          {featuredPlants.map((p, i) => (
-            <ScrollRevealSection key={p.id} delay={i * 60}>
-              <button
-                onClick={() => onNavigate(`/plants/${p.id}`)}
-                className="group relative aspect-square overflow-hidden rounded-2xl border border-white/[0.08] card-3d w-full"
-              >
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 to-transparent" />
-                <div className="absolute bottom-3 left-3 text-left depth-layer-1">
-                  <div className="text-xs text-white/80">{PLANT_CATEGORY_MAP[p.category[0]]?.name ?? p.environment}</div>
-                  <div className="font-display text-sm font-semibold text-white">
-                    {p.name}
-                  </div>
-                </div>
-              </button>
-            </ScrollRevealSection>
-          ))}
-        </div>
-      </section>
 
-      {/* Interactive 3D Pet Dashboard Experience: Bruno */}
-      <section className="container-px mt-24 section-glow">
-        <ScrollRevealSection>
-          <div className="mx-auto max-w-2xl text-center mb-10">
-            <p className="eyebrow">The Petziq Experience</p>
-            <h2 className="mt-3 section-title text-balance text-gradient">
-              Here’s what your pet’s dashboard actually looks like
-            </h2>
-            <p className="mt-3 text-base leading-relaxed text-ink-300">
-              Interactive live demo: Switch between Bruno’s medical records, vaccination passports, daily meal rations, active reminders, and scannable collar tag.
+          {/* Bento Card 3: Instant Emergency Finder Tag */}
+          <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl">
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-300 uppercase tracking-widest">
+              <Shield className="h-4 w-4" />
+              <span>Smart Hardware</span>
+            </div>
+            <h3 className="mt-4 font-display text-xl font-bold text-white">
+              Instant Collar QR Routing
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-ink-300">
+              Laser-engraved aerospace acrylic tags that connect lost pets with owners in seconds without any app download needed by finders.
             </p>
-          </div>
-        </ScrollRevealSection>
-
-        <ScrollRevealSection delay={40}>
-          <InteractivePetDashboardDemo
-            onExploreSmartTag={() => onNavigate('/smart-tags')}
-            onExploreCare={() => onNavigate('/care')}
-          />
-        </ScrollRevealSection>
-      </section>
-
-      {/* Smart Tag product story */}
-      <section className="container-px mt-24 section-glow">
-        <ScrollRevealSection>
-          <div className="grid items-center gap-8 overflow-hidden rounded-3xl border border-cyan-300/15 surface-highlight p-8 sm:p-12 lg:grid-cols-[1.05fr_0.95fr]">
-            <div>
-              <p className="eyebrow">Petziq Smart Tag</p>
-              <h2 className="mt-3 section-title text-balance">A calmer way to stay connected.</h2>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-300">
-                Create a private, scannable profile for the companion who matters most. Smart Tags bring essential care and contact details together without adding noise to your day.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button onClick={() => onNavigate('/smart-tags')} className="btn-primary">
-                  <Tag className="h-4 w-4" />
-                  Explore Smart Tags
-                </button>
-                <button onClick={() => onNavigate('/about')} className="btn-ghost">How it works</button>
-              </div>
-            </div>
-            <div className="relative mx-auto w-full max-w-sm">
-              <div className="absolute inset-8 rounded-full bg-cyan-300/15 blur-3xl" />
-              <div className="relative mx-auto grid aspect-square max-w-[260px] place-items-center rounded-full border border-cyan-200/25 bg-gradient-to-br from-white/[0.14] via-ocean-500/10 to-iris-500/10 shadow-glow-blue">
-                <div className="grid h-32 w-32 place-items-center rounded-[2rem] border border-white/20 bg-ink-900/70 shadow-card-hover">
-                  <Scan className="h-14 w-14 text-cyan-200" />
-                </div>
-                <span className="absolute bottom-8 rounded-full border border-white/10 bg-ink-950/70 px-3 py-1 font-mono text-[10px] tracking-[0.25em] text-cyan-200">PZ-000001</span>
-              </div>
-            </div>
-          </div>
-        </ScrollRevealSection>
-      </section>
-
-      {/* Blog teaser with glass depth */}
-      <section className="container-px mt-24 section-glow">
-        <ScrollRevealSection>
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="eyebrow">Blog</p>
-              <h2 className="mt-3 section-title">Care guides & stories</h2>
-              <p className="mt-2 text-sm text-ink-400">
-                Practical, vet-informed articles — free to read, no account needed.
-              </p>
+            <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs">
+              <span className="text-ink-400 font-mono">PZ-HARDWARE</span>
+              <span className="text-emerald-400 font-semibold">100% Waterproof</span>
             </div>
             <button
-              onClick={() => onNavigate('/blog')}
-              className="btn-subtle hidden sm:inline-flex"
+              onClick={() => onNavigate('/smart-tags')}
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-brand-300 transition"
             >
-              All articles
-              <ArrowRight className="h-4 w-4" />
+              Order Hardware <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
-        </ScrollRevealSection>
-        <div className="mt-8 grid gap-5 sm:grid-cols-3" style={{ perspective: '1000px' }}>
-          {blogPosts.map((post, i) => (
-            <ScrollRevealSection key={post.id} delay={i * 60}>
-              <button
-                onClick={() => onNavigate(`/blog/${post.id}`)}
-                className="group glass-depth card-3d overflow-hidden text-left w-full"
-              >
-                <div className="relative aspect-video overflow-hidden bg-ink-900">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <span className={`absolute left-3 top-3 chip border text-xs backdrop-blur-sm ${CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS.general}`}>
-                    {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
-                  </span>
-                </div>
-                <div className="p-5 depth-layer-1">
-                  <div className="flex items-center gap-3 text-xs text-ink-400">
-                    <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{post.readTime}</span>
-                  </div>
-                  <h3 className="mt-3 font-display text-base font-semibold leading-snug text-ink-50">
-                    {post.title}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-300">
-                    {post.excerpt}
-                  </p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand-300">
-                    Read more
-                    <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
-                  </span>
-                </div>
-              </button>
-            </ScrollRevealSection>
-          ))}
-        </div>
-        <div className="mt-6 text-center sm:hidden">
-          <button onClick={() => onNavigate('/blog')} className="btn-ghost text-sm">
-            All articles
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-      </section>
 
-      {/* What you can do - 3D feature cards */}
-      <section className="container-px mt-24 section-glow">
-        <ScrollRevealSection>
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">What you can do</p>
-            <h2 className="mt-3 section-title text-balance text-gradient">
-              Built for keepers, by keepers
-            </h2>
+          {/* Bento Card 4: Clinical Triage & Care Schedules (Span 2 col on Desktop) */}
+          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl">
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-brand-300 uppercase tracking-widest">
+              <Activity className="h-4 w-4" />
+              <span>Preventative Husbandry</span>
+            </div>
+            <h3 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white">
+              Symptom Triage & Active Care Checklists
+            </h3>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-300">
+              Educational behavioral solvers and synchronized daily checklists for meal portions, joint supplements, flea medication, and vet booster milestones.
+            </p>
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-xs">
+                <span className="text-ink-400 text-[11px]">Vaccines</span>
+                <p className="font-bold text-white mt-0.5">Automated Sync</p>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-xs">
+                <span className="text-ink-400 text-[11px]">Toxicity Guard</span>
+                <p className="font-bold text-white mt-0.5">Instant Alert</p>
+              </div>
+              <div className="col-span-2 sm:col-span-1 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-xs">
+                <span className="text-ink-400 text-[11px]">Reminders</span>
+                <p className="font-bold text-white mt-0.5">Push & Calendar</p>
+              </div>
+            </div>
           </div>
-        </ScrollRevealSection>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" style={{ perspective: '1200px' }}>
-          {[
-            {
-              icon: PawPrint,
-              title: 'Explore pets',
-              body: 'Browse 330 pet breeds across 14 categories with detailed care and temperament info.',
-            },
-            {
-              icon: Sprout,
-              title: 'Learn about plants',
-              body: 'Discover sunlight, watering, and soil needs for popular houseplants and garden plants.',
-            },
-            {
-              icon: Bell,
-              title: 'Set reminders',
-              body: 'Create one-time or repeating reminders for watering, feeding, and vet appointments.',
-            },
-            {
-              icon: Heart,
-              title: 'Save favorites',
-              body: 'Star the breeds and plants you love and revisit them anytime in your collection.',
-            },
-          ].map((f, i) => (
-            <ScrollRevealSection key={f.title} delay={i * 60}>
-              <div className="glass-depth card-3d p-6 h-full">
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-500/10 text-brand-300 transition group-hover:bg-brand-500/20 depth-layer-2">
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <h3 className="mt-4 font-display text-base font-semibold text-ink-50 depth-layer-1">
-                  {f.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-300 depth-layer-1">{f.body}</p>
-              </div>
-            </ScrollRevealSection>
-          ))}
         </div>
       </section>
 
-      {/* CTA with glass depth */}
-      <section className="container-px mt-24">
-        <ScrollRevealSection>
-          <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-brand-50/10 via-brand-100/5 to-accent-50/5 p-10 sm:p-14 glass-depth" style={{ perspective: '800px' }}>
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-500/15 blur-3xl" />
-            <div className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl" />
-            <div className="relative max-w-2xl depth-layer-2">
-              <h2 className="font-display text-2xl font-semibold text-ink-50 sm:text-3xl text-balance">
-                Ready to care smarter?
-              </h2>
-              <p className="mt-3 text-base text-ink-300">
-                Create a free account to save favorites, set reminders, and build
-                your personal care dashboard. Browsing is always free — no account
-                needed to explore.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button onClick={onSignUp} className="btn-primary">
-                  <UserPlus className="h-4 w-4" />
-                  Create free account
-                </button>
-                <button onClick={onLogin} className="btn-ghost">
-                  <LogIn className="h-4 w-4" />
-                  Log In
-                </button>
+      {/* =========================================================================
+          4. DYNAMIC CARE DASHBOARD PREVIEW (The Value Prop - Bruno Showcase)
+          ========================================================================= */}
+      <section className="container-px mt-32 relative z-20">
+        <div className="mx-auto max-w-2xl text-center mb-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.04] px-4 py-1 text-xs font-semibold text-brand-300">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Real Application Interface</span>
+          </div>
+          <h2 className="mt-3 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+            Everything in calm, unified clarity
+          </h2>
+          <p className="mt-3 text-base text-ink-300 leading-relaxed">
+            Live interactive prototype: test Bruno's clinical vaccination passport, daily ration calculators, and collar tag telemetry below.
+          </p>
+        </div>
+
+        {/* Live Interactive Petziq Care Console Component */}
+        <InteractivePetDashboardDemo
+          onExploreSmartTag={() => onNavigate('/smart-tags')}
+          onExploreCare={() => onNavigate('/care')}
+        />
+      </section>
+
+      {/* =========================================================================
+          5. PREMIUM SUBSCRIPTION EXPERIENCE (Apple Frictionless Conversion)
+          ========================================================================= */}
+      <section className="container-px mt-36 relative z-20">
+        <div className="mx-auto max-w-2xl text-center mb-12">
+          <span className="eyebrow text-brand-300">Membership Tiers</span>
+          <h2 className="mt-3 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+            Choose your care tier
+          </h2>
+          <p className="mt-3 text-base text-ink-300 leading-relaxed">
+            Essential encyclopedia access is forever free. Upgrade for automated medical passports, smart telemetry, and custom laser-engraved collar tags.
+          </p>
+
+          {/* Monthly vs Yearly Billing Switcher */}
+          <div className="mt-8 inline-flex items-center rounded-full border border-white/[0.12] bg-ink-900/80 p-1 backdrop-blur-xl">
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              className={`rounded-full px-5 py-2 text-xs font-semibold transition ${
+                billingCycle === 'monthly'
+                  ? 'bg-white text-ink-950 shadow-md font-bold'
+                  : 'text-ink-400 hover:text-ink-100'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingCycle('yearly')}
+              className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-xs font-semibold transition ${
+                billingCycle === 'yearly'
+                  ? 'bg-white text-ink-950 shadow-md font-bold'
+                  : 'text-ink-400 hover:text-ink-100'
+              }`}
+            >
+              <span>Annual</span>
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+                Save 25%
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Comparison Tier Cards: Free Explorer vs Companion Pro */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+          {/* Tier 1: Free Explorer */}
+          <div className="rounded-3xl border border-white/[0.12] bg-gradient-to-b from-ink-900/90 to-ink-950/95 p-8 flex flex-col justify-between glass">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-400">Essential Explorer</span>
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="font-display text-4xl font-extrabold text-white">Free</span>
+                <span className="text-xs text-ink-400">/ forever</span>
               </div>
-              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-400">
-                {['No credit card required', 'Free to browse', 'Privacy-first'].map((item) => (
-                  <span key={item} className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-400" />
-                    {item}
-                  </span>
+              <p className="mt-3 text-sm text-ink-300 leading-relaxed">
+                Complete unrestricted access to all pet breed and plant care guides.
+              </p>
+
+              <div className="mt-8 space-y-3 border-t border-white/[0.08] pt-6 text-xs text-ink-200">
+                {[
+                  '330 Detailed Pet Breed Guides',
+                  '99 Safe Botanical Care Profiles',
+                  'Basic Household Toxicity Search',
+                  'Community Care Articles & Journal',
+                ].map((feat) => (
+                  <div key={feat} className="flex items-center gap-2.5">
+                    <CheckCircle2 className="h-4 w-4 text-ink-400 shrink-0" />
+                    <span>{feat}</span>
+                  </div>
                 ))}
               </div>
             </div>
+
+            <button
+              onClick={onSignUp}
+              className="mt-8 btn-ghost w-full justify-center py-3 text-xs font-semibold"
+            >
+              Start Free Browsing
+            </button>
           </div>
-        </ScrollRevealSection>
+
+          {/* Tier 2: Companion Pro (Highlighted Hero Card) */}
+          <div className="relative rounded-3xl border-2 border-white/30 bg-gradient-to-b from-ink-850 via-ink-900 to-ink-950 p-8 flex flex-col justify-between glass shadow-2xl">
+            {/* Best Value Badge */}
+            <div className="absolute -top-3.5 right-8 rounded-full bg-gradient-to-r from-brand-300 to-white px-3.5 py-1 text-[11px] font-bold text-ink-950 shadow-md">
+              Most Popular
+            </div>
+
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-300">Companion Pro Ecosystem</span>
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="font-display text-4xl font-extrabold text-white">
+                  {billingCycle === 'yearly' ? '₹149' : '₹199'}
+                </span>
+                <span className="text-xs text-ink-400">/ month</span>
+              </div>
+              <p className="mt-3 text-sm text-ink-300 leading-relaxed">
+                Full digital medical history, automated booster alerts, and synchronized collar tags.
+              </p>
+
+              <div className="mt-8 space-y-3 border-t border-white/[0.08] pt-6 text-xs text-ink-100">
+                {[
+                  'All 330 Breeds + 99 Plant Guides Included',
+                  'Smart Collar Tag (Laser Acrylic) Included',
+                  'Instant Scannable Emergency Finder QR',
+                  'Vaccine Passport & Automated Due Date Alerts',
+                  'Daily Medication & Feeding Interactive Checklists',
+                  'Unlimited Photo & Activity History Storage',
+                ].map((feat) => (
+                  <div key={feat} className="flex items-center gap-2.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <span className="font-medium">{feat}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => onNavigate('/smart-tags')}
+              className="mt-8 btn-primary w-full justify-center py-3.5 text-xs font-bold shadow-glow hover:scale-[1.02]"
+            >
+              Get Companion Pro + Free Collar Tag &rarr;
+            </button>
+          </div>
+        </div>
       </section>
 
-      {/* Footer */}
-      <footer className="mt-24 border-t border-white/[0.08] bg-ink-950/60">
-        <div className="container-px py-10">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2.5">
-              <span className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-brand-400 via-teal-400 to-ocean-400 text-white">
-                <PawPrint className="h-4 w-4" strokeWidth={2.5} />
-              </span>
-              <span className="font-display text-base font-semibold text-ink-50">
-                Petziq
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-ink-400">
-              <button onClick={() => onNavigate('/plus')} className="font-semibold text-brand-300 transition hover:text-brand-200">Petziq Plus</button>
-              <button onClick={() => onNavigate('/blog')} className="transition hover:text-ink-50">Blog</button>
-              <button onClick={() => onNavigate('/explore')} className="transition hover:text-ink-50">Explore Pets</button>
-              <button onClick={() => onNavigate('/plants')} className="transition hover:text-ink-50">Explore Plants</button>
-              <button onClick={() => onNavigate('/about')} className="transition hover:text-ink-50">About</button>
-              <button onClick={() => onNavigate('/contact')} className="transition hover:text-ink-50">Contact</button>
-              <button onClick={() => onNavigate('/help')} className="transition hover:text-ink-50">Support</button>
-            </div>
-            <p className="text-xs text-ink-400">
-              © {new Date().getFullYear()} Petziq. Created by Nipun Menon. Educational guidance only.
-            </p>
+      {/* =========================================================================
+          6. FOOTER & COMPLIANCE ARCHITECTURE
+          ========================================================================= */}
+      <footer className="mt-36 border-t border-white/[0.08] bg-ink-950/80 py-12">
+        <div className="container-px flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-ink-400">
+          <div className="flex items-center gap-3">
+            <Logo size={28} withWordmark />
+            <span className="text-ink-600">|</span>
+            <span>Educational companion & hardware ecosystem</span>
           </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-5 text-xs">
+            <button onClick={() => onNavigate('/explore')} className="hover:text-white transition">330 Breeds</button>
+            <button onClick={() => onNavigate('/plants')} className="hover:text-white transition">99 Plants</button>
+            <button onClick={() => onNavigate('/smart-tags')} className="hover:text-white transition">Collar Tags</button>
+            <button onClick={() => onNavigate('/care')} className="hover:text-white transition">Care Guides</button>
+            <button onClick={() => onNavigate('/about')} className="hover:text-white transition">About</button>
+            <button onClick={() => onNavigate('/privacy')} className="hover:text-white transition">Privacy Policy</button>
+          </div>
+
+          <p>© {new Date().getFullYear()} Petziq. Crafted with precision for pets & plants.</p>
         </div>
       </footer>
     </div>
