@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { AntigravityHero } from '@/components/AntigravityHero';
-import { InteractivePetDashboardDemo } from '@/components/InteractivePetDashboardDemo';
 import { BREEDS } from '@/data/breeds';
 import { PLANTS } from '@/data/plants';
 import { BLOG_POSTS } from '@/data/blog';
@@ -264,29 +263,6 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
         </div>
       </section>
 
-      {/* =========================================================================
-          4. DYNAMIC CARE DASHBOARD PREVIEW (The Value Prop - Bruno Showcase)
-          ========================================================================= */}
-      <section className="container-px mt-32 relative z-20">
-        <div className="mx-auto max-w-2xl text-center mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.04] px-4 py-1 text-xs font-semibold text-brand-300">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Real Application Interface</span>
-          </div>
-          <h2 className="mt-3 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-            Everything in calm, unified clarity
-          </h2>
-          <p className="mt-3 text-base text-ink-300 leading-relaxed">
-            Live interactive prototype: test Bruno's clinical vaccination passport, daily ration calculators, and collar tag telemetry below.
-          </p>
-        </div>
-
-        {/* Live Interactive Petziq Care Console Component */}
-        <InteractivePetDashboardDemo
-          onExploreSmartTag={() => onNavigate('/smart-tags')}
-          onExploreCare={() => onNavigate('/care')}
-        />
-      </section>
 
       {/* =========================================================================
           5. PREMIUM SUBSCRIPTION EXPERIENCE (Apple Frictionless Conversion)
