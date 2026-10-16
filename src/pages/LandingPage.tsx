@@ -190,8 +190,8 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
 
             {/* Right Column: Real Photorealistic Tag Hardware & Live Profile Card */}
             <div className="relative mx-auto w-full max-w-md lg:col-span-5">
-              <div className="relative rounded-3xl border border-white/[0.10] bg-gradient-to-b from-ink-850/90 to-ink-900/95 p-8 shadow-2xl glass">
-                <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
+              <div className="relative rounded-3xl border border-white/[0.10] bg-gradient-to-b from-ink-850/90 to-ink-900/95 p-5 sm:p-8 shadow-2xl glass">
+                <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-white/[0.08]">
                   <div className="flex items-center gap-2.5">
                     <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-500/15 text-brand-300">
                       <Shield className="h-4 w-4" />
@@ -207,8 +207,8 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
                 </div>
 
                 {/* Real 3D Physical Hardware with Smooth Parallax Scrolling */}
-                <div className="py-2 flex items-center justify-center relative">
-                  <PetTag3DViewer className="max-w-[280px] sm:max-w-[320px]" />
+                <div className="py-2 flex items-center justify-center relative overflow-hidden">
+                  <PetTag3DViewer className="w-full max-w-[240px] sm:max-w-[290px] lg:max-w-[320px]" />
                 </div>
 
                 {/* Interactive Action Bar */}

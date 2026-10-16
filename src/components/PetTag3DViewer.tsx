@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { Loader2, Sparkles, Move3d } from 'lucide-react';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { Loader2, Move3d } from 'lucide-react';
 
 interface PetTag3DViewerProps {
   className?: string;
@@ -33,32 +34,37 @@ export function PetTag3DViewer({
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.set(0, 0, 3.2);
 
-    // 3. WebGL Renderer
+    // 3. WebGL Renderer with mobile/tablet battery & GPU optimizations
+    const isMobileOrTablet = window.innerWidth <= 1024;
+    // On high-DPI phones, render at max 1.5x pixel ratio for buttery 60/120fps without overheating
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, isMobileOrTablet ? 1.5 : 2);
+
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: !isMobileOrTablet,
       alpha: true,
       powerPreference: 'high-performance',
+      precision: isMobileOrTablet ? 'mediump' : 'highp',
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(pixelRatio);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.35;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
 
     // 4. Lighting setup for metallic and glossy materials
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 3.0);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
     keyLight.position.set(4, 5, 4);
     scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0xb3b3b3, 2.5);
+    const rimLight = new THREE.DirectionalLight(0xb3b3b3, 2.8);
     rimLight.position.set(-4, -2, -3);
     scene.add(rimLight);
 
-    const fillLight = new THREE.PointLight(0xe0e0e0, 2.0, 15);
+    const fillLight = new THREE.PointLight(0xe0e0e0, 2.2, 15);
     fillLight.position.set(0, -3, 3);
     scene.add(fillLight);
 
@@ -68,8 +74,13 @@ export function PetTag3DViewer({
 
     let isDisposed = false;
 
-    // 6. Load GLB Model
+    // 6. Setup DRACOLoader and GLTFLoader
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('/draco/');
+
     const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+
     loader.load(
       modelUrl,
       (gltf) => {
@@ -81,7 +92,8 @@ export function PetTag3DViewer({
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 1.85 / (maxDim || 1);
+        const targetSize = isMobileOrTablet ? 1.7 : 1.85;
+        const scale = targetSize / (maxDim || 1);
 
         model.scale.setScalar(scale);
         model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
@@ -115,7 +127,7 @@ export function PetTag3DViewer({
       }
     );
 
-    // 7. Mouse Interactivity for 3D Tilt
+    // 7. Touch & Mouse Interactivity for 3D Tilt
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -127,16 +139,57 @@ export function PetTag3DViewer({
       mouseTargetRef.current = { x: 0, y: 0 };
     };
 
+    // Touch event handling for mobile and tablet swipe tilt
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        const deltaX = (e.touches[0].clientX - touchStartX) / 140;
+        const deltaY = (e.touches[0].clientY - touchStartY) / 140;
+        mouseTargetRef.current = {
+          x: Math.max(-1, Math.min(1, deltaX)),
+          y: Math.max(-1, Math.min(1, -deltaY)),
+        };
+      }
+    };
+
+    const handleTouchEnd = () => {
+      mouseTargetRef.current = { x: 0, y: 0 };
+    };
+
+    // Optional DeviceOrientation / Gyroscope tilt on mobile
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma !== null && e.beta !== null) {
+        // gamma: left-to-right tilt in [-90, 90]
+        // beta: front-to-back tilt in [-180, 180]
+        const gyroX = Math.max(-1, Math.min(1, e.gamma / 30));
+        const gyroY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+        mouseTargetRef.current = { x: gyroX * 0.7, y: -gyroY * 0.7 };
+      }
+    };
+
+    if (window.DeviceOrientationEvent && typeof (DeviceOrientationEvent as any).requestPermission !== 'function') {
+      window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+    }
+
     // 8. Parallax Scroll Listener
     const handleScroll = () => {
-      // Normalized scroll progression
-      const scrollY = window.scrollY;
-      scrollOffsetRef.current = scrollY;
+      scrollOffsetRef.current = window.scrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     container.addEventListener('mousemove', handleMouseMove);
     container.addEventListener('mouseleave', handleMouseLeave);
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     // 9. Resize Observer
     const handleResize = () => {
@@ -153,7 +206,8 @@ export function PetTag3DViewer({
 
     // 10. Smooth Animation Loop with LERP interpolation
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    let lastTime = performance.now();
+    let elapsedTime = 0;
 
     let curRotX = 0.12;
     let curRotY = -0.3;
@@ -162,26 +216,25 @@ export function PetTag3DViewer({
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
-      const elapsed = clock.getElapsedTime();
+      const now = performance.now();
+      const delta = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+      elapsedTime += delta;
 
       // Gentle floating oscillation
-      const floatY = Math.sin(elapsed * 1.6) * 0.06;
-      const floatTilt = Math.cos(elapsed * 1.3) * 0.03;
+      const floatY = Math.sin(elapsedTime * 1.6) * 0.06;
+      const floatTilt = Math.cos(elapsedTime * 1.3) * 0.03;
 
       // Scroll physics calculation:
-      // When scrolling down, scrollOffset increases:
-      // 1) It descends (moves downwards from posY +0.3 down to -0.9)
-      // 2) It spins around Y axis continuously with a smooth tumbling roll
       const scrollY = scrollOffsetRef.current;
       const scrollFactor = Math.min(1.8, scrollY * 0.0016);
 
-      // Downward descent driven by scrolling
+      // Downward descent driven by scrolling (calibrated for both touch-flick and mouse wheel)
       const targetPosY = (0.2 + floatY) - (scrollFactor * 0.95);
 
-      // Dynamic 3D spin on scroll (rotates 360+ degrees as you scroll down)
-      const targetRotY = (elapsed * 0.25) + (scrollY * 0.0065) + (mouseTargetRef.current.x * 0.5);
-      const targetRotX = floatTilt + (scrollFactor * 0.45) + (-mouseTargetRef.current.y * 0.35);
+      // Dynamic 3D spin on scroll
+      const targetRotY = (elapsedTime * 0.25) + (scrollY * 0.0065) + (mouseTargetRef.current.x * 0.6);
+      const targetRotX = floatTilt + (scrollFactor * 0.45) + (-mouseTargetRef.current.y * 0.4);
       const targetRotZ = (mouseTargetRef.current.x * 0.2) + Math.sin(scrollY * 0.003) * 0.2;
 
       // Smooth interpolation (LERP) for liquid physics
@@ -206,8 +259,12 @@ export function PetTag3DViewer({
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('deviceorientation', handleOrientation);
       container.removeEventListener('mousemove', handleMouseMove);
       container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
@@ -218,25 +275,25 @@ export function PetTag3DViewer({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full aspect-square flex items-center justify-center cursor-grab active:cursor-grabbing select-none ${className}`}
+      className={`relative w-full aspect-square flex items-center justify-center select-none cursor-grab active:cursor-grabbing touch-pan-y ${className}`}
       style={{ touchAction: 'pan-y' }}
-      title="Hover and scroll to interact with the 3D Petziq Smart Tag"
+      title="Swipe, tilt, and scroll to interact with the 3D Petziq Smart Tag"
     >
       {/* Loading Spinner */}
       {loading && !loadError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 rounded-3xl bg-ink-950/60 backdrop-blur-sm z-20">
-          <Loader2 className="h-8 w-8 text-brand-300 animate-spin" />
-          <span className="text-xs text-ink-300 font-mono tracking-wider">
-            Loading 3D Hardware Model...
+          <Loader2 className="h-7 w-7 text-brand-300 animate-spin" />
+          <span className="text-[11px] text-ink-300 font-mono tracking-wider">
+            Loading 3D Hardware...
           </span>
         </div>
       )}
 
       {/* Floating 3D Badge Indicator */}
       {!loading && !loadError && (
-        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-ink-950/80 px-2.5 py-1 text-[10px] font-medium text-ink-300 backdrop-blur-md pointer-events-none shadow-sm">
+        <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-ink-950/80 px-2.5 py-1 text-[10px] font-medium text-ink-300 backdrop-blur-md pointer-events-none shadow-sm">
           <Move3d className="h-3 w-3 text-brand-300 animate-pulse" />
-          <span>3D Parallax Active</span>
+          <span>3D Motion</span>
         </div>
       )}
 
