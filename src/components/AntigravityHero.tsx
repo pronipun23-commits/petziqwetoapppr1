@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SplitType from 'split-type';
 import { ArrowRight, Tag, Shield, CheckCircle2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -16,8 +17,10 @@ interface AntigravityHeroProps {
 export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [lowPowerMode, setLowPowerMode] = useState(false);
 
   // Text layer refs for staggered GSAP reveal
   const layer1Ref = useRef<HTMLDivElement>(null);
@@ -275,7 +278,49 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       }
     );
 
-    // --- 8. Ambient Pointer Tracking Physics ---
+    // --- 8. SplitType Editorial Headline Animation ---
+    let splitInstance: SplitType | null = null;
+    if (headlineRef.current) {
+      splitInstance = new SplitType(headlineRef.current, { types: 'words,chars' });
+      if (splitInstance.words) {
+        gsap.fromTo(
+          splitInstance.words,
+          { opacity: 0, y: 36, filter: 'blur(8px)' },
+          {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 1.0,
+            stagger: 0.04,
+            ease: 'power4.out',
+            delay: 0.1,
+          }
+        );
+      }
+    }
+
+    // --- 9. Adaptive DPR & Scroll Velocity Monitor ---
+    let isScrollingFast = false;
+    let scrollTimeout: NodeJS.Timeout;
+    const baseDpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const handleScrollAdaptive = () => {
+      if (!isScrollingFast) {
+        isScrollingFast = true;
+        // Reduce rendering resolution dynamically during active scrolling to conserve GPU fill-rate
+        renderer.setPixelRatio(Math.max(1, baseDpr * 0.75));
+      }
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrollingFast = false;
+        // Restore full native high-definition resolution the exact millisecond scrolling stops
+        renderer.setPixelRatio(baseDpr);
+      }, 90);
+    };
+
+    window.addEventListener('scroll', handleScrollAdaptive, { passive: true });
+
+    // --- 10. Ambient Pointer Tracking Physics ---
     const handlePointerMove = (e: MouseEvent) => {
       mouseRef.current.targetX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseRef.current.targetY = -(e.clientY / window.innerHeight) * 2 - 1;
@@ -283,7 +328,7 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
 
     window.addEventListener('mousemove', handlePointerMove, { passive: true });
 
-    // --- 9. Ultra-Responsive Camera Bounds Handler ---
+    // --- 11. Ultra-Responsive Camera Bounds Handler ---
     const handleResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -295,19 +340,23 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       camera.updateProjectionMatrix();
 
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(baseDpr);
 
-      // Adjust model positioning on resize
       if (mobile) {
         modelTarget.posX = 0;
       }
     };
     window.addEventListener('resize', handleResize);
 
-    // --- 10. Google Material You Damped LERP Animation Loop (0.05 - 0.08 coefficient) ---
+    // --- 12. Real-Time Telemetry & Fluid Damped Animation Loop ---
     let reqId: number;
     let lastTime = performance.now();
     let elapsed = 0;
+
+    // Real-time FPS telemetry sliding window
+    let frameCount = 0;
+    let lastFpsCheck = performance.now();
+    let lowFpsCount = 0;
 
     // Current interpolated states
     let curPosX = isMobile ? 0 : 0.85;
@@ -324,6 +373,24 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       const delta = Math.min(0.1, (now - lastTime) / 1000);
       lastTime = now;
       elapsed += delta;
+
+      // Telemetry check: calculate instantaneous FPS
+      frameCount++;
+      if (now - lastFpsCheck >= 1000) {
+        const currentFps = (frameCount * 1000) / (now - lastFpsCheck);
+        frameCount = 0;
+        lastFpsCheck = now;
+
+        // If frame rate dips below 45 FPS repeatedly (3 checks), switch to optimized low-power state
+        if (currentFps < 45) {
+          lowFpsCount++;
+          if (lowFpsCount >= 3) {
+            setLowPowerMode(true);
+          }
+        } else {
+          lowFpsCount = Math.max(0, lowFpsCount - 1);
+        }
+      }
 
       // Antigravity micro-floating oscillation
       const floatY = Math.sin(elapsed * 1.5) * 0.045;
@@ -371,8 +438,11 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
     return () => {
       isDisposed = true;
       cancelAnimationFrame(reqId);
+      clearTimeout(scrollTimeout);
+      window.removeEventListener('scroll', handleScrollAdaptive);
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('resize', handleResize);
+      if (splitInstance) splitInstance.revert();
       renderer.dispose();
       dracoLoader.dispose();
       ScrollTrigger.getAll().forEach((st) => st.kill());
@@ -415,9 +485,20 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         </div>
       )}
 
-      {/* Sticky Fixed WebGL Canvas Layer */}
+      {/* Sticky Fixed WebGL Canvas Layer or Low-Power Static Fallback */}
       <div className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
-        <canvas ref={canvasRef} className="w-full h-full block" />
+        {!lowPowerMode ? (
+          <canvas ref={canvasRef} className="w-full h-full block" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center p-8 bg-gradient-to-b from-ink-950/40 via-ink-900/20 to-ink-950/80">
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border border-brand-500/30 bg-radial from-brand-500/20 to-transparent flex items-center justify-center shadow-glow animate-pulse">
+              <Tag className="w-24 h-24 text-brand-300 drop-shadow-[0_0_24px_rgba(20,184,166,0.5)]" />
+              <span className="absolute bottom-4 font-mono text-[10px] text-brand-300 tracking-wider uppercase bg-ink-950/80 px-2 py-0.5 rounded-full border border-brand-500/30">
+                Eco Power Mode Active
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Layer 1: Initial Hero Section (0vh - 80vh) */}
@@ -427,7 +508,7 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       >
         <div className="container-px w-full">
           <div className="max-w-xl text-left pointer-events-auto">
-            <h1 className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
+            <h1 ref={headlineRef} className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
               A smarter voice for the pets you love most.
             </h1>
 
