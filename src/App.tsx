@@ -183,6 +183,51 @@ function App() {
     }
   }, [session, authModalOpen, consumePendingRedirect, navigate]);
 
+  // World-class smooth scrolling via Lenis + GSAP ScrollTrigger ticker sync
+  useEffect(() => {
+    let lenisInstance: any = null;
+    let removeTicker: (() => void) | null = null;
+
+    import('@studio-freight/lenis').then(({ default: Lenis }) => {
+      import('gsap').then(({ default: gsap }) => {
+        import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+          gsap.registerPlugin(ScrollTrigger);
+
+          lenisInstance = new Lenis({
+            duration: 1.2,
+            easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            orientation: 'vertical',
+            gestureOrientation: 'vertical',
+            smoothWheel: true,
+            wheelMultiplier: 1.0,
+            touchMultiplier: 1.5,
+          });
+
+          // Synchronize Lenis scroll with GSAP ScrollTrigger updates
+          lenisInstance.on('scroll', ScrollTrigger.update);
+
+          const updateLenis = (time: number) => {
+            lenisInstance.raf(time * 1000);
+          };
+
+          gsap.ticker.add(updateLenis);
+          gsap.ticker.lagSmoothing(0);
+
+          removeTicker = () => {
+            gsap.ticker.remove(updateLenis);
+          };
+        });
+      });
+    }).catch((err) => {
+      console.warn('Lenis smooth scrolling fallback:', err);
+    });
+
+    return () => {
+      if (removeTicker) removeTicker();
+      if (lenisInstance) lenisInstance.destroy();
+    };
+  }, []);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
