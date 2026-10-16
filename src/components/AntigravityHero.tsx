@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Tag, Shield, Sparkles, CheckCircle2, Heart, Sprout, QrCode } from 'lucide-react';
+import { ArrowRight, Tag, Shield, CheckCircle2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,8 +17,14 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
 
-  // Mouse coordinates for ambient lerp-based pointer tracking
+  // Text layer refs for staggered GSAP reveal
+  const layer1Ref = useRef<HTMLDivElement>(null);
+  const layer2Ref = useRef<HTMLDivElement>(null);
+  const layer3Ref = useRef<HTMLDivElement>(null);
+
+  // Mouse coordinates with damped pointer tracking
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
 
   useEffect(() => {
@@ -26,74 +32,108 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    // --- 1. Three.js Scene & Camera Setup ---
+    // --- 1. Scene & Dynamic Responsive Camera ---
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      100
-    );
-    camera.position.set(0, 0, 4.2);
+    
+    // Calculate initial responsive FOV & Camera Z
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const isMobile = width < 768;
+    const isTablet = width >= 768 && width < 1024;
+    const initialFov = isMobile ? 52 : isTablet ? 48 : 42;
+    const camera = new THREE.PerspectiveCamera(initialFov, width / height, 0.1, 100);
+    camera.position.set(0, 0, isMobile ? 4.8 : 4.0);
 
-    const isMobile = window.innerWidth <= 1024;
+    // --- 2. High-Performance WebGL Renderer (Apple / Google Web Vitals Standard) ---
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: !isMobile,
+      antialias: true,
       alpha: true,
       powerPreference: 'high-performance',
-      precision: isMobile ? 'mediump' : 'highp',
+      stencil: false,
     });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
+    renderer.toneMappingExposure = 1.32;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // --- 2. Studio Three-Point Lighting Setup ---
-    // Key Light (warm high-contrast key)
-    const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
-    keyLight.position.set(5, 6, 5);
+    // --- 3. Studio Three-Point Lighting Setup (Apple Pro Hardware Style) ---
+    // 3a. Strong Key Light (crisp specular highlights & depth)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 4.0);
+    keyLight.position.set(5, 7, 5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.bias = -0.0001;
     scene.add(keyLight);
 
-    // Fill Light (diffused moonlit fill)
-    const fillLight = new THREE.PointLight(0xe0e0e0, 2.2, 20);
+    // 3b. Soft Diffused Fill Light (ambient bounce fill)
+    const fillLight = new THREE.PointLight(0xe8ecf2, 2.5, 25);
     fillLight.position.set(-5, -2, 4);
     scene.add(fillLight);
 
-    // Rim Light (sharp metallic edge definition)
-    const rimLight = new THREE.DirectionalLight(0xb3b3b3, 3.0);
+    // 3c. Sharp Rim / Backlight (high-definition metallic edge isolation)
+    const rimLight = new THREE.DirectionalLight(0xb3b3b3, 3.8);
     rimLight.position.set(0, -6, -4);
     scene.add(rimLight);
 
-    // Ambient soft base
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
+    // Ambient ground bounce
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.6);
     scene.add(ambientLight);
 
-    // --- 3. Model Parent Pivot ---
+    // --- 4. Physically Grounded Contact Shadow Disc ---
+    const shadowCanvas = document.createElement('canvas');
+    shadowCanvas.width = 256;
+    shadowCanvas.height = 256;
+    const sCtx = shadowCanvas.getContext('2d');
+    if (sCtx) {
+      const grad = sCtx.createRadialGradient(128, 128, 10, 128, 128, 120);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
+      grad.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      sCtx.fillStyle = grad;
+      sCtx.fillRect(0, 0, 256, 256);
+    }
+    const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
+    const shadowGeo = new THREE.PlaneGeometry(2.4, 2.4);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTexture,
+      transparent: true,
+      opacity: 0.7,
+      depthWrite: false,
+    });
+    const contactShadow = new THREE.Mesh(shadowGeo, shadowMat);
+    contactShadow.rotation.x = -Math.PI / 2;
+    contactShadow.position.set(isMobile ? 0 : 0.85, -1.2, 0);
+    scene.add(contactShadow);
+
+    // --- 5. Model Pivot & Spatial Target State ---
     const modelPivot = new THREE.Group();
     scene.add(modelPivot);
 
-    // Spatial parameters animated by GSAP ScrollTrigger
-    const modelTransform = {
-      rotX: 0.15,
-      rotY: -0.2,
-      rotZ: 0,
+    const modelTarget = {
       posX: isMobile ? 0 : 0.85,
       posY: 0,
       posZ: 0,
-      cameraZ: 4.2,
+      rotX: 0.12,
+      rotY: -0.25,
+      rotZ: 0,
+      cameraZ: isMobile ? 4.8 : 4.0,
       cameraY: 0,
+      shadowOpacity: 0.7,
     };
 
-    // --- 4. GLTF / DRACO Asset Loader ---
+    let isDisposed = false;
+
+    // --- 6. Preload Model with DRACO Decompression ---
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/draco/');
 
     const loader = new GLTFLoader();
     loader.setDRACOLoader(dracoLoader);
-
-    let isDisposed = false;
 
     loader.load(
       '/assets/petziq-model.glb',
@@ -101,18 +141,18 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         if (isDisposed) return;
         const model = gltf.scene;
 
-        // Auto-center and normalize geometry scale
+        // Auto-center & normalize dimensions
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        const targetScale = isMobile ? 1.6 : 2.0;
+        const targetScale = isMobile ? 1.5 : 1.95;
         const scale = targetScale / (maxDim || 1);
 
         model.scale.setScalar(scale);
         model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
 
-        // Polish materials
+        // Apple-style Material Tuning: Metalness, roughness & clearcoat depth
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
@@ -120,67 +160,122 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
             mesh.receiveShadow = true;
             if (mesh.material) {
               const mat = mesh.material as THREE.MeshStandardMaterial;
-              if (mat.roughness !== undefined) mat.roughness = Math.max(0.18, mat.roughness * 0.85);
-              if (mat.metalness !== undefined) mat.metalness = Math.min(0.92, mat.metalness * 1.15);
+              // Organic parts get soft matte diffusion; hardware gets high metalness & clearcoat sheen
+              if (mat.name.toLowerCase().includes('leaf') || mat.name.toLowerCase().includes('plant')) {
+                mat.roughness = 0.65;
+                mat.metalness = 0.05;
+              } else {
+                mat.roughness = Math.max(0.18, (mat.roughness ?? 0.3) * 0.85);
+                mat.metalness = Math.min(0.95, (mat.metalness ?? 0.5) * 1.25);
+              }
             }
           }
         });
 
-        modelPivot.add(model);
-        setModelLoaded(true);
+        // Warm up WebGL shader cache before fading in
+        renderer.compile(scene, camera);
 
-        // --- 5. GSAP ScrollTrigger Cinematic Camera & Model Path ---
+        modelPivot.add(model);
+        setLoadProgress(100);
+        setTimeout(() => setModelLoaded(true), 150);
+
+        // --- 7. GSAP ScrollTrigger Animation (Fluid Kinetic Damping) ---
         const ctx = gsap.context(() => {
           const tl = gsap.timeline({
             scrollTrigger: {
               trigger: container,
               start: 'top top',
               end: 'bottom bottom',
-              scrub: 1.2,
+              scrub: 1.4,
             },
           });
 
-          // Phase 1: From Hero initial pose to feature angle (exploring front/side profile)
-          tl.to(modelTransform, {
+          // Phase 1: Descent to middle card showing reverse QR angle
+          tl.to(modelTarget, {
             posX: isMobile ? 0 : -0.85,
-            posY: -0.2,
-            rotY: Math.PI * 0.8,
-            rotX: 0.25,
-            cameraZ: 3.8,
-            cameraY: 0.15,
+            posY: -0.25,
+            rotY: Math.PI * 1.1,
+            rotX: 0.22,
+            cameraZ: isMobile ? 4.2 : 3.6,
+            cameraY: 0.1,
+            shadowOpacity: 0.5,
             ease: 'none',
           }, 0)
-          // Phase 2: Dynamic 360 inspection angle revealing QR reverse face & laser detail
-          .to(modelTransform, {
+          // Phase 2: Complete inspection rotation revealing edge craftsmanship
+          .to(modelTarget, {
             posX: isMobile ? 0 : 0.85,
-            posY: -0.4,
-            rotY: Math.PI * 1.8,
-            rotX: -0.2,
-            cameraZ: 3.4,
-            cameraY: -0.2,
+            posY: -0.45,
+            rotY: Math.PI * 2.1,
+            rotX: -0.15,
+            cameraZ: isMobile ? 4.0 : 3.4,
+            cameraY: -0.15,
+            shadowOpacity: 0.6,
             ease: 'none',
           }, 0.5)
-          // Phase 3: Descend and center into hardware showcase section
-          .to(modelTransform, {
+          // Phase 3: Settle into bottom showcase presentation
+          .to(modelTarget, {
             posX: 0,
-            posY: -0.7,
-            rotY: Math.PI * 2.5,
-            rotX: 0.1,
-            cameraZ: 3.1,
+            posY: -0.75,
+            rotY: Math.PI * 2.8,
+            rotX: 0.08,
+            cameraZ: isMobile ? 3.8 : 3.1,
             cameraY: 0,
+            shadowOpacity: 0.8,
             ease: 'none',
           }, 1);
+
+          // Staggered UI Layer Reveals (Fade-in + 20px slide-up)
+          if (layer2Ref.current) {
+            gsap.fromTo(
+              layer2Ref.current,
+              { opacity: 0, y: 20 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: 'power2.out',
+                scrollTrigger: {
+                  trigger: layer2Ref.current,
+                  start: 'top 75%',
+                  toggleActions: 'play reverse play reverse',
+                },
+              }
+            );
+          }
+
+          if (layer3Ref.current) {
+            gsap.fromTo(
+              layer3Ref.current,
+              { opacity: 0, y: 20 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: 'power2.out',
+                scrollTrigger: {
+                  trigger: layer3Ref.current,
+                  start: 'top 80%',
+                  toggleActions: 'play reverse play reverse',
+                },
+              }
+            );
+          }
         }, container);
 
         return () => ctx.revert();
       },
-      undefined,
+      (xhr) => {
+        if (xhr.total > 0) {
+          setLoadProgress(Math.min(99, Math.round((xhr.loaded / xhr.total) * 100)));
+        }
+      },
       (err) => {
-        console.warn('Failed loading /assets/petziq-model.glb, falling back to /pet_tag.glb:', err);
+        console.warn('GLB asset loading issue:', err);
+        setModelLoaded(true);
       }
     );
 
-    // --- 6. Ambient Pointer Tracking Physics ---
+    // --- 8. Ambient Pointer Tracking Physics ---
     const handlePointerMove = (e: MouseEvent) => {
       mouseRef.current.targetX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseRef.current.targetY = -(e.clientY / window.innerHeight) * 2 - 1;
@@ -188,17 +283,40 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
 
     window.addEventListener('mousemove', handlePointerMove, { passive: true });
 
+    // --- 9. Ultra-Responsive Camera Bounds Handler ---
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const mobile = w < 768;
+      const tablet = w >= 768 && w < 1024;
+
+      camera.aspect = w / h;
+      camera.fov = mobile ? 52 : tablet ? 48 : 42;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      // Adjust model positioning on resize
+      if (mobile) {
+        modelTarget.posX = 0;
+      }
     };
     window.addEventListener('resize', handleResize);
 
-    // --- 7. High-Performance WebGL Render Loop with Lerp Smoothing ---
+    // --- 10. Google Material You Damped LERP Animation Loop (0.05 - 0.08 coefficient) ---
     let reqId: number;
     let lastTime = performance.now();
     let elapsed = 0;
+
+    // Current interpolated states
+    let curPosX = isMobile ? 0 : 0.85;
+    let curPosY = 0;
+    let curRotX = 0.12;
+    let curRotY = -0.25;
+    let curRotZ = 0;
+    let curCameraZ = isMobile ? 4.8 : 4.0;
+    let curCameraY = 0;
 
     const animate = () => {
       reqId = requestAnimationFrame(animate);
@@ -207,26 +325,43 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       lastTime = now;
       elapsed += delta;
 
-      // Antigravity ambient floating oscillation
-      const floatY = Math.sin(elapsed * 1.6) * 0.06;
-      const floatTilt = Math.cos(elapsed * 1.2) * 0.04;
+      // Antigravity micro-floating oscillation
+      const floatY = Math.sin(elapsed * 1.5) * 0.045;
+      const floatTilt = Math.cos(elapsed * 1.2) * 0.03;
 
-      // Lerp mouse pointer
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * (delta * 4.5);
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * (delta * 4.5);
+      // Damped pointer follow
+      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.06;
+      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.06;
 
-      // Apply synced ScrollTrigger transforms + Ambient Physics
-      modelPivot.position.x = modelTransform.posX + (mouseRef.current.x * 0.18);
-      modelPivot.position.y = modelTransform.posY + floatY + (mouseRef.current.y * 0.18);
-      modelPivot.position.z = modelTransform.posZ;
+      // Fluid Kinetic Motion Damping (Strict 0.065 LERP coefficient)
+      const lerpFactor = 0.065;
 
-      modelPivot.rotation.x = modelTransform.rotX + floatTilt + (-mouseRef.current.y * 0.25);
-      modelPivot.rotation.y = modelTransform.rotY + (mouseRef.current.x * 0.35);
-      modelPivot.rotation.z = modelTransform.rotZ + (mouseRef.current.x * 0.15);
+      curPosX += (modelTarget.posX - curPosX) * lerpFactor;
+      curPosY += (modelTarget.posY - curPosY) * lerpFactor;
+      curRotX += (modelTarget.rotX - curRotX) * lerpFactor;
+      curRotY += (modelTarget.rotY - curRotY) * lerpFactor;
+      curRotZ += (modelTarget.rotZ - curRotZ) * lerpFactor;
+      curCameraZ += (modelTarget.cameraZ - curCameraZ) * lerpFactor;
+      curCameraY += (modelTarget.cameraY - curCameraY) * lerpFactor;
 
-      camera.position.z = modelTransform.cameraZ;
-      camera.position.y = modelTransform.cameraY;
-      camera.lookAt(0, modelTransform.posY * 0.5, 0);
+      // Position model with cursor reaction
+      modelPivot.position.x = curPosX + (mouseRef.current.x * 0.16);
+      modelPivot.position.y = curPosY + floatY + (mouseRef.current.y * 0.16);
+      modelPivot.position.z = modelTarget.posZ;
+
+      modelPivot.rotation.x = curRotX + floatTilt + (-mouseRef.current.y * 0.2);
+      modelPivot.rotation.y = curRotY + (mouseRef.current.x * 0.3);
+      modelPivot.rotation.z = curRotZ + (mouseRef.current.x * 0.1);
+
+      // Synchronize contact shadow to model ground plane
+      contactShadow.position.x = modelPivot.position.x;
+      contactShadow.position.y = curPosY - 1.25;
+      contactShadow.material.opacity = modelTarget.shadowOpacity;
+
+      // Camera coordinates
+      camera.position.z = curCameraZ;
+      camera.position.y = curCameraY;
+      camera.lookAt(0, curPosY * 0.45, 0);
 
       renderer.render(scene, camera);
     };
@@ -239,27 +374,60 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
+      dracoLoader.dispose();
       ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ height: '250vh' }}>
+      {/* Premium Minimal Loading Screen Overlay with Circular Progress Indicator */}
+      {!modelLoaded && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-ink-950/90 backdrop-blur-md transition-opacity duration-700 pointer-events-none">
+          <div className="relative flex items-center justify-center">
+            {/* SVG Circular Progress Ring */}
+            <svg className="h-16 w-16 -rotate-90 transform" viewBox="0 0 64 64">
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                className="stroke-white/10 fill-none"
+                strokeWidth="3"
+              />
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                className="stroke-white fill-none transition-all duration-300 ease-out"
+                strokeWidth="3"
+                strokeDasharray="175.9"
+                strokeDashoffset={175.9 - (175.9 * loadProgress) / 100}
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="absolute font-mono text-xs font-semibold text-white">
+              {loadProgress}%
+            </span>
+          </div>
+          <p className="mt-4 text-xs font-mono tracking-widest text-ink-300 uppercase">
+            Compiling WebGL Engine...
+          </p>
+        </div>
+      )}
+
       {/* Sticky Fixed WebGL Canvas Layer */}
       <div className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
 
       {/* Layer 1: Initial Hero Section (0vh - 80vh) */}
-      <div className="absolute top-0 left-0 w-full h-screen flex items-center z-10 pointer-events-none">
+      <div
+        ref={layer1Ref}
+        className="absolute top-0 left-0 w-full h-screen flex items-center z-10 pointer-events-none"
+      >
         <div className="container-px w-full">
           <div className="max-w-xl text-left pointer-events-auto">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.04] px-4 py-1.5 text-xs font-semibold text-brand-300 backdrop-blur-md">
-              <Tag className="h-3.5 w-3.5" />
-              <span>Petziq Ecosystem &middot; Antigravity 3D Design</span>
-            </div>
-
-            <h1 className="mt-6 font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
+            <h1 className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
               A smarter voice for the pets you love most.
             </h1>
 
@@ -303,10 +471,13 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         </div>
       </div>
 
-      {/* Layer 2: Mid-Scroll Angle (80vh - 160vh) */}
+      {/* Layer 2: Mid-Scroll Angle (80vh - 160vh) with Staggered Reveal */}
       <div className="absolute top-[85vh] left-0 w-full h-screen flex items-center justify-end z-10 pointer-events-none">
         <div className="container-px w-full flex justify-end">
-          <div className="max-w-md text-left p-6 sm:p-8 rounded-3xl border border-white/[0.12] bg-ink-950/70 backdrop-blur-xl shadow-2xl glass pointer-events-auto">
+          <div
+            ref={layer2Ref}
+            className="max-w-md text-left p-6 sm:p-8 rounded-3xl border border-white/[0.12] bg-ink-950/70 backdrop-blur-xl shadow-2xl glass pointer-events-auto"
+          >
             <span className="chip border-brand-500/30 text-brand-300 bg-brand-500/10 text-xs">
               <Shield className="h-3.5 w-3.5" />
               Direct Scan Routing
@@ -327,9 +498,12 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         </div>
       </div>
 
-      {/* Layer 3: End of 250vh Hero Showcase (170vh - 250vh) */}
+      {/* Layer 3: End of 250vh Hero Showcase (170vh - 250vh) with Staggered Reveal */}
       <div className="absolute top-[175vh] left-0 w-full h-[75vh] flex items-center justify-center z-10 pointer-events-none">
-        <div className="container-px w-full text-center max-w-2xl pointer-events-auto">
+        <div
+          ref={layer3Ref}
+          className="container-px w-full text-center max-w-2xl pointer-events-auto"
+        >
           <div className="p-8 sm:p-10 rounded-3xl border border-white/[0.12] bg-ink-950/80 backdrop-blur-2xl shadow-2xl glass">
             <span className="eyebrow">Precision Engineering</span>
             <h2 className="mt-3 section-title text-balance text-gradient">
