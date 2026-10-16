@@ -227,18 +227,19 @@ export function PetTag3DViewer({
 
       // Scroll physics calculation:
       const scrollY = scrollOffsetRef.current;
-      const scrollFactor = Math.min(1.8, scrollY * 0.0016);
+      // Scroll factor progresses with user scroll
+      const scrollProgress = scrollY * 0.0018;
 
-      // Downward descent driven by scrolling (calibrated for both touch-flick and mouse wheel)
-      const targetPosY = (0.2 + floatY) - (scrollFactor * 0.95);
+      // Downward descent: smooth continuous travel down through the viewport
+      const targetPosY = (0.2 + floatY) - (scrollProgress * 1.4);
 
-      // Dynamic 3D spin on scroll
-      const targetRotY = (elapsedTime * 0.25) + (scrollY * 0.0065) + (mouseTargetRef.current.x * 0.6);
-      const targetRotX = floatTilt + (scrollFactor * 0.45) + (-mouseTargetRef.current.y * 0.4);
-      const targetRotZ = (mouseTargetRef.current.x * 0.2) + Math.sin(scrollY * 0.003) * 0.2;
+      // Dynamic 3D spin on scroll: spins smoothly around Y and tilts on X/Z
+      const targetRotY = (elapsedTime * 0.3) + (scrollY * 0.008) + (mouseTargetRef.current.x * 0.5);
+      const targetRotX = floatTilt + (Math.sin(scrollY * 0.002) * 0.35) + (-mouseTargetRef.current.y * 0.35);
+      const targetRotZ = (mouseTargetRef.current.x * 0.15) + (Math.cos(scrollY * 0.0025) * 0.25);
 
       // Smooth interpolation (LERP) for liquid physics
-      const lerpSpeed = Math.min(1, delta * 4.8);
+      const lerpSpeed = Math.min(1, delta * 5.2);
       curRotX += (targetRotX - curRotX) * lerpSpeed;
       curRotY += (targetRotY - curRotY) * lerpSpeed;
       curRotZ += (targetRotZ - curRotZ) * lerpSpeed;
@@ -286,14 +287,6 @@ export function PetTag3DViewer({
           <span className="text-[11px] text-ink-300 font-mono tracking-wider">
             Loading 3D Hardware...
           </span>
-        </div>
-      )}
-
-      {/* Floating 3D Badge Indicator */}
-      {!loading && !loadError && (
-        <div className="absolute bottom-2.5 right-2.5 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-ink-950/80 px-2.5 py-1 text-[10px] font-medium text-ink-300 backdrop-blur-md pointer-events-none shadow-sm">
-          <Move3d className="h-3 w-3 text-brand-300 animate-pulse" />
-          <span>3D Motion</span>
         </div>
       )}
 
