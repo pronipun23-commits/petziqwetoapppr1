@@ -129,8 +129,9 @@ export function PetTag3DViewer({
 
     // 8. Parallax Scroll Listener
     const handleScroll = () => {
+      // Normalized scroll progression
       const scrollY = window.scrollY;
-      scrollOffsetRef.current = scrollY * 0.0028;
+      scrollOffsetRef.current = scrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -154,10 +155,10 @@ export function PetTag3DViewer({
     let animationFrameId: number;
     let clock = new THREE.Clock();
 
-    let curRotX = 0.15;
+    let curRotX = 0.12;
     let curRotY = -0.3;
     let curRotZ = 0;
-    let curPosY = 0;
+    let curPosY = 0.25;
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -165,17 +166,26 @@ export function PetTag3DViewer({
       const elapsed = clock.getElapsedTime();
 
       // Gentle floating oscillation
-      const floatY = Math.sin(elapsed * 1.5) * 0.08;
-      const floatTilt = Math.cos(elapsed * 1.2) * 0.04;
+      const floatY = Math.sin(elapsed * 1.6) * 0.06;
+      const floatTilt = Math.cos(elapsed * 1.3) * 0.03;
 
-      // Desired rotation based on scroll + mouse cursor
-      const targetRotX = floatTilt + -mouseTargetRef.current.y * 0.45 + scrollOffsetRef.current * 0.6;
-      const targetRotY = (elapsed * 0.35) + (mouseTargetRef.current.x * 0.6) + (scrollOffsetRef.current * 1.8);
-      const targetRotZ = mouseTargetRef.current.x * 0.2 + (floatTilt * 0.5);
-      const targetPosY = floatY - (scrollOffsetRef.current * 0.4);
+      // Scroll physics calculation:
+      // When scrolling down, scrollOffset increases:
+      // 1) It descends (moves downwards from posY +0.3 down to -0.9)
+      // 2) It spins around Y axis continuously with a smooth tumbling roll
+      const scrollY = scrollOffsetRef.current;
+      const scrollFactor = Math.min(1.8, scrollY * 0.0016);
 
-      // Smooth interpolation (LERP)
-      const lerpSpeed = Math.min(1, delta * 5.5);
+      // Downward descent driven by scrolling
+      const targetPosY = (0.2 + floatY) - (scrollFactor * 0.95);
+
+      // Dynamic 3D spin on scroll (rotates 360+ degrees as you scroll down)
+      const targetRotY = (elapsed * 0.25) + (scrollY * 0.0065) + (mouseTargetRef.current.x * 0.5);
+      const targetRotX = floatTilt + (scrollFactor * 0.45) + (-mouseTargetRef.current.y * 0.35);
+      const targetRotZ = (mouseTargetRef.current.x * 0.2) + Math.sin(scrollY * 0.003) * 0.2;
+
+      // Smooth interpolation (LERP) for liquid physics
+      const lerpSpeed = Math.min(1, delta * 4.8);
       curRotX += (targetRotX - curRotX) * lerpSpeed;
       curRotY += (targetRotY - curRotY) * lerpSpeed;
       curRotZ += (targetRotZ - curRotZ) * lerpSpeed;
