@@ -22,6 +22,7 @@ import { PLANT_CATEGORY_MAP } from '@/data/plants/types';
 import { BLOG_POSTS } from '@/data/blog';
 import { TagProductPreview } from '@/components/TagProductPreview';
 import { InteractivePetDashboardDemo } from '@/components/InteractivePetDashboardDemo';
+import { PetTag3DViewer } from '@/components/PetTag3DViewer';
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -205,15 +206,9 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
                   </span>
                 </div>
 
-                {/* Real Physical Product Render */}
-                <div className="py-6 flex items-center justify-center">
-                  <TagProductPreview
-                    petName="Leo"
-                    tagId="PZ-LEO2026"
-                    shape="round"
-                    color="black"
-                    side="front"
-                  />
+                {/* Real 3D Physical Hardware with Smooth Parallax Scrolling */}
+                <div className="py-2 flex items-center justify-center relative">
+                  <PetTag3DViewer className="max-w-[280px] sm:max-w-[320px]" />
                 </div>
 
                 {/* Interactive Action Bar */}
