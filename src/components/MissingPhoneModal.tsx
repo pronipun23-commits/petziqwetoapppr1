@@ -12,7 +12,6 @@ export function MissingPhoneModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [demoNotice, setDemoNotice] = useState<string | null>(null);
 
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -38,7 +37,6 @@ export function MissingPhoneModal() {
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError(null);
-    setDemoNotice(null);
 
     const clean = phone.replace(/\D/g, '');
     if (clean.length < 10) {
@@ -54,9 +52,6 @@ export function MissingPhoneModal() {
       } else {
         setStep('enter_otp');
         setCountdown(60); // 60-second rate-limiting cool-down
-        if (res.demoCode) {
-          setDemoNotice(res.demoCode);
-        }
         // Auto-focus first OTP digit input
         setTimeout(() => {
           otpInputRefs.current[0]?.focus();
@@ -213,13 +208,6 @@ export function MissingPhoneModal() {
           </form>
         ) : (
           <div className="space-y-4">
-            {/* Demo code banner if Supabase SMS keys are in sandbox/demo mode */}
-            {demoNotice && (
-              <div className="rounded-xl border border-brand-500/30 bg-brand-500/15 p-3 text-xs text-brand-200 flex items-center justify-between">
-                <span>Passkey Generated: <strong className="font-mono text-white text-sm tracking-widest">{demoNotice}</strong></span>
-                <span className="text-[10px] text-brand-300 font-mono">(5 min TTL)</span>
-              </div>
-            )}
 
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs font-semibold uppercase tracking-wider text-ink-300">

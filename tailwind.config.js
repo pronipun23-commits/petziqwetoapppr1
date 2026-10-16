@@ -4,83 +4,88 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Deep dark navy base
+        // Charcoal Noir monochromatic palette:
+        // Charcoal Noir: #2B2B2B
+        // Ironclad Grey: #565656
+        // Urban Fog: #848484
+        // Moonlit Silver: #B3B3B3
+        // Cloud Veil: #E0E0E0
         ink: {
-          950: '#070B16',
-          900: '#0A0F1F',
-          850: '#0E1528',
-          800: '#121B33',
-          750: '#162241',
-          700: '#1C2A4E',
-          600: '#283459',
-          500: '#3A4670',
-          400: '#6B7896',
-          300: '#94A1BC',
-          200: '#BBC6DD',
-          100: '#DCE4F2',
-          50: '#EEF3FC',
+          950: '#141414',
+          900: '#1C1C1C',
+          850: '#232323',
+          800: '#2B2B2B', // Charcoal Noir
+          750: '#3D3D3D',
+          700: '#565656', // Ironclad Grey
+          600: '#6E6E6E',
+          500: '#848484', // Urban Fog
+          400: '#9E9E9E',
+          300: '#B3B3B3', // Moonlit Silver
+          200: '#CCCCCC',
+          100: '#E0E0E0', // Cloud Veil
+          50: '#F5F5F5',
         },
         brand: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#2563EB',
-          600: '#1D4ED8',
-          700: '#1E40AF',
-          800: '#1E3A8A',
-          900: '#172554',
-          950: '#0B1736',
+          50: '#F8F8F8',
+          100: '#F0F0F0',
+          200: '#E0E0E0', // Cloud Veil
+          300: '#C8C8C8',
+          400: '#B3B3B3', // Moonlit Silver
+          500: '#848484', // Urban Fog
+          600: '#565656', // Ironclad Grey
+          700: '#3D3D3D',
+          800: '#2B2B2B', // Charcoal Noir
+          900: '#1C1C1C',
+          950: '#121212',
         },
         teal: {
-          50: '#F0FDFA',
-          100: '#CCFBF1',
-          200: '#99F6E4',
-          300: '#5EEAD4',
-          400: '#2DD4BF',
-          500: '#14B8A6',
-          600: '#0D9488',
-          700: '#0F766E',
-          800: '#115E56',
-          900: '#134E4A',
-          950: '#042F2E',
+          50: '#F5F5F5',
+          100: '#E6E6E6',
+          200: '#CCCCCC',
+          300: '#B3B3B3', // Moonlit Silver
+          400: '#999999',
+          500: '#848484', // Urban Fog
+          600: '#666666',
+          700: '#565656', // Ironclad Grey
+          800: '#3B3B3B',
+          900: '#2B2B2B', // Charcoal Noir
+          950: '#1A1A1A',
         },
         ocean: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#3B82F6',
-          600: '#2563EB',
-          700: '#1D4ED8',
-          800: '#1E40AF',
-          900: '#1E3A8A',
-          950: '#172554',
+          50: '#FAFAFA',
+          100: '#EDEDED',
+          200: '#D6D6D6',
+          300: '#BDBDBD',
+          400: '#A3A3A3',
+          500: '#848484',
+          600: '#696969',
+          700: '#565656',
+          800: '#404040',
+          900: '#2B2B2B',
+          950: '#181818',
         },
         iris: {
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          200: '#DDD6FE',
-          300: '#C4B5FD',
-          400: '#A78BFA',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
-          800: '#5B21B6',
-          900: '#4C1D95',
-          950: '#2E1065',
+          50: '#F7F7F7',
+          100: '#EDEDED',
+          200: '#D9D9D9',
+          300: '#C4C4C4',
+          400: '#ABABAB',
+          500: '#8E8E8E',
+          600: '#737373',
+          700: '#565656',
+          800: '#3E3E3E',
+          900: '#2B2B2B',
+          950: '#171717',
         },
         accent: {
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          200: '#DDD6FE',
-          300: '#C4B5FD',
-          400: '#A78BFA',
-          500: '#7C3AED',
-          600: '#6D28D9',
-          700: '#5B21B6',
+          50: '#FAFAFA',
+          100: '#F0F0F0',
+          200: '#E0E0E0',
+          300: '#B3B3B3',
+          400: '#848484',
+          500: '#565656',
+          600: '#3D3D3D',
+          700: '#2B2B2B',
         },
       },
       fontFamily: {
@@ -95,14 +100,14 @@ export default {
         '5xl': '2rem',
       },
       boxShadow: {
-        glow: '0 0 24px -4px rgba(96,165,250,0.3), 0 0 48px -8px rgba(45,212,191,0.2)',
-        'glow-teal': '0 0 24px -4px rgba(45,212,191,0.35), 0 0 48px -8px rgba(20,184,166,0.2)',
-        'glow-blue': '0 0 24px -4px rgba(96,165,250,0.3), 0 0 48px -8px rgba(59,130,246,0.2)',
-        'glow-iris': '0 0 24px -4px rgba(167,139,250,0.3), 0 0 48px -8px rgba(139,92,246,0.2)',
-        'glow-accent': '0 0 24px -4px rgba(251,146,60,0.35), 0 0 48px -8px rgba(249,115,22,0.2)',
-        soft: '0 2px 24px -4px rgba(0,0,0,0.25), 0 1px 0 0 rgba(255,255,255,0.04) inset',
-        card: '0 4px 24px -8px rgba(0,0,0,0.35), 0 1px 0 0 rgba(255,255,255,0.04) inset',
-        'card-hover': '0 8px 40px -8px rgba(96,165,250,0.18), 0 1px 0 0 rgba(255,255,255,0.06) inset',
+        glow: '0 0 24px -4px rgba(224,224,224,0.22), 0 0 48px -8px rgba(179,179,179,0.15)',
+        'glow-teal': '0 0 24px -4px rgba(179,179,179,0.25), 0 0 48px -8px rgba(132,132,132,0.18)',
+        'glow-blue': '0 0 24px -4px rgba(224,224,224,0.25), 0 0 48px -8px rgba(179,179,179,0.15)',
+        'glow-iris': '0 0 24px -4px rgba(200,200,200,0.22), 0 0 48px -8px rgba(132,132,132,0.15)',
+        'glow-accent': '0 0 24px -4px rgba(224,224,224,0.25), 0 0 48px -8px rgba(179,179,179,0.15)',
+        soft: '0 2px 24px -4px rgba(0,0,0,0.45), 0 1px 0 0 rgba(255,255,255,0.06) inset',
+        card: '0 4px 24px -8px rgba(0,0,0,0.6), 0 1px 0 0 rgba(255,255,255,0.06) inset',
+        'card-hover': '0 8px 40px -8px rgba(179,179,179,0.12), 0 1px 0 0 rgba(255,255,255,0.1) inset',
       },
       keyframes: {
         'fade-up': {
