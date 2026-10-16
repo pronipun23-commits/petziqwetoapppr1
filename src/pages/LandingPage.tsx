@@ -23,6 +23,7 @@ import { BLOG_POSTS } from '@/data/blog';
 import { TagProductPreview } from '@/components/TagProductPreview';
 import { InteractivePetDashboardDemo } from '@/components/InteractivePetDashboardDemo';
 import { PetTag3DViewer } from '@/components/PetTag3DViewer';
+import { AntigravityHero } from '@/components/AntigravityHero';
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -129,111 +130,11 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
         </div>
       </header>
 
-      {/* Hero Section — Award-Winning Editorial Design */}
-      <section className="relative overflow-hidden pt-12 pb-16 lg:pt-20 lg:pb-28">
-        {/* Subtle ambient lighting without fake overlays */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute top-1/4 left-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-brand-500/12 via-ocean-500/8 to-transparent blur-[120px]" />
-          <div className="absolute top-0 right-10 h-72 w-72 rounded-full bg-cyan-500/5 blur-3xl" />
-        </div>
-
-        <div className="container-px">
-          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
-            {/* Left Column: Typography & Action */}
-            <div className="text-center lg:col-span-7 lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/25 bg-brand-500/10 px-4 py-1.5 text-xs font-semibold text-brand-300">
-                <Tag className="h-3.5 w-3.5" />
-                <span>Petziq Ecosystem &middot; Smart Tag Hardware &amp; Digital Care</span>
-              </div>
-
-              <h1 className="mt-6 font-display text-4xl font-extrabold tracking-tight text-ink-50 sm:text-6xl lg:text-6xl lg:leading-[1.12]">
-                A smarter voice for the pets you love most.
-              </h1>
-
-              <p className="mt-6 text-base leading-relaxed text-ink-300 sm:text-lg max-w-xl mx-auto lg:mx-0">
-                Petziq unites laser-engraved Smart Tag hardware with real-time care intelligence, vet-reviewed breed encyclopedias, and instant emergency QR profiles.
-              </p>
-
-              <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                <button
-                  onClick={() => onNavigate('/smart-tags')}
-                  className="btn-primary text-base shadow-glow-blue transition-transform hover:scale-[1.02]"
-                >
-                  <Tag className="h-4 w-4" />
-                  Order Smart Tag (₹599)
-                </button>
-                <button
-                  onClick={() => onNavigate('/explore')}
-                  className="btn-ghost text-base inline-flex items-center gap-2"
-                >
-                  <PawPrint className="h-4 w-4" />
-                  Explore {BREEDS.length} Breeds
-                </button>
-              </div>
-
-              {/* Real Value Pillars */}
-              <div className="mt-10 grid grid-cols-3 gap-4 border-t border-white/[0.08] pt-8 text-left">
-                <div>
-                  <p className="font-display text-2xl font-bold text-ink-50">{BREEDS.length}</p>
-                  <p className="text-xs text-ink-400 mt-0.5">Pet Breeds Catalogued</p>
-                </div>
-                <div>
-                  <p className="font-display text-2xl font-bold text-ink-50">{PLANTS.length}</p>
-                  <p className="text-xs text-ink-400 mt-0.5">Safe Plant Guides</p>
-                </div>
-                <div>
-                  <p className="font-display text-2xl font-bold text-brand-300">Instant</p>
-                  <p className="text-xs text-ink-400 mt-0.5">Emergency QR Profiles</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Real Photorealistic Tag Hardware & Live Profile Card */}
-            <div className="relative mx-auto w-full max-w-md lg:col-span-5">
-              <div className="relative rounded-3xl border border-white/[0.10] bg-gradient-to-b from-ink-850/90 to-ink-900/95 p-5 sm:p-8 shadow-2xl glass">
-                <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-white/[0.08]">
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-500/15 text-brand-300">
-                      <Shield className="h-4 w-4" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-ink-50">Petziq Smart Tag</p>
-                      <p className="text-[10px] text-brand-300 font-mono">PZ-VERIFIED</p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-green-500/10 border border-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-300">
-                    Live Active QR
-                  </span>
-                </div>
-
-                {/* Real 3D Physical Hardware with Smooth Parallax Scrolling */}
-                <div className="py-2 flex items-center justify-center relative overflow-hidden">
-                  <PetTag3DViewer className="w-full max-w-[240px] sm:max-w-[290px] lg:max-w-[320px]" />
-                </div>
-
-                {/* Interactive Action Bar */}
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 text-xs space-y-2">
-                  <div className="flex items-center justify-between text-ink-200">
-                    <span className="font-medium">Direct Scan Protection</span>
-                    <span className="text-brand-300 font-semibold">Immediate</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-ink-400">
-                    When anyone scans your tag, they are redirected to your pet's secure profile with emergency contact options.
-                  </p>
-                  <div className="pt-2">
-                    <button
-                      onClick={() => onNavigate('/smart-tags')}
-                      className="btn-subtle w-full justify-center text-xs"
-                    >
-                      Customize shape, color &amp; name &rarr;
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 250vh Immersive Antigravity 3D Parallax Hero Container */}
+      <AntigravityHero
+        onNavigate={onNavigate}
+        onOrderTag={() => onNavigate('/smart-tags')}
+      />
 
       {/* Trust & Capability Strip */}
       <ScrollRevealSection className="container-px">
