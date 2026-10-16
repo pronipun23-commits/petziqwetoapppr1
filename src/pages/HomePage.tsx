@@ -24,7 +24,7 @@ export function HomePage({
     {
       icon: Compass,
       title: 'Breed Explorer',
-      body: 'Deep, structured profiles for 20+ breeds across 14 categories.',
+      body: 'Deep, structured profiles for 330 pet breeds across 14 categories.',
       path: '/explore',
     },
     {

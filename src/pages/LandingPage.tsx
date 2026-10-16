@@ -21,6 +21,7 @@ import { PLANTS } from '@/data/plants';
 import { PLANT_CATEGORY_MAP } from '@/data/plants/types';
 import { BLOG_POSTS } from '@/data/blog';
 import { TagProductPreview } from '@/components/TagProductPreview';
+import { InteractivePetDashboardDemo } from '@/components/InteractivePetDashboardDemo';
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -245,7 +246,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
           {[
             { icon: Shield, label: 'Owner-controlled privacy settings' },
             { icon: Zap, label: 'Instant QR routing with no app download needed' },
-            { icon: Globe, label: 'Veterinary care databases & toxic plant alerts' },
+            { icon: Globe, label: 'Husbandry guides & toxic plant alerts' },
             { icon: Scan, label: 'Durable laser-engraved acrylic hardware' },
           ].map((badge) => (
             <div
@@ -291,7 +292,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
                     <h3 className="font-display text-xl font-semibold text-ink-50">
                       Pets
                     </h3>
-                    <p className="text-xs text-brand-300">Explore 20+ breeds</p>
+                    <p className="text-xs text-brand-300">Explore 330 pet breeds</p>
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-ink-300">
@@ -323,7 +324,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
                     <h3 className="font-display text-xl font-semibold text-ink-50">
                       Plants
                     </h3>
-                    <p className="text-xs text-brand-300">14+ species profiles</p>
+                    <p className="text-xs text-brand-300">99 species profiles</p>
                   </div>
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-ink-300">
@@ -459,6 +460,28 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
         </div>
       </section>
 
+      {/* Interactive 3D Pet Dashboard Experience: Bruno */}
+      <section className="container-px mt-24 section-glow">
+        <ScrollRevealSection>
+          <div className="mx-auto max-w-2xl text-center mb-10">
+            <p className="eyebrow">The Petziq Experience</p>
+            <h2 className="mt-3 section-title text-balance text-gradient">
+              Here’s what your pet’s dashboard actually looks like
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-ink-300">
+              Interactive live demo: Switch between Bruno’s medical records, vaccination passports, daily meal rations, active reminders, and scannable collar tag.
+            </p>
+          </div>
+        </ScrollRevealSection>
+
+        <ScrollRevealSection delay={40}>
+          <InteractivePetDashboardDemo
+            onExploreSmartTag={() => onNavigate('/smart-tags')}
+            onExploreCare={() => onNavigate('/care')}
+          />
+        </ScrollRevealSection>
+      </section>
+
       {/* Smart Tag product story */}
       <section className="container-px mt-24 section-glow">
         <ScrollRevealSection>
@@ -571,7 +594,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
             {
               icon: PawPrint,
               title: 'Explore pets',
-              body: 'Browse 20+ breeds across 14 categories with detailed care and temperament info.',
+              body: 'Browse 330 pet breeds across 14 categories with detailed care and temperament info.',
             },
             {
               icon: Sprout,
