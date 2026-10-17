@@ -54,12 +54,12 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
   return (
     <div className="relative min-h-screen bg-ink-950 text-ink-100 selection:bg-brand-400/30 selection:text-white">
       {/* =========================================================================
-          1. GLOBAL FLOATING NAVIGATION & SMART SWITCHER (Apple x Google Hybrid)
+          1. GLOBAL FLOATING NAVIGATION & SMART SWITCHER (Playful & Colorful)
           ========================================================================= */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
           isScrolled
-            ? 'py-2.5 bg-ink-950/80 backdrop-blur-2xl border-b border-white/[0.08] shadow-2xl'
+            ? 'py-2.5 bg-[#080C0E]/90 backdrop-blur-2xl border-b border-white/[0.1] shadow-[0_10px_35px_rgba(0,0,0,0.8)]'
             : 'py-5 bg-transparent'
         }`}
       >
@@ -67,34 +67,34 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
           {/* Logo with Brand Wordmark */}
           <button
             onClick={() => onNavigate('/')}
-            className="flex items-center gap-2.5 transition-transform hover:scale-[1.02] focus:outline-none"
+            className="flex items-center gap-2.5 transition-transform hover:scale-[1.05] focus:outline-none"
             aria-label="Petziq Home"
           >
-            <Logo size={36} withWordmark />
+            <Logo size={38} withWordmark />
           </button>
 
-          {/* Central Smart Switcher Toggle: Pet Mode <-> Plant Mode */}
-          <div className="hidden md:flex items-center rounded-full border border-white/[0.12] bg-ink-900/80 p-1 backdrop-blur-xl shadow-inner">
+          {/* Central Playful Smart Switcher Toggle: Pet Mode <-> Plant Mode */}
+          <div className="hidden md:flex items-center rounded-full border border-white/[0.16] bg-[#0E1419]/90 p-1.5 backdrop-blur-xl shadow-[0_0_20px_rgba(16,185,129,0.15)]">
             <button
               onClick={() => setActiveMode('pets')}
-              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-wide transition-all duration-300 ${
                 activeMode === 'pets'
-                  ? 'bg-gradient-to-r from-amber-500/20 to-brand-500/20 text-white border border-white/20 shadow-sm'
-                  : 'text-ink-400 hover:text-ink-200'
+                  ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-[1.02]'
+                  : 'text-amber-200/70 hover:text-amber-300'
               }`}
             >
-              <PawPrint className="h-3.5 w-3.5 text-amber-300" />
+              <PawPrint className="h-3.5 w-3.5 text-amber-200" />
               Pet Ecosystem
             </button>
             <button
               onClick={() => setActiveMode('plants')}
-              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-300 ${
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-wide transition-all duration-300 ${
                 activeMode === 'plants'
-                  ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-white border border-white/20 shadow-sm'
-                  : 'text-ink-400 hover:text-ink-200'
+                  ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)] scale-[1.02]'
+                  : 'text-emerald-200/70 hover:text-emerald-300'
               }`}
             >
-              <Sprout className="h-3.5 w-3.5 text-emerald-300" />
+              <Sprout className="h-3.5 w-3.5 text-emerald-200" />
               Plant Sanctuary
             </button>
           </div>
@@ -103,25 +103,25 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => onNavigate('/blog')}
-              className="hidden lg:inline-flex text-xs font-semibold text-ink-300 hover:text-white px-3 py-1.5 transition"
+              className="hidden lg:inline-flex text-xs font-bold text-amber-200/80 hover:text-amber-300 px-3 py-1.5 rounded-full hover:bg-amber-500/10 transition"
             >
               Journal
             </button>
             <button
               onClick={() => onNavigate('/smart-tags')}
-              className="hidden sm:inline-flex text-xs font-semibold text-ink-300 hover:text-white px-3 py-1.5 transition"
+              className="hidden sm:inline-flex text-xs font-bold text-cyan-200/80 hover:text-cyan-300 px-3 py-1.5 rounded-full hover:bg-cyan-500/10 transition"
             >
               Smart Tags
             </button>
             <button
               onClick={onLogin}
-              className="btn-ghost text-xs px-4 py-2 border border-white/[0.12] hover:bg-white/[0.06]"
+              className="btn-ghost text-xs px-4 py-2 border border-white/[0.18] bg-white/[0.04] hover:bg-white/[0.1] hover:text-white rounded-full transition font-semibold"
             >
               Sign In
             </button>
             <button
               onClick={onSignUp}
-              className="btn-primary text-xs px-4 py-2 shadow-glow hover:scale-[1.02]"
+              className="btn-primary text-xs px-4.5 py-2 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-ink-950 font-bold shadow-[0_0_20px_rgba(20,184,166,0.45)] hover:scale-[1.04] transition-all"
             >
               Join Companion
               <ArrowRight className="h-3.5 w-3.5" />
@@ -145,12 +145,15 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
           ========================================================================= */}
       <section className="container-px mt-28 relative z-20">
         <div className="mx-auto max-w-2xl text-center mb-14">
-          <span className="eyebrow text-brand-300">Biophilic Cyber-Minimalism</span>
-          <h2 className="mt-3 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <div className="inline-flex items-center gap-2 rounded-full border border-pink-500/30 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-cyan-500/10 px-4 py-1 text-xs font-bold text-pink-300 mb-3 backdrop-blur-md shadow-[0_0_15px_rgba(236,72,153,0.2)]">
+            <Sparkles className="h-3.5 w-3.5 text-pink-400 animate-spin" style={{ animationDuration: '6s' }} />
+            <span>Vibrant Care Architecture</span>
+          </div>
+          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-emerald-300 via-cyan-300 to-purple-300 leading-tight">
             Designed for living things.
           </h2>
-          <p className="mt-3 text-base text-ink-300 leading-relaxed">
-            A cohesive hardware and software ecosystem bridging biometric pet profiles, clinical medication schedules, and botanical moisture telemetry.
+          <p className="mt-3 text-base text-ink-200 leading-relaxed font-medium">
+            A joyful, cohesive hardware and software ecosystem bridging biometric pet profiles, clinical medication schedules, and botanical moisture telemetry.
           </p>
         </div>
 
@@ -278,11 +281,14 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
           ========================================================================= */}
       <section className="container-px mt-36 relative z-20">
         <div className="mx-auto max-w-2xl text-center mb-12">
-          <span className="eyebrow text-brand-300">Membership Tiers</span>
-          <h2 className="mt-3 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-gradient-to-r from-teal-500/10 via-emerald-500/10 to-amber-500/10 px-4 py-1 text-xs font-bold text-teal-300 mb-3 backdrop-blur-md shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+            <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+            <span>Companion Memberships</span>
+          </div>
+          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-200 via-emerald-300 to-amber-300">
             Choose your care tier
           </h2>
-          <p className="mt-3 text-base text-ink-300 leading-relaxed">
+          <p className="mt-3 text-base text-ink-200 leading-relaxed font-medium">
             Essential encyclopedia access is forever free. Upgrade for automated medical passports, smart telemetry, and custom laser-engraved collar tags.
           </p>
 
