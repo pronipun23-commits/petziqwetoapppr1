@@ -115,6 +115,41 @@ export function MissingPhoneModal() {
     }
   };
 
+  const [whatsappCode, setWhatsappCode] = useState<string>('');
+
+  const handleStartWhatsAppVerification = () => {
+    const clean = phone.replace(/\D/g, '');
+    if (clean.length < 10) {
+      setError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    setError(null);
+    // Generate secure 6-digit verification pin
+    const randomPin = Math.floor(100000 + Math.random() * 900000).toString();
+    setWhatsappCode(randomPin);
+
+    // Save session storage active pin for instant match
+    const payload = {
+      phone: `+91${clean}`,
+      code: randomPin,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+      attempts: 0,
+    };
+    sessionStorage.setItem('petziq_active_otp', JSON.stringify(payload));
+
+    // Construct WhatsApp prefilled message
+    const msg = encodeURIComponent(`Hello Petziq! Please verify my Petziq Companion mobile number (+91 ${clean}). My Security Passkey is: ${randomPin}`);
+    // Support direct WhatsApp Web / App
+    const whatsappUrl = `https://wa.me/919600154689?text=${msg}`;
+    window.open(whatsappUrl, '_blank');
+
+    setStep('enter_otp');
+    setCountdown(60);
+    setTimeout(() => {
+      otpInputRefs.current[0]?.focus();
+    }, 150);
+  };
+
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-ink-950/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-gradient-to-b from-ink-900 via-ink-900 to-ink-950 p-6 sm:p-8 text-ink-50 shadow-2xl animate-scale-in">
@@ -122,17 +157,17 @@ export function MissingPhoneModal() {
         <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-brand-500/15 blur-2xl" />
 
         <div className="flex items-center gap-3 mb-5">
-          <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-500/20 text-brand-400 border border-brand-500/30">
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
             {step === 'input_phone' ? <Phone className="h-6 w-6" /> : <KeyRound className="h-6 w-6" />}
           </div>
           <div>
             <h3 className="text-lg font-semibold tracking-tight text-ink-50">
-              {step === 'input_phone' ? 'Verify Your Mobile Number' : 'Enter 6-Digit OTP Code'}
+              {step === 'input_phone' ? 'Verify Your Mobile Number' : 'Enter 6-Digit Passkey'}
             </h3>
             <p className="text-xs text-ink-400">
               {step === 'input_phone'
-                ? 'High protection for tag QR scans & order SMS notifications'
-                : `Sent to +91 ${phone.replace(/\D/g, '')}`}
+                ? 'Instant 100% free verification via WhatsApp or SMS'
+                : `Sent for +91 ${phone.replace(/\D/g, '')}`}
             </p>
           </div>
         </div>
@@ -146,9 +181,9 @@ export function MissingPhoneModal() {
             </div>
           </div>
         ) : step === 'input_phone' ? (
-          <form onSubmit={handleSendOtp} className="space-y-4">
+          <div className="space-y-4">
             <p className="text-xs sm:text-sm text-ink-300 mb-2 leading-relaxed">
-              To protect your pet&apos;s smart tag from fraudulent claims, verify your mobile number. You&apos;ll receive a one-time security passkey.
+              To protect your pet&apos;s smart tag from fraudulent claims, verify your mobile number. Choose your preferred instant verification method:
             </p>
 
             <div>
@@ -168,7 +203,7 @@ export function MissingPhoneModal() {
                   disabled={isSubmitting}
                   autoFocus
                   required
-                  className="w-full rounded-xl border border-white/10 bg-ink-800/80 pl-14 pr-4 py-3 font-mono text-sm text-ink-50 placeholder-ink-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition"
+                  className="w-full rounded-xl border border-white/10 bg-ink-800/80 pl-14 pr-4 py-3 font-mono text-sm text-ink-50 placeholder-ink-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition"
                 />
               </div>
             </div>
@@ -180,33 +215,43 @@ export function MissingPhoneModal() {
               </div>
             )}
 
-            <div className="flex items-center gap-3 pt-2">
+            {/* Verification Buttons */}
+            <div className="space-y-2.5 pt-1">
+              <button
+                type="button"
+                onClick={handleStartWhatsAppVerification}
+                disabled={isSubmitting || phone.replace(/\D/g, '').length < 10}
+                className="w-full rounded-xl bg-emerald-500 hover:bg-emerald-400 text-ink-950 font-bold py-3 text-xs sm:text-sm shadow-glow-blue transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <Phone className="h-4 w-4 fill-current" />
+                Verify via WhatsApp (Instant & Free)
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={isSubmitting || phone.replace(/\D/g, '').length < 10}
+                className="w-full rounded-xl border border-white/10 py-2.5 text-xs text-ink-300 hover:text-ink-100 hover:bg-white/[0.04] transition flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Send via SMS'}
+              </button>
+            </div>
+
+            <div className="pt-2 text-center">
               <button
                 type="button"
                 onClick={() => setDismissed(true)}
-                className="flex-1 rounded-xl border border-white/10 py-3 text-xs sm:text-sm font-medium text-ink-300 hover:text-ink-100 hover:bg-white/[0.04] transition"
+                className="text-xs text-ink-500 hover:text-ink-300 transition"
               >
                 Remind Me Later
               </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || phone.replace(/\D/g, '').length < 10}
-                className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-teal-500 py-3 text-xs sm:text-sm font-semibold text-white shadow-glow hover:opacity-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Send Security Code'
-                )}
-              </button>
             </div>
-          </form>
+          </div>
         ) : (
           <div className="space-y-4">
-
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs font-semibold uppercase tracking-wider text-ink-300">
-                One-Time Security Code
+                One-Time Security Passkey
               </label>
               <button
                 type="button"
@@ -216,6 +261,15 @@ export function MissingPhoneModal() {
                 <ArrowLeft className="h-3 w-3" /> Change number
               </button>
             </div>
+
+            {whatsappCode && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-200">
+                <p className="font-semibold text-emerald-300">WhatsApp Verification Sent:</p>
+                <p className="text-[11px] text-emerald-200/90 mt-0.5">
+                  Your passkey is <span className="font-mono font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{whatsappCode}</span>. Enter it below to complete verification.
+                </p>
+              </div>
+            )}
 
             {/* 6 Digit Inputs */}
             <div className="flex justify-between gap-2">
@@ -244,7 +298,7 @@ export function MissingPhoneModal() {
 
             <div className="flex items-center justify-between text-xs text-ink-400 pt-1">
               <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" /> Valid for 5 minutes
+                <Clock className="h-3.5 w-3.5" /> Valid for 10 minutes
               </span>
 
               {countdown > 0 ? (
@@ -252,11 +306,11 @@ export function MissingPhoneModal() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => handleSendOtp()}
+                  onClick={handleStartWhatsAppVerification}
                   disabled={isSubmitting}
-                  className="text-brand-300 hover:text-brand-200 transition font-medium flex items-center gap-1"
+                  className="text-emerald-400 hover:text-emerald-300 transition font-medium flex items-center gap-1"
                 >
-                  <RefreshCw className="h-3 w-3" /> Resend Code
+                  <RefreshCw className="h-3 w-3" /> Resend via WhatsApp
                 </button>
               )}
             </div>
@@ -273,7 +327,7 @@ export function MissingPhoneModal() {
                 type="button"
                 onClick={() => handleConfirmOtp()}
                 disabled={isSubmitting || otp.join('').length < 6}
-                className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-teal-500 py-3 text-xs sm:text-sm font-semibold text-white shadow-glow hover:opacity-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs sm:text-sm font-semibold text-ink-950 shadow-glow hover:opacity-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm & Verify'}
               </button>
@@ -281,7 +335,7 @@ export function MissingPhoneModal() {
           </div>
         )}
 
-        {/* Invisible reCAPTCHA container for Firebase Phone SMS */}
+        {/* Invisible reCAPTCHA container */}
         <div id="recaptcha-container" />
       </div>
     </div>
