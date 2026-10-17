@@ -12,6 +12,8 @@ export function MissingPhoneModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [activeCodeHint, setActiveCodeHint] = useState<string | null>(null);
+  const [dispatchMethod, setDispatchMethod] = useState<'firebase_sms' | 'supabase_sms' | 'demo' | null>(null);
 
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -37,6 +39,7 @@ export function MissingPhoneModal() {
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setError(null);
+    setActiveCodeHint(null);
 
     const clean = phone.replace(/\D/g, '');
     if (clean.length < 10) {
@@ -50,6 +53,10 @@ export function MissingPhoneModal() {
       if (res.error) {
         setError(res.error);
       } else {
+        setDispatchMethod(res.method ?? null);
+        if (res.demoCode) {
+          setActiveCodeHint(res.demoCode);
+        }
         setStep('enter_otp');
         setCountdown(60); // 60-second rate-limiting cool-down
         // Auto-focus first OTP digit input
@@ -239,6 +246,29 @@ export function MissingPhoneModal() {
                 />
               ))}
             </div>
+
+            {/* If SMS provider is unconfigured, show the generated security code immediately */}
+            {activeCodeHint && (
+              <div className="rounded-xl border border-teal-500/30 bg-teal-500/10 p-3 text-xs text-teal-200">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">Security Passkey Generated:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const digits = activeCodeHint.split('');
+                      setOtp(digits);
+                      handleConfirmOtp(activeCodeHint);
+                    }}
+                    className="font-mono font-bold text-sm bg-teal-500/20 px-2 py-0.5 rounded border border-teal-500/40 text-teal-300 hover:bg-teal-500/30 transition"
+                  >
+                    {activeCodeHint} (Auto-Fill)
+                  </button>
+                </div>
+                <p className="text-[11px] text-teal-300/80 mt-1">
+                  (Live SMS provider gateway is currently in test mode. Click Auto-Fill or type the code to verify your phone instantly).
+                </p>
+              </div>
+            )}
 
             {error && (
               <div className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
