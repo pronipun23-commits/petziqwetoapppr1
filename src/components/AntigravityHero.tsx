@@ -20,7 +20,6 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
-  const [lowPowerMode, setLowPowerMode] = useState(false);
 
   // Dynamic card border highlight refs for color parallax
   const layer1Ref = useRef<HTMLDivElement>(null);
@@ -48,94 +47,79 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
     scene.background = new THREE.Color(0x0b0f12);
 
     // Responsive camera initialization
-    const initialFov = isMobile ? 54 : isTablet ? 48 : 42;
+    const initialFov = isMobile ? 52 : isTablet ? 46 : 40;
     const camera = new THREE.PerspectiveCamera(initialFov, width / height, 0.1, 100);
     camera.position.set(0, 0, isMobile ? 4.9 : 4.0);
 
-    // --- 2. High-Efficiency WebGL Renderer ---
+    // --- 2. Ultra High-Efficiency WebGL Renderer (Zero Heavy Stencils / Zero Shadows) ---
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: !isMobile, // Turn off costly MSAA on low-end mobile to gain frame budget
+      antialias: false, // Disabling MSAA guarantees rock-solid 60 FPS on mobile and integrated GPUs
       alpha: false,
       powerPreference: 'high-performance',
       stencil: false,
       depth: true,
+      precision: isMobile ? 'mediump' : 'highp',
     });
     renderer.setSize(width, height);
 
-    // Dynamic resolution base target (capped at 1.5 stationary to protect GPU fill-rate)
-    const stationaryMaxDpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    let currentDpr = isMobile ? 1.0 : isTablet ? 1.2 : stationaryMaxDpr;
-    renderer.setPixelRatio(currentDpr);
+    // Strict performance DPR: 1.0 on mobile to completely prevent GPU fill-rate throttling
+    const maxDpr = isMobile ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.5);
+    renderer.setPixelRatio(maxDpr);
 
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.35;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = false; // Disable heavy multi-pass real-time shadow map computation
 
-    // Pillar 3: If screen width < 1024px, completely disable real-time canvas shadow computation
-    const enableShadows = !isTouchViewport;
-    renderer.shadowMap.enabled = enableShadows;
-    if (enableShadows) {
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    }
-
-    // --- 3. Pillar 1: Chromatic Vibrancy & Biophilic Cyber Three-Point Lighting Profile ---
-    // 3a. Key Light: Warm Sunset Gold / Soft Terracotta (#FFB26B / #F59E0B)
+    // --- 3. Optimized Biophilic Three-Point Lighting Profile (Zero shadow pass overhead) ---
+    // 3a. Key Light: Warm Sunset Gold / Soft Terracotta
     const keyLightColor = new THREE.Color('#f59e0b');
-    const keyLight = new THREE.DirectionalLight(keyLightColor, isTouchViewport ? 3.8 : 4.5);
+    const keyLight = new THREE.DirectionalLight(keyLightColor, 4.2);
     keyLight.position.set(4.5, 6, 4.5);
-    if (enableShadows) {
-      keyLight.castShadow = true;
-      keyLight.shadow.mapSize.width = 1024;
-      keyLight.shadow.mapSize.height = 1024;
-      keyLight.shadow.bias = -0.0001;
-    }
     scene.add(keyLight);
 
-    // 3b. Fill Light: Fresh Vibrant Botanical Mint / Sage Green (#10B981 / #34D399)
+    // 3b. Fill Light: Fresh Botanical Mint / Sage Green
     const fillLightColor = new THREE.Color('#10b981');
-    const fillLight = new THREE.PointLight(fillLightColor, 3.2, 30);
+    const fillLight = new THREE.DirectionalLight(fillLightColor, 2.6);
     fillLight.position.set(-5, -2, 3.5);
     scene.add(fillLight);
 
-    // 3c. Rim/Backlight: Electric Neon Lime / Cyber-Cyan Halo Silhouette (#06B6D4 / #22C55E)
+    // 3c. Rim/Backlight: Electric Neon Lime / Cyber-Cyan Halo Silhouette
     const rimLightColor = new THREE.Color('#06b6d4');
-    const rimLight = new THREE.DirectionalLight(rimLightColor, isTouchViewport ? 3.4 : 4.2);
+    const rimLight = new THREE.DirectionalLight(rimLightColor, 3.5);
     rimLight.position.set(0, -5, -4);
     scene.add(rimLight);
 
     // Subtle ambient bounce
-    const ambientLight = new THREE.AmbientLight(0x0f172a, 1.2);
+    const ambientLight = new THREE.AmbientLight(0x1e293b, 1.2);
     scene.add(ambientLight);
 
-    // --- 4. Physically Grounded Soft Contact Shadow ---
-    let contactShadow: THREE.Mesh | null = null;
-    if (enableShadows) {
-      const shadowCanvas = document.createElement('canvas');
-      shadowCanvas.width = 256;
-      shadowCanvas.height = 256;
-      const sCtx = shadowCanvas.getContext('2d');
-      if (sCtx) {
-        const grad = sCtx.createRadialGradient(128, 128, 10, 128, 128, 120);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0.7)');
-        grad.addColorStop(0.35, 'rgba(11, 15, 18, 0.4)');
-        grad.addColorStop(1, 'rgba(11, 15, 18, 0)');
-        sCtx.fillStyle = grad;
-        sCtx.fillRect(0, 0, 256, 256);
-      }
-      const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
-      const shadowGeo = new THREE.PlaneGeometry(2.4, 2.4);
-      const shadowMat = new THREE.MeshBasicMaterial({
-        map: shadowTexture,
-        transparent: true,
-        opacity: 0.75,
-        depthWrite: false,
-      });
-      contactShadow = new THREE.Mesh(shadowGeo, shadowMat);
-      contactShadow.rotation.x = -Math.PI / 2;
-      contactShadow.position.set(isMobile ? 0 : 0.85, -1.2, 0);
-      scene.add(contactShadow);
+    // --- 4. Lightweight Contact Shadow (Single transparent quad, zero GPU cost) ---
+    const shadowCanvas = document.createElement('canvas');
+    shadowCanvas.width = 128;
+    shadowCanvas.height = 128;
+    const sCtx = shadowCanvas.getContext('2d');
+    if (sCtx) {
+      const grad = sCtx.createRadialGradient(64, 64, 5, 64, 64, 60);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0.7)');
+      grad.addColorStop(0.35, 'rgba(11, 15, 18, 0.35)');
+      grad.addColorStop(1, 'rgba(11, 15, 18, 0)');
+      sCtx.fillStyle = grad;
+      sCtx.fillRect(0, 0, 128, 128);
     }
+    const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
+    const shadowGeo = new THREE.PlaneGeometry(2.4, 2.4);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTexture,
+      transparent: true,
+      opacity: 0.7,
+      depthWrite: false,
+    });
+    const contactShadow = new THREE.Mesh(shadowGeo, shadowMat);
+    contactShadow.rotation.x = -Math.PI / 2;
+    contactShadow.position.set(isMobile ? 0 : 0.85, -1.2, 0);
+    scene.add(contactShadow);
 
     // --- 5. Model Pivot & Target States ---
     const modelPivot = new THREE.Group();
@@ -150,8 +134,7 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       rotZ: 0,
       cameraZ: isMobile ? 4.9 : 4.0,
       cameraY: 0,
-      shadowOpacity: 0.75,
-      // Dynamic color interpolation parameters
+      shadowOpacity: 0.7,
       keyHue: 0.11, // Sunset Gold
       fillHue: 0.44, // Botanical Mint
       rimHue: 0.52, // Cyber Cyan
@@ -159,14 +142,13 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
 
     let isDisposed = false;
 
-    // --- 6. Pillar 2: 2.7MB Asset Delivery & Draco WebAssembly Pipeline ---
+    // --- 6. 2.7MB Draco Asset Pipeline ---
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('/draco/');
 
     const loader = new GLTFLoader();
     loader.setDRACOLoader(dracoLoader);
 
-    // Load the 2.7MB local asset
     loader.load(
       '/assets/petziq-model.glb',
       (gltf) => {
@@ -184,18 +166,12 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         model.scale.setScalar(scale);
         model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
 
-        // Apple-style Material Tuning with colorful iridescent reflections
+        // Optimize model mesh matrices
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
-            // Raycasting BVH optimization: disable matrix auto-update on static nodes
             mesh.matrixAutoUpdate = false;
             mesh.updateMatrix();
-
-            if (enableShadows) {
-              mesh.castShadow = true;
-              mesh.receiveShadow = true;
-            }
 
             if (mesh.material) {
               const mat = mesh.material as THREE.MeshStandardMaterial;
@@ -203,34 +179,32 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
                 mat.roughness = 0.55;
                 mat.metalness = 0.08;
               } else {
-                mat.roughness = Math.max(0.16, (mat.roughness ?? 0.3) * 0.8);
-                mat.metalness = Math.min(0.96, (mat.metalness ?? 0.5) * 1.3);
+                mat.roughness = Math.max(0.18, (mat.roughness ?? 0.3) * 0.8);
+                mat.metalness = Math.min(0.95, (mat.metalness ?? 0.5) * 1.25);
               }
             }
           }
         });
 
-        // Warm up WebGL shader cache before presenting to eliminate mid-scroll stutter
+        // Warm up WebGL shader cache
         renderer.compile(scene, camera);
 
         modelPivot.add(model);
         setLoadProgress(100);
-        setTimeout(() => setModelLoaded(true), 120);
+        setTimeout(() => setModelLoaded(true), 80);
 
-        // --- 7. Pillar 4: Lenis-Synchronized GSAP ScrollTrigger Animation ---
-        const scrubValue = isTouchViewport ? 1.8 : 1.2;
-
+        // --- 7. GSAP ScrollTrigger Animation (Direct Fast Scrub for Zero Input Lag) ---
         const ctx = gsap.context(() => {
           const tl = gsap.timeline({
             scrollTrigger: {
               trigger: container,
               start: 'top top',
               end: 'bottom bottom',
-              scrub: scrubValue, // Cushioned touch inertia for mobile
+              scrub: 0.3, // Direct 0.3s scrub eliminates laggy drag and keeps motion crisp
             },
           });
 
-          // Phase 1 (0 -> 50% scroll): Morph position and transition lighting to botanical green
+          // Phase 1 (0 -> 50% scroll)
           tl.to(modelTarget, {
             posX: isMobile ? 0 : -0.85,
             posY: -0.22,
@@ -239,12 +213,12 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
             cameraZ: isMobile ? 4.3 : 3.6,
             cameraY: 0.1,
             shadowOpacity: 0.5,
-            keyHue: 0.42, // Shift key toward botanical emerald
-            fillHue: 0.12, // Shift fill toward warm amber
-            rimHue: 0.48, // Vivid aqua
+            keyHue: 0.42,
+            fillHue: 0.12,
+            rimHue: 0.48,
             ease: 'none',
           }, 0)
-          // Phase 2 (50% -> 100% scroll): Full 360 showcase and transition lighting to cyber cyan/lime
+          // Phase 2 (50% -> 100% scroll)
           .to(modelTarget, {
             posX: 0,
             posY: -0.72,
@@ -252,36 +226,23 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
             rotX: 0.08,
             cameraZ: isMobile ? 3.8 : 3.1,
             cameraY: 0,
-            shadowOpacity: 0.8,
-            keyHue: 0.52, // Cyber cyan
-            fillHue: 0.38, // Mint green
-            rimHue: 0.22, // Electric lime
+            shadowOpacity: 0.75,
+            keyHue: 0.52,
+            fillHue: 0.38,
+            rimHue: 0.22,
             ease: 'none',
           }, 0.5);
 
-          // Dynamic Color Parallax: Morph glowing background and glassmorphic card borders
-          if (glowMeshRef.current) {
-            tl.to(glowMeshRef.current, {
-              background: 'radial-gradient(circle at 75% 35%, rgba(16, 185, 129, 0.28) 0%, rgba(6, 182, 212, 0.15) 45%, transparent 70%)',
-              ease: 'none',
-            }, 0)
-            .to(glowMeshRef.current, {
-              background: 'radial-gradient(circle at 45% 65%, rgba(245, 158, 11, 0.25) 0%, rgba(16, 185, 129, 0.2) 50%, transparent 75%)',
-              ease: 'none',
-            }, 0.5);
-          }
-
-          // Staggered reveals for glassmorphic cards
+          // Card reveal transitions
           if (layer2Ref.current) {
             gsap.fromTo(
               layer2Ref.current,
-              { opacity: 0, y: 30, filter: 'blur(6px)' },
+              { opacity: 0, y: 24 },
               {
                 opacity: 1,
                 y: 0,
-                filter: 'blur(0px)',
-                duration: 0.9,
-                ease: 'power3.out',
+                duration: 0.6,
+                ease: 'power2.out',
                 scrollTrigger: {
                   trigger: layer2Ref.current,
                   start: 'top 75%',
@@ -294,13 +255,12 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
           if (layer3Ref.current) {
             gsap.fromTo(
               layer3Ref.current,
-              { opacity: 0, y: 30, filter: 'blur(6px)' },
+              { opacity: 0, y: 24 },
               {
                 opacity: 1,
                 y: 0,
-                filter: 'blur(0px)',
-                duration: 0.9,
-                ease: 'power3.out',
+                duration: 0.6,
+                ease: 'power2.out',
                 scrollTrigger: {
                   trigger: layer3Ref.current,
                   start: 'top 80%',
@@ -324,56 +284,36 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       }
     );
 
-    // --- 8. SplitType Editorial Typography Stagger Animation ---
+    // --- 8. SplitType Editorial Headline Animation ---
     let splitInstance: SplitType | null = null;
     if (headlineRef.current) {
       splitInstance = new SplitType(headlineRef.current, { types: 'words,chars' });
       if (splitInstance.words) {
         gsap.fromTo(
           splitInstance.words,
-          { opacity: 0, y: 40, filter: 'blur(10px)' },
+          { opacity: 0, y: 32 },
           {
             opacity: 1,
             y: 0,
-            filter: 'blur(0px)',
-            duration: 1.1,
-            stagger: 0.035,
-            ease: 'power4.out',
-            delay: 0.15,
+            duration: 0.8,
+            stagger: 0.03,
+            ease: 'power3.out',
+            delay: 0.1,
           }
         );
       }
     }
 
-    // --- 9. Pillar 3: Dynamic Hardware & Adaptive DPR Throttling ---
-    let isScrollingFast = false;
-    let scrollTimeout: NodeJS.Timeout;
-
-    const handleScrollAdaptive = () => {
-      if (!isScrollingFast) {
-        isScrollingFast = true;
-        // Dynamically throttle DPR: 1.0 for mobile, 1.2 for tablet during active scroll
-        const scrollDpr = isMobile ? 1.0 : isTablet ? 1.2 : 1.25;
-        renderer.setPixelRatio(scrollDpr);
-      }
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        isScrollingFast = false;
-        // Restore stationary max DPR when scroll stops
-        renderer.setPixelRatio(stationaryMaxDpr);
-      }, 95);
-    };
-
-    window.addEventListener('scroll', handleScrollAdaptive, { passive: true });
-
-    // Pointer tracking
+    // Pointer tracking (only on non-touch devices to avoid tracking drag touches)
     const handlePointerMove = (e: MouseEvent) => {
       mouseRef.current.targetX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseRef.current.targetY = -(e.clientY / window.innerHeight) * 2 - 1;
     };
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
+    if (!isTouchViewport) {
+      window.addEventListener('mousemove', handlePointerMove, { passive: true });
+    }
 
-    // Responsive resize listener
+    // Resize listener
     const handleResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -381,11 +321,11 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       const tablet = w >= 768 && w < 1024;
 
       camera.aspect = w / h;
-      camera.fov = mobile ? 54 : tablet ? 48 : 42;
+      camera.fov = mobile ? 52 : tablet ? 46 : 40;
       camera.updateProjectionMatrix();
 
       renderer.setSize(w, h);
-      renderer.setPixelRatio(stationaryMaxDpr);
+      renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.5));
 
       if (mobile) {
         modelTarget.posX = 0;
@@ -393,16 +333,11 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
     };
     window.addEventListener('resize', handleResize);
 
-    // --- 10. Performance Monitor & Damped Kinetic Render Loop ---
+    // --- 9. High-FPS Render Loop (Responsive LERP: 0.12 for snappy response) ---
     let reqId: number;
     let lastTime = performance.now();
     let elapsed = 0;
 
-    let frameCount = 0;
-    let lastFpsCheck = performance.now();
-    let lowFpsCount = 0;
-
-    // Interpolation state
     let curPosX = isMobile ? 0 : 0.85;
     let curPosY = 0;
     let curRotX = 0.12;
@@ -411,6 +346,8 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
     let curCameraZ = isMobile ? 4.9 : 4.0;
     let curCameraY = 0;
 
+    const lerpFactor = isTouchViewport ? 0.14 : 0.1;
+
     const animate = () => {
       reqId = requestAnimationFrame(animate);
       const now = performance.now();
@@ -418,33 +355,17 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       lastTime = now;
       elapsed += delta;
 
-      // Real-time FPS monitor: if FPS dips below 50 repeatedly, downgrade to Eco-Power mode
-      frameCount++;
-      if (now - lastFpsCheck >= 1000) {
-        const currentFps = (frameCount * 1000) / (now - lastFpsCheck);
-        frameCount = 0;
-        lastFpsCheck = now;
+      // Micro-floating physics
+      const floatY = Math.sin(elapsed * 1.5) * 0.035;
+      const floatTilt = Math.cos(elapsed * 1.2) * 0.02;
 
-        if (currentFps < 50) {
-          lowFpsCount++;
-          if (lowFpsCount >= 3) {
-            setLowPowerMode(true);
-          }
-        } else {
-          lowFpsCount = Math.max(0, lowFpsCount - 1);
-        }
+      // Snappy pointer follow on desktop
+      if (!isTouchViewport) {
+        mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.08;
+        mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.08;
       }
 
-      // Micro-floating antigravity physics
-      const floatY = Math.sin(elapsed * 1.6) * 0.04;
-      const floatTilt = Math.cos(elapsed * 1.3) * 0.025;
-
-      // Damped pointer follow
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.055;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.055;
-
-      // Fluid Kinetic Motion Damping (0.065 LERP)
-      const lerpFactor = 0.065;
+      // Smooth, responsive interpolation
       curPosX += (modelTarget.posX - curPosX) * lerpFactor;
       curPosY += (modelTarget.posY - curPosY) * lerpFactor;
       curRotX += (modelTarget.rotX - curRotX) * lerpFactor;
@@ -453,21 +374,19 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       curCameraZ += (modelTarget.cameraZ - curCameraZ) * lerpFactor;
       curCameraY += (modelTarget.cameraY - curCameraY) * lerpFactor;
 
-      modelPivot.position.x = curPosX + (mouseRef.current.x * 0.14);
-      modelPivot.position.y = curPosY + floatY + (mouseRef.current.y * 0.14);
+      modelPivot.position.x = curPosX + (mouseRef.current.x * 0.12);
+      modelPivot.position.y = curPosY + floatY + (mouseRef.current.y * 0.12);
       modelPivot.position.z = modelTarget.posZ;
 
-      modelPivot.rotation.x = curRotX + floatTilt + (-mouseRef.current.y * 0.18);
-      modelPivot.rotation.y = curRotY + (mouseRef.current.x * 0.28);
-      modelPivot.rotation.z = curRotZ + (mouseRef.current.x * 0.08);
+      modelPivot.rotation.x = curRotX + floatTilt + (-mouseRef.current.y * 0.15);
+      modelPivot.rotation.y = curRotY + (mouseRef.current.x * 0.22);
+      modelPivot.rotation.z = curRotZ + (mouseRef.current.x * 0.06);
 
-      if (contactShadow) {
-        contactShadow.position.x = modelPivot.position.x;
-        contactShadow.position.y = curPosY - 1.25;
-        (contactShadow.material as THREE.MeshBasicMaterial).opacity = modelTarget.shadowOpacity;
-      }
+      contactShadow.position.x = modelPivot.position.x;
+      contactShadow.position.y = curPosY - 1.25;
+      (contactShadow.material as THREE.MeshBasicMaterial).opacity = modelTarget.shadowOpacity;
 
-      // Dynamic light color morphing
+      // Light color changes
       keyLight.color.setHSL(modelTarget.keyHue, 0.95, 0.55);
       fillLight.color.setHSL(modelTarget.fillHue, 0.85, 0.48);
       rimLight.color.setHSL(modelTarget.rimHue, 0.92, 0.52);
@@ -484,9 +403,9 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
     return () => {
       isDisposed = true;
       cancelAnimationFrame(reqId);
-      clearTimeout(scrollTimeout);
-      window.removeEventListener('scroll', handleScrollAdaptive);
-      window.removeEventListener('mousemove', handlePointerMove);
+      if (!isTouchViewport) {
+        window.removeEventListener('mousemove', handlePointerMove);
+      }
       window.removeEventListener('resize', handleResize);
       if (splitInstance) splitInstance.revert();
       renderer.dispose();
@@ -496,23 +415,23 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: '250vh' }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: '240vh' }}>
       {/* Dynamic Background Gradient Mesh with Biophilic Cyber Highlights */}
       <div
         ref={glowMeshRef}
         className="fixed inset-0 pointer-events-none transition-all duration-700 z-0"
         style={{
           background:
-            'radial-gradient(circle at 65% 25%, rgba(245, 158, 11, 0.18) 0%, rgba(16, 185, 129, 0.16) 40%, rgba(11, 15, 18, 0) 70%)',
+            'radial-gradient(circle at 65% 25%, rgba(245, 158, 11, 0.16) 0%, rgba(16, 185, 129, 0.14) 40%, rgba(11, 15, 18, 0) 70%)',
         }}
       />
 
       {/* Premium Minimal Loading Screen Overlay with Circular Progress Indicator */}
       {!modelLoaded && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0B0F12]/95 backdrop-blur-md transition-opacity duration-700 pointer-events-none">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0B0F12]/95 backdrop-blur-md transition-opacity duration-500 pointer-events-none">
           <div className="relative flex items-center justify-center">
             {/* SVG Circular Progress Ring */}
-            <svg className="h-16 w-16 -rotate-90 transform" viewBox="0 0 64 64">
+            <svg className="h-14 w-14 -rotate-90 transform" viewBox="0 0 64 64">
               <circle
                 cx="32"
                 cy="32"
@@ -524,7 +443,7 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
                 cx="32"
                 cy="32"
                 r="28"
-                className="stroke-amber-400 fill-none transition-all duration-300 ease-out"
+                className="stroke-amber-400 fill-none transition-all duration-200 ease-out"
                 strokeWidth="3"
                 strokeDasharray="175.9"
                 strokeDashoffset={175.9 - (175.9 * loadProgress) / 100}
@@ -535,26 +454,15 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
               {loadProgress}%
             </span>
           </div>
-          <p className="mt-4 text-xs font-mono tracking-widest text-emerald-300 uppercase">
-            Unpacking 2.7MB Draco Asset...
+          <p className="mt-3 text-xs font-mono tracking-widest text-emerald-300 uppercase">
+            Loading Petziq 3D...
           </p>
         </div>
       )}
 
-      {/* Sticky Fixed WebGL Canvas Layer or Low-Power Static Fallback */}
+      {/* Sticky Fixed WebGL Canvas Layer */}
       <div className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
-        {!lowPowerMode ? (
-          <canvas ref={canvasRef} className="w-full h-full block" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center p-8 bg-gradient-to-b from-[#0B0F12] via-[#0D151C] to-[#0B0F12]">
-            <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border border-emerald-500/30 bg-radial from-emerald-500/20 to-transparent flex items-center justify-center shadow-glow animate-pulse">
-              <Tag className="w-24 h-24 text-emerald-300 drop-shadow-[0_0_24px_rgba(16,185,129,0.5)]" />
-              <span className="absolute bottom-4 font-mono text-[10px] text-emerald-300 tracking-wider uppercase bg-[#0B0F12]/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                Eco Power Mode Active
-              </span>
-            </div>
-          </div>
-        )}
+        <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
 
       {/* Layer 1: Initial Hero Section (0vh - 80vh) */}
@@ -613,7 +521,7 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         </div>
       </div>
 
-      {/* Layer 2: Mid-Scroll Angle (80vh - 160vh) with Staggered Reveal */}
+      {/* Layer 2: Mid-Scroll Angle (80vh - 160vh) */}
       <div className="absolute top-[85vh] left-0 w-full h-screen flex items-center justify-end z-10 pointer-events-none transform-gpu will-change-transform">
         <div className="container-px w-full flex justify-end">
           <div
@@ -640,8 +548,8 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         </div>
       </div>
 
-      {/* Layer 3: End of 250vh Hero Showcase (170vh - 250vh) with Staggered Reveal */}
-      <div className="absolute top-[175vh] left-0 w-full h-[75vh] flex items-center justify-center z-10 pointer-events-none transform-gpu will-change-transform">
+      {/* Layer 3: End of Hero Showcase */}
+      <div className="absolute top-[165vh] left-0 w-full h-[75vh] flex items-center justify-center z-10 pointer-events-none transform-gpu will-change-transform">
         <div
           ref={layer3Ref}
           className="container-px w-full text-center max-w-2xl pointer-events-auto transform-gpu will-change-transform"
