@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { AntigravityHero } from '@/components/AntigravityHero';
+import { MobileAppShowcase } from '@/components/MobileAppShowcase';
 import { BREEDS } from '@/data/breeds';
 import { PLANTS } from '@/data/plants';
 import { BLOG_POSTS } from '@/data/blog';
@@ -265,6 +266,10 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
         </div>
       </section>
 
+      {/* =========================================================================
+          4. HIGH-FIDELITY MOBILE APP OS SHOWCASE (Apple Health x Material You)
+          ========================================================================= */}
+      <MobileAppShowcase />
 
       {/* =========================================================================
           5. PREMIUM SUBSCRIPTION EXPERIENCE (Apple Frictionless Conversion)
