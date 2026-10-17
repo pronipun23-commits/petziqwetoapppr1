@@ -146,10 +146,10 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
           {/* Docked AI Assistant Button */}
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-petziq-ai'))}
-            className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-brand-500/20 via-teal-500/20 to-ocean-500/20 px-2.5 py-1.5 text-cyan-200 transition hover:bg-cyan-500/25"
+            className="flex items-center gap-1.5 rounded-xl border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1.5 text-emerald-200 transition hover:bg-emerald-500/25"
             aria-label="Petziq AI Assistant"
           >
-            <Sparkles className="h-4 w-4 text-cyan-300 animate-pulse" />
+            <Sparkles className="h-4 w-4 text-emerald-300 animate-pulse" />
             <span className="text-xs font-semibold tracking-wide text-white">AI</span>
           </button>
 

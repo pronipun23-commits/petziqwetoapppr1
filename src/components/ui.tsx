@@ -66,7 +66,7 @@ export function TraitBar({
       </div>
       <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-brand-400 via-teal-400 to-ocean-400 transition-[width] duration-700 ease-out"
+          className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 transition-[width] duration-700 ease-out"
           style={{ width: `${value}%`, transitionDelay: `${delay}ms` }}
         />
       </div>

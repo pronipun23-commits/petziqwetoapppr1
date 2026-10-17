@@ -108,67 +108,67 @@
   }
   .btn-primary {
     @apply btn text-ink-950 font-bold;
-    background: linear-gradient(135deg, #FFFFFF, #B3B3B3);
-    box-shadow: 0 10px 28px -8px rgba(224, 224, 224, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    background: linear-gradient(135deg, #10B981, #34D399);
+    box-shadow: 0 10px 28px -8px rgba(16, 185, 129, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   }
   .btn-primary:hover {
-    background: linear-gradient(135deg, #FFFFFF, #D4D4D4);
-    box-shadow: 0 12px 32px -8px rgba(255, 255, 255, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+    background: linear-gradient(135deg, #34D399, #6EE7B7);
+    box-shadow: 0 12px 32px -8px rgba(16, 185, 129, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
     transform: translateY(-1px);
   }
   .btn-accent {
-    @apply btn text-white;
-    background: linear-gradient(135deg, #565656, #2B2B2B);
-    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(179, 179, 179, 0.25) inset;
+    @apply btn text-ink-950 font-semibold;
+    background: linear-gradient(135deg, #2DD4BF, #14B8A6);
+    box-shadow: 0 8px 24px -8px rgba(45, 212, 191, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   }
   .btn-accent:hover {
-    background: linear-gradient(135deg, #6E6E6E, #3D3D3D);
-    box-shadow: 0 12px 32px -8px rgba(179, 179, 179, 0.25);
+    background: linear-gradient(135deg, #5EEAD4, #2DD4BF);
+    box-shadow: 0 12px 32px -8px rgba(45, 212, 191, 0.5);
     transform: translateY(-1px);
   }
   .btn-iris {
-    @apply btn text-white;
-    background: linear-gradient(135deg, #565656, #2B2B2B);
-    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(179, 179, 179, 0.2) inset;
+    @apply btn text-ink-950 font-semibold;
+    background: linear-gradient(135deg, #10B981, #059669);
+    box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   }
   .btn-iris:hover {
-    background: linear-gradient(135deg, #6E6E6E, #3D3D3D);
-    box-shadow: 0 12px 32px -8px rgba(179, 179, 179, 0.3);
+    background: linear-gradient(135deg, #34D399, #10B981);
+    box-shadow: 0 12px 32px -8px rgba(16, 185, 129, 0.5);
     transform: translateY(-1px);
   }
   .btn-ghost {
-    @apply btn text-ink-100 border border-white/[0.12] hover:border-white/[0.25];
+    @apply btn text-ink-100 border border-white/[0.12] hover:border-emerald-400/40;
     background: rgba(255, 255, 255, 0.04);
   }
   .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(16, 185, 129, 0.08);
     transform: translateY(-1px);
   }
   .btn-subtle {
-    @apply btn text-ink-200 hover:text-white hover:bg-white/[0.08];
+    @apply btn text-ink-200 hover:text-emerald-300 hover:bg-emerald-500/[0.08];
   }
 
   /* Chips / badges */
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-white/[0.12] px-3 py-1 text-xs font-medium text-ink-200;
-    background: rgba(255, 255, 255, 0.05);
+    @apply inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-300;
+    background: rgba(16, 185, 129, 0.06);
   }
 
   /* Gradient text */
   .text-gradient {
-    background: linear-gradient(135deg, #FFFFFF, #B3B3B3, #848484);
+    background: linear-gradient(135deg, #FFFFFF, #D1FAE5, #10B981);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   .text-gradient-iris {
-    background: linear-gradient(135deg, #E0E0E0, #B3B3B3, #565656);
+    background: linear-gradient(135deg, #FFFFFF, #A7F3D0, #059669);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   .text-gradient-accent {
-    background: linear-gradient(135deg, #FFFFFF, #B3B3B3);
+    background: linear-gradient(135deg, #F0FDFA, #5EEAD4, #14B8A6);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
