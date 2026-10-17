@@ -262,14 +262,12 @@ export function MissingPhoneModal() {
               </button>
             </div>
 
-            {whatsappCode && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-200">
-                <p className="font-semibold text-emerald-300">WhatsApp Verification Sent:</p>
-                <p className="text-[11px] text-emerald-200/90 mt-0.5">
-                  Your passkey is <span className="font-mono font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{whatsappCode}</span>. Enter it below to complete verification.
-                </p>
-              </div>
-            )}
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs text-ink-300">
+              <p className="font-semibold text-emerald-400">Security Passkey Dispatched</p>
+              <p className="text-[11px] text-ink-400 mt-0.5">
+                Check your WhatsApp message or SMS for your 6-digit verification code and enter it below.
+              </p>
+            </div>
 
             {/* 6 Digit Inputs */}
             <div className="flex justify-between gap-2">
