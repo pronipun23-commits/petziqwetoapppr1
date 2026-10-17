@@ -604,8 +604,15 @@ export function AntigravityHero({
                 Acquire Smart Tag (From ₹324)
               </button>
               <button
-                onClick={() => onNavigate('/explore')}
+                onClick={() => onNavigate('/find-pet')}
                 className="btn-ghost rounded-[4px] px-5 py-3 font-mono text-xs uppercase tracking-wider inline-flex items-center gap-2 border border-emerald-500/30 bg-emerald-500/[0.06] text-emerald-300 hover:border-emerald-400/60 hover:bg-emerald-500/12 transition-all duration-300"
+              >
+                <Shield className="h-3.5 w-3.5" />
+                Find a Pet (QR)
+              </button>
+              <button
+                onClick={() => onNavigate('/explore')}
+                className="btn-ghost rounded-[4px] px-5 py-3 font-mono text-xs uppercase tracking-wider inline-flex items-center gap-2 border border-white/10 text-ink-300 hover:text-white transition-all duration-300"
               >
                 Explore 330 Breeds
                 <ArrowRight className="h-3.5 w-3.5" />

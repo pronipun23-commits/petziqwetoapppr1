@@ -267,8 +267,15 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
               Customize & Buy Tag
             </button>
             <button
+              onClick={() => onNavigate('/find-pet')}
+              className="btn-secondary inline-flex items-center gap-2 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
+            >
+              <Shield className="h-4 w-4 text-emerald-400" />
+              Find a Pet (QR Lookup)
+            </button>
+            <button
               onClick={() => handleOpenTracker()}
-              className="btn-secondary inline-flex items-center gap-2"
+              className="btn-ghost inline-flex items-center gap-2"
             >
               <Package className="h-4 w-4 text-brand-300" />
               Track Order

@@ -89,6 +89,9 @@ export function parseRoute(path: string): {
       page = 'smart-tags-edit';
       if (segments[2]) params.id = segments[2];
     }
+  } else if (segments[0] === 'find-pet') {
+    page = 'find-pet';
+    if (segments[1]) params.tagId = segments[1];
   } else if (segments[0] === 'tag') {
     page = 'tag';
     if (segments[1]) params.tagId = segments[1];

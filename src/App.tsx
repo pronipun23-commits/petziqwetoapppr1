@@ -34,6 +34,7 @@ import { BlogPostPage } from '@/pages/BlogPostPage';
 import { SmartTagsPage } from '@/pages/SmartTagsPage';
 import { SmartTagCreatePage } from '@/pages/SmartTagCreatePage';
 import { TagProfilePage } from '@/pages/TagProfilePage';
+import { FindPetPage } from '@/pages/FindPetPage';
 import { AdminPage, type AdminTab } from '@/pages/AdminPage';
 import { MissingPhoneModal } from '@/components/MissingPhoneModal';
 import { LegalModal, CookieConsentBanner, type LegalModalType } from '@/components/LegalModals';
@@ -120,6 +121,7 @@ const RENDERED_PAGES = new Set([
   'smart-tags',
   'smart-tags-create',
   'smart-tags-edit',
+  'find-pet',
   'tag',
 ]);
 
@@ -392,6 +394,9 @@ function App() {
           )}
           {page === 'smart-tags-edit' && (
             <SmartTagCreatePage onNavigate={navigateWithAuth} editId={params.id} />
+          )}
+          {page === 'find-pet' && (
+            <FindPetPage onNavigate={navigateWithAuth} />
           )}
           {page === 'tag' && (
             <TagProfilePage tagId={params.tagId ?? ''} onNavigate={navigateWithAuth} />

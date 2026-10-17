@@ -39,10 +39,11 @@ export function Footer({ onNavigate }: FooterProps) {
             </h4>
             <ul className="mt-4 space-y-2.5 text-sm">
               {[
+                { label: 'Find a Pet (QR Scan)', path: '/find-pet' },
                 { label: 'All Breeds', path: '/explore' },
                 { label: 'Categories', path: '/categories' },
                 { label: 'Care Guides', path: '/care' },
-                { label: 'Problem Solver', path: '/problems' },
+                { label: 'Smart Tags', path: '/smart-tags' },
                 { label: 'Blog', path: '/blog' },
                 { label: 'Favorites', path: '/favorites' },
               ].map((l) => (
