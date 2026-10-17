@@ -285,6 +285,9 @@ export function MissingPhoneModal() {
             </div>
           </div>
         )}
+
+        {/* Invisible reCAPTCHA container for Firebase Phone SMS */}
+        <div id="recaptcha-container" />
       </div>
     </div>
   );

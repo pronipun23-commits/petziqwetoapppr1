@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured, type Profile } from '@/lib/supabase';
+import {
+  isFirebaseConfigured,
+  sendFirebasePhoneOtp,
+  verifyFirebasePhoneOtp,
+} from '@/lib/firebaseAuth';
 
 interface AuthState {
   session: Session | null;
@@ -28,8 +33,10 @@ interface AuthContextValue extends AuthState {
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
-  sendPhoneOtp: (phone: string) => Promise<{ error: string | null; demoCode?: string }>;
+  sendPhoneOtp: (phone: string, containerId?: string) => Promise<{ error: string | null; demoCode?: string; method?: 'firebase_sms' | 'supabase_sms' | 'demo' }>;
   verifyPhoneOtp: (phone: string, token: string) => Promise<{ error: string | null }>;
+  sendEmailOtp: (email: string) => Promise<{ error: string | null }>;
+  verifyEmailOtp: (email: string, token: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -479,7 +486,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const sendPhoneOtp = useCallback(
-    async (rawPhone: string): Promise<{ error: string | null; demoCode?: string }> => {
+    async (rawPhone: string, containerId: string = 'recaptcha-container'): Promise<{ error: string | null; demoCode?: string; method?: 'firebase_sms' | 'supabase_sms' | 'demo' }> => {
       try {
         const cleanDigits = rawPhone.replace(/\D/g, '');
         if (cleanDigits.length < 10) {
@@ -488,7 +495,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Format to E.164 (India default +91 if not specified)
         const formattedPhone = cleanDigits.length === 10 ? `+91${cleanDigits}` : `+${cleanDigits}`;
 
-        // 1. If Supabase is configured with Twilio / Phone provider, call signInWithOtp
+        // 1. Primary Free Real SMS Provider: Firebase Phone Auth (10,000 free SMS/mo)
+        if (isFirebaseConfigured) {
+          const res = await sendFirebasePhoneOtp(formattedPhone, containerId);
+          if (res.success) {
+            return { error: null, method: 'firebase_sms' };
+          }
+          console.warn('Firebase Phone Auth attempt error:', res.error);
+        }
+
+        // 2. Supabase SMS provider (if Twilio or MessageBird configured in Supabase dashboard)
         if (isSupabaseConfigured) {
           try {
             const { error } = await supabase.auth.signInWithOtp({
@@ -499,17 +515,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             if (!error) {
-              return { error: null };
+              return { error: null, method: 'supabase_sms' };
             }
 
-            console.warn('Supabase signInWithOtp error or provider unconfigured:', error.message);
+            console.warn('Supabase signInWithOtp error:', error.message);
           } catch (e: any) {
             console.warn('Supabase signInWithOtp caught:', e?.message);
           }
         }
 
-        // 2. High-protection local cryptographic verification fallback:
-        // Generates cryptographically secure 6-digit OTP with 5-minute expiry & rate limiting
+        // 3. Fallback: High-protection local cryptographic verification fallback
         const randomValues = new Uint32Array(1);
         crypto.getRandomValues(randomValues);
         const generatedOtp = String((randomValues[0] % 900000) + 100000); // 6-digit number
@@ -524,7 +539,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         sessionStorage.setItem('petziq_active_otp', JSON.stringify(otpPayload));
 
-        return { error: null, demoCode: generatedOtp };
+        return { error: null, demoCode: generatedOtp, method: 'demo' };
       } catch (err: any) {
         return { error: err?.message || 'Failed to dispatch verification code.' };
       }
@@ -543,7 +558,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: 'Please enter the complete 6-digit verification code.' };
         }
 
-        // 1. Try Supabase verifyOtp first if configured
+        // 1. Try Firebase verification first if Firebase is configured
+        if (isFirebaseConfigured) {
+          const fbRes = await verifyFirebasePhoneOtp(cleanToken);
+          if (fbRes.success) {
+            await updateProfile({ phone: cleanDigits });
+            return { error: null };
+          }
+          console.warn('Firebase verifyPhoneOtp error:', fbRes.error);
+        }
+
+        // 2. Try Supabase verifyOtp
         if (isSupabaseConfigured) {
           try {
             const { error } = await supabase.auth.verifyOtp({
@@ -553,7 +578,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             if (!error) {
-              // Successfully verified via Supabase
               await updateProfile({ phone: cleanDigits });
               return { error: null };
             }
@@ -563,7 +587,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // 2. Check cryptographic local OTP payload with attempt limits
+        // 3. Check cryptographic local OTP payload with attempt limits
         const rawOtp = sessionStorage.getItem('petziq_active_otp');
         if (!rawOtp) {
           return { error: 'No active verification code found. Please request a new code.' };
@@ -602,6 +626,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [updateProfile],
   );
 
+  const sendEmailOtp = useCallback(
+    async (email: string): Promise<{ error: string | null }> => {
+      try {
+        if (!isSupabaseConfigured) {
+          return { error: 'Email service is not configured.' };
+        }
+        const { error } = await supabase.auth.signInWithOtp({
+          email: email.trim(),
+        });
+        if (error) return { error: error.message };
+        return { error: null };
+      } catch (err: any) {
+        return { error: err?.message || 'Failed to dispatch email verification code.' };
+      }
+    },
+    [],
+  );
+
+  const verifyEmailOtp = useCallback(
+    async (email: string, token: string): Promise<{ error: string | null }> => {
+      try {
+        if (!isSupabaseConfigured) {
+          return { error: 'Email service is not configured.' };
+        }
+        const { error } = await supabase.auth.verifyOtp({
+          email: email.trim(),
+          token: token.trim(),
+          type: 'email',
+        });
+        if (error) return { error: error.message };
+        return { error: null };
+      } catch (err: any) {
+        return { error: err?.message || 'Verification failed.' };
+      }
+    },
+    [],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -616,6 +678,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         resetPassword,
         sendPhoneOtp,
         verifyPhoneOtp,
+        sendEmailOtp,
+        verifyEmailOtp,
       }}
     >
       {children}
