@@ -131,11 +131,13 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
       </header>
 
       {/* =========================================================================
-          2. 250vh HERO SECTION & 3D PARALLAX CANVAS (The Hook)
+          2. 300vh HERO SECTION & 3D PARALLAX CANVAS (The Hook)
           ========================================================================= */}
       <AntigravityHero
         onNavigate={onNavigate}
         onOrderTag={() => onNavigate('/smart-tags')}
+        activeMode={activeMode}
+        onToggleMode={setActiveMode}
       />
 
       {/* =========================================================================
