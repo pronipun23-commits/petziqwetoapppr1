@@ -194,13 +194,14 @@ function App() {
           gsap.registerPlugin(ScrollTrigger);
 
           lenisInstance = new Lenis({
-            duration: 1.2,
+            duration: 1.0,
             easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             orientation: 'vertical',
             gestureOrientation: 'vertical',
             smoothWheel: true,
             wheelMultiplier: 1.0,
-            touchMultiplier: 1.5,
+            touchMultiplier: 1.0,
+            infinite: false,
           });
 
           // Synchronize Lenis scroll with GSAP ScrollTrigger updates
@@ -211,7 +212,7 @@ function App() {
           };
 
           gsap.ticker.add(updateLenis);
-          gsap.ticker.lagSmoothing(0);
+          gsap.ticker.lagSmoothing(500, 33);
 
           removeTicker = () => {
             gsap.ticker.remove(updateLenis);

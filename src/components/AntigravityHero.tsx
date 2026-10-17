@@ -192,14 +192,14 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         setLoadProgress(100);
         setTimeout(() => setModelLoaded(true), 80);
 
-        // --- 7. GSAP ScrollTrigger Animation (Direct Fast Scrub for Zero Input Lag) ---
+        // --- 7. GSAP ScrollTrigger Animation (Direct Instant Scrub for Zero Lag) ---
         const ctx = gsap.context(() => {
           const tl = gsap.timeline({
             scrollTrigger: {
               trigger: container,
               start: 'top top',
               end: 'bottom bottom',
-              scrub: 0.3, // Direct 0.3s scrub eliminates laggy drag and keeps motion crisp
+              scrub: true, // Immediate direct synchronization with scroll position
             },
           });
 
