@@ -15,28 +15,22 @@ import {
 const firebaseConfig = {
   apiKey:
     import.meta.env.VITE_FIREBASE_API_KEY ||
-    import.meta.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-    '',
+    'AIzaSyAu2YJ1jTXZIitj2sN2FvYHqoMbK8ni69w',
   authDomain:
     import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
-    import.meta.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-    '',
+    'petziqq.firebaseapp.com',
   projectId:
     import.meta.env.VITE_FIREBASE_PROJECT_ID ||
-    import.meta.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-    '',
+    'petziqq',
   storageBucket:
     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ||
-    import.meta.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-    '',
+    'petziqq.firebasestorage.app',
   messagingSenderId:
     import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ||
-    import.meta.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
-    '',
+    '379754270949',
   appId:
     import.meta.env.VITE_FIREBASE_APP_ID ||
-    import.meta.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
-    '',
+    '1:379754270949:web:d6996f1ba1da474ae7440c',
 };
 
 export const isFirebaseConfigured = Boolean(
@@ -75,10 +69,11 @@ export function getRecaptchaVerifier(containerId: string): RecaptchaVerifier | n
   if (!auth) return null;
 
   try {
-    const el = document.getElementById(containerId);
+    let el = document.getElementById(containerId);
     if (!el) {
-      console.warn(`reCAPTCHA container element #${containerId} not found in DOM.`);
-      return null;
+      el = document.createElement('div');
+      el.id = containerId;
+      document.body.appendChild(el);
     }
 
     if (currentRecaptchaVerifier) {
