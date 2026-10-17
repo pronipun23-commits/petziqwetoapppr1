@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Disallow authenticated private app user routes from indexing
+Disallow: /dashboard
+Disallow: /my-pets
+Disallow: /my-plants
+Disallow: /reminders
+Disallow: /favorites
+
+# Host & Sitemap Mapping for Googlebot & Bingbot
+Host: https://petziqq.com
+Sitemap: https://petziqq.com/sitemap.xml
+
