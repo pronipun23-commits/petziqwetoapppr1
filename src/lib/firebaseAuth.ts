@@ -74,6 +74,9 @@ export function getRecaptchaVerifier(containerId: string): RecaptchaVerifier | n
       el = document.createElement('div');
       el.id = containerId;
       document.body.appendChild(el);
+    } else {
+      // Clear previous reCAPTCHA widget DOM tree to avoid "already been rendered" error
+      el.innerHTML = '';
     }
 
     if (currentRecaptchaVerifier) {
@@ -130,7 +133,7 @@ export async function sendFirebasePhoneOtp(
 
     const appVerifier = getRecaptchaVerifier(containerId);
     if (!appVerifier) {
-      return { success: false, error: 'Could not initialize reCAPTCHA verifier. Please check container.' };
+      return { success: false, error: 'Could not initialize reCAPTCHA verifier. Please refresh the page.' };
     }
 
     const confirmationResult = await signInWithPhoneNumber(auth, formatted, appVerifier);
@@ -140,7 +143,9 @@ export async function sendFirebasePhoneOtp(
   } catch (err: any) {
     console.error('sendFirebasePhoneOtp error:', err);
     let msg = 'Failed to send SMS OTP.';
-    if (err?.code === 'auth/invalid-phone-number') {
+    if (err?.code === 'auth/operation-not-allowed' || err?.message?.includes('region enabled')) {
+      msg = 'SMS region not enabled in Firebase Console. Go to Firebase Console > Authentication > Settings > SMS Region Policy and enable India (+91).';
+    } else if (err?.code === 'auth/invalid-phone-number') {
       msg = 'Invalid phone number format.';
     } else if (err?.code === 'auth/too-many-requests') {
       msg = 'Too many requests. Please wait a moment before requesting another code.';
@@ -150,6 +155,8 @@ export async function sendFirebasePhoneOtp(
       msg = 'reCAPTCHA verification failed. Please refresh and try again.';
     } else if (err?.code === 'auth/app-not-authorized') {
       msg = 'Domain not authorized in Firebase Console > Authentication > Settings > Authorized domains.';
+    } else if (err?.message?.includes('already been rendered')) {
+      msg = 'Verification widget reset. Please click Send Security Code again.';
     } else if (err?.message) {
       msg = err.message;
     }
