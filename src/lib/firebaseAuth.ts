@@ -74,28 +74,35 @@ export function getRecaptchaVerifier(containerId: string): RecaptchaVerifier | n
   const auth = getFirebaseAuth();
   if (!auth) return null;
 
-  if (currentRecaptchaVerifier) {
-    try {
-      currentRecaptchaVerifier.clear();
-    } catch {
-      // ignore
-    }
-    currentRecaptchaVerifier = null;
-  }
-
   try {
-    currentRecaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+    const el = document.getElementById(containerId);
+    if (!el) {
+      console.warn(`reCAPTCHA container element #${containerId} not found in DOM.`);
+      return null;
+    }
+
+    if (currentRecaptchaVerifier) {
+      try {
+        currentRecaptchaVerifier.clear();
+      } catch {
+        // ignore
+      }
+      currentRecaptchaVerifier = null;
+    }
+
+    currentRecaptchaVerifier = new RecaptchaVerifier(auth, el, {
       size: 'invisible',
       callback: () => {
-        // reCAPTCHA solved - allow signInWithPhoneNumber
+        // reCAPTCHA solved
       },
       'expired-callback': () => {
-        // Response expired. Ask user to solve reCAPTCHA again.
+        // expired
       },
     });
+
     return currentRecaptchaVerifier;
-  } catch (err) {
-    console.warn('Failed to initialize RecaptchaVerifier:', err);
+  } catch (err: any) {
+    console.error('Failed to initialize RecaptchaVerifier:', err);
     return null;
   }
 }
@@ -128,7 +135,7 @@ export async function sendFirebasePhoneOtp(
 
     const appVerifier = getRecaptchaVerifier(containerId);
     if (!appVerifier) {
-      return { success: false, error: 'Could not initialize reCAPTCHA verifier.' };
+      return { success: false, error: 'Could not initialize reCAPTCHA verifier. Please check container.' };
     }
 
     const confirmationResult = await signInWithPhoneNumber(auth, formatted, appVerifier);
@@ -144,6 +151,10 @@ export async function sendFirebasePhoneOtp(
       msg = 'Too many requests. Please wait a moment before requesting another code.';
     } else if (err?.code === 'auth/quota-exceeded') {
       msg = 'Monthly SMS quota limit reached.';
+    } else if (err?.code === 'auth/captcha-check-failed') {
+      msg = 'reCAPTCHA verification failed. Please refresh and try again.';
+    } else if (err?.code === 'auth/app-not-authorized') {
+      msg = 'Domain not authorized in Firebase Console > Authentication > Settings > Authorized domains.';
     } else if (err?.message) {
       msg = err.message;
     }

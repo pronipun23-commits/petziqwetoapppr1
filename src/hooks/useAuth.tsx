@@ -501,7 +501,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (res.success) {
             return { error: null, method: 'firebase_sms' };
           }
-          console.warn('Firebase Phone Auth attempt error:', res.error);
+          console.error('Firebase Phone Auth error:', res.error);
+          return { error: res.error || 'Failed to dispatch SMS via Firebase.', method: 'firebase_sms' };
         }
 
         // 2. Supabase SMS provider (if Twilio or MessageBird configured in Supabase dashboard)
