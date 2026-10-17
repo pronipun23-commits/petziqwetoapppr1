@@ -5,32 +5,26 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --petziq-midnight: #141414;
-    --petziq-charcoal: #2B2B2B;
-    --petziq-ironclad: #565656;
-    --petziq-fog: #848484;
-    --petziq-silver: #B3B3B3;
-    --petziq-cloud: #E0E0E0;
-    --petziq-navy: #1C1C1C;
-    --petziq-surface: rgba(43, 43, 43, 0.72);
-    --petziq-border: rgba(179, 179, 179, 0.16);
-    --holo-cyan: rgba(224, 224, 224, 0.6);
-    --holo-teal: rgba(179, 179, 179, 0.5);
-    --holo-blue: rgba(132, 132, 132, 0.4);
+    --petziq-obsidian: #06080A;
+    --petziq-charcoal: #0F1418;
+    --petziq-emerald: #10B981;
+    --petziq-sage: #2DD4BF;
+    --petziq-amber: #F59E0B;
   }
 
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    background-color: #06080A;
   }
 
   body {
-    @apply bg-ink-950 text-ink-100 font-sans antialiased;
-    background-color: #141414;
+    @apply text-ink-100 font-sans antialiased;
+    background-color: #06080A;
     background-image:
-      radial-gradient(52rem 42rem at 78% -8%, rgba(179, 179, 179, 0.08), transparent 58%),
-      radial-gradient(38rem 34rem at 5% 8%, rgba(132, 132, 132, 0.06), transparent 55%),
-      radial-gradient(44rem 38rem at 52% 105%, rgba(86, 86, 86, 0.1), transparent 60%);
+      radial-gradient(52rem 42rem at 78% -8%, rgba(16, 185, 129, 0.05), transparent 58%),
+      radial-gradient(38rem 34rem at 5% 8%, rgba(45, 212, 191, 0.04), transparent 55%),
+      radial-gradient(44rem 38rem at 52% 105%, rgba(16, 185, 129, 0.04), transparent 60%);
     background-attachment: fixed;
   }
 
@@ -70,21 +64,18 @@
   /* Organic Brutalist UI — crisp 4px radius, razor borders, vivid chromatic shadows */
   .brutalist-card {
     border-radius: 4px;
-    background: linear-gradient(145deg, rgba(16, 21, 25, 0.88), rgba(10, 14, 17, 0.94));
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-  .brutalist-card-amber {
-    box-shadow: 0 20px 45px -12px rgba(255, 140, 66, 0.28), 0 0 0 1px rgba(255, 140, 66, 0.22);
+    background: linear-gradient(145deg, rgba(14, 18, 22, 0.88), rgba(8, 11, 14, 0.94));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
   .brutalist-card-emerald {
-    box-shadow: 0 20px 45px -12px rgba(16, 185, 129, 0.28), 0 0 0 1px rgba(16, 185, 129, 0.22);
+    box-shadow: 0 20px 45px -12px rgba(16, 185, 129, 0.22), 0 0 0 1px rgba(16, 185, 129, 0.2);
   }
-  .brutalist-card-cyan {
-    box-shadow: 0 20px 45px -12px rgba(0, 240, 255, 0.25), 0 0 0 1px rgba(0, 240, 255, 0.22);
+  .brutalist-card-sage {
+    box-shadow: 0 20px 45px -12px rgba(45, 212, 191, 0.2), 0 0 0 1px rgba(45, 212, 191, 0.18);
   }
-  .brutalist-card-violet {
-    box-shadow: 0 20px 45px -12px rgba(139, 92, 246, 0.25), 0 0 0 1px rgba(139, 92, 246, 0.22);
+  .brutalist-card-amber {
+    box-shadow: 0 20px 45px -12px rgba(245, 158, 11, 0.25), 0 0 0 1px rgba(245, 158, 11, 0.25);
   }
 
   .meta-tag {

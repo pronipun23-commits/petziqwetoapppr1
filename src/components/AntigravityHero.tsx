@@ -83,30 +83,30 @@ export function AntigravityHero({
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = false; // Zero shadow map pass overhead on mobile
 
-    // --- 3. Ultra-Vivid Three-Point Lighting Layout ---
-    // 3a. Key Light: Warm radiant sunset terracotta gold (#FF8C42)
-    const keyLightColor = new THREE.Color('#FF8C42');
-    const keyLight = new THREE.DirectionalLight(keyLightColor, 4.4);
+    // --- 3. Unified Monochromatic Biophilic Three-Point Lighting ---
+    // 3a. Key Light: Crisp pure clean white (#FFFFFF) calibrated to reveal natural GLB textures
+    const keyLightColor = new THREE.Color('#FFFFFF');
+    const keyLight = new THREE.DirectionalLight(keyLightColor, 2.6);
     keyLight.position.set(4.5, 6, 4.5);
     scene.add(keyLight);
     keyLightRef.current = keyLight;
 
-    // 3b. Fill Light: Hyper-fresh glowing botanical mint emerald (#10B981)
-    const fillLightColor = new THREE.Color('#10B981');
-    const fillLight = new THREE.DirectionalLight(fillLightColor, 3.2);
+    // 3b. Fill Light: Calibrated pure white (#FFFFFF) at low intensity to soften contrast
+    const fillLightColor = new THREE.Color('#FFFFFF');
+    const fillLight = new THREE.DirectionalLight(fillLightColor, 1.8);
     fillLight.position.set(-5, -2, 3.5);
     scene.add(fillLight);
     fillLightRef.current = fillLight;
 
-    // 3c. Back/Rim Light: Sharp high-intensity cyber neon cyan (#00F0FF)
-    const rimLightColor = new THREE.Color('#00F0FF');
-    const rimLight = new THREE.DirectionalLight(rimLightColor, 4.0);
+    // 3c. Back/Rim Light: Single soft, low-saturation botanical sage green (#2DD4BF)
+    const rimLightColor = new THREE.Color('#2DD4BF');
+    const rimLight = new THREE.DirectionalLight(rimLightColor, 2.8);
     rimLight.position.set(0, -5, -4);
     scene.add(rimLight);
     rimLightRef.current = rimLight;
 
-    // Subtle biophilic ambient bounce
-    const ambientLight = new THREE.AmbientLight(0x0f1b21, 1.4);
+    // Subtle biophilic obsidian ambient bounce
+    const ambientLight = new THREE.AmbientLight(0x0a1012, 1.6);
     scene.add(ambientLight);
 
     // --- 4. Contact Shadow Disc (Zero GPU draw overhead) ---
@@ -150,12 +150,10 @@ export function AntigravityHero({
       cameraX: 0,
       cameraY: 0,
       shadowOpacity: 0.72,
-      keyIntensity: 4.4,
-      fillIntensity: 3.2,
-      rimIntensity: 4.0,
-      keyHue: 0.07, // Terracotta gold
-      fillHue: 0.44, // Mint emerald
-      rimHue: 0.51, // Cyber cyan
+      keyIntensity: 2.6,
+      fillIntensity: 1.8,
+      rimIntensity: 2.8,
+      rimSaturation: 0.65, // Controlled sage saturation
     };
 
     let isDisposed = false;
@@ -234,11 +232,9 @@ export function AntigravityHero({
               cameraX: isMobile ? 0 : 0.15,
               cameraY: 0.12,
               shadowOpacity: 0.55,
-              keyHue: 0.42, // Shift toward botanical mint emerald
-              fillHue: 0.08, // Shift fill toward terracotta gold
-              rimHue: 0.52,
-              keyIntensity: 4.8,
-              fillIntensity: 3.6,
+              keyIntensity: 2.8,
+              fillIntensity: 2.0,
+              rimIntensity: 3.2,
               ease: 'none',
             },
             0
@@ -255,12 +251,9 @@ export function AntigravityHero({
               cameraX: isMobile ? 0 : -0.2,
               cameraY: -0.15,
               shadowOpacity: 0.65,
-              keyHue: 0.52, // Shift key toward cyber neon cyan
-              fillHue: 0.44, // Shift fill toward botanical mint
-              rimHue: 0.07, // Terracotta gold rim halo
-              keyIntensity: 5.0,
-              fillIntensity: 3.4,
-              rimIntensity: 4.6,
+              keyIntensity: 3.0,
+              fillIntensity: 1.9,
+              rimIntensity: 3.4,
               ease: 'none',
             },
             0.333
@@ -277,24 +270,21 @@ export function AntigravityHero({
               cameraX: 0,
               cameraY: 0,
               shadowOpacity: 0.8,
-              keyHue: 0.07, // Terracotta gold
-              fillHue: 0.44, // Mint emerald
-              rimHue: 0.51, // Cyber cyan
-              keyIntensity: 4.4,
-              fillIntensity: 3.2,
-              rimIntensity: 4.0,
+              keyIntensity: 2.6,
+              fillIntensity: 1.8,
+              rimIntensity: 2.8,
               ease: 'none',
             },
             0.666
           );
 
-          // Dynamic Ambient Aurora Gradient Mesh Parallax
+          // Monochromatic Biophilic Ambient Mesh Parallax
           if (glowMeshRef.current) {
             tl.to(
               glowMeshRef.current,
               {
                 background:
-                  'radial-gradient(circle at 75% 35%, rgba(16, 185, 129, 0.35) 0%, rgba(0, 240, 255, 0.22) 40%, rgba(8, 12, 14, 0) 75%)',
+                  'radial-gradient(circle at 75% 35%, rgba(16, 185, 129, 0.22) 0%, rgba(45, 212, 191, 0.12) 40%, rgba(6, 8, 10, 0) 75%)',
                 ease: 'none',
               },
               0
@@ -302,7 +292,7 @@ export function AntigravityHero({
               glowMeshRef.current,
               {
                 background:
-                  'radial-gradient(circle at 45% 65%, rgba(255, 140, 66, 0.32) 0%, rgba(16, 185, 129, 0.24) 45%, rgba(8, 12, 14, 0) 80%)',
+                  'radial-gradient(circle at 45% 65%, rgba(16, 185, 129, 0.2) 0%, rgba(45, 212, 191, 0.14) 45%, rgba(6, 8, 10, 0) 80%)',
                 ease: 'none',
               },
               0.5
@@ -482,14 +472,9 @@ export function AntigravityHero({
       contactShadow.position.y = curPosY - 1.25;
       (contactShadow.material as THREE.MeshBasicMaterial).opacity = modelTarget.shadowOpacity;
 
-      // Dynamic Three-Point Light color interpolation
-      keyLight.color.setHSL(modelTarget.keyHue, 0.95, 0.55);
+      // Monochromatic Three-Point Light Intensity Interpolation
       keyLight.intensity = modelTarget.keyIntensity;
-
-      fillLight.color.setHSL(modelTarget.fillHue, 0.88, 0.48);
       fillLight.intensity = modelTarget.fillIntensity;
-
-      rimLight.color.setHSL(modelTarget.rimHue, 0.95, 0.52);
       rimLight.intensity = modelTarget.rimIntensity;
 
       camera.position.z = curCameraZ;
@@ -518,24 +503,24 @@ export function AntigravityHero({
 
   return (
     <div ref={containerRef} className="relative w-full" style={{ height: '300vh' }}>
-      {/* Dynamic Background Gradient Mesh with Biophilic Cyber Highlights (#080C0E Canvas) */}
+      {/* Dynamic Background Gradient Mesh with Biophilic Highlights (#06080A Canvas) */}
       <div
         ref={glowMeshRef}
         className="fixed inset-0 pointer-events-none transition-all duration-700 z-0"
         style={{
           background:
-            'radial-gradient(circle at 65% 25%, rgba(255, 140, 66, 0.28) 0%, rgba(16, 185, 129, 0.24) 40%, rgba(0, 240, 255, 0.16) 65%, transparent 85%)',
+            'radial-gradient(circle at 65% 25%, rgba(16, 185, 129, 0.16) 0%, rgba(45, 212, 191, 0.08) 40%, transparent 75%)',
         }}
       />
 
       {/* Luxury Loading Screen Overlay with Architectural Monospace Progress Indicator */}
       {!modelLoaded && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#080C0E]/95 backdrop-blur-md transition-opacity duration-500 pointer-events-none">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#06080A]/98 backdrop-blur-md transition-opacity duration-500 pointer-events-none">
           <div className="mb-4">
             <img
               src="/petziq-shield-logo.png"
               alt="Petziq Shield"
-              className="w-12 h-12 rounded object-contain shadow-[0_0_24px_rgba(255,140,66,0.4)] animate-pulse"
+              className="w-12 h-12 rounded object-contain shadow-[0_0_24px_rgba(16,185,129,0.3)] animate-pulse"
             />
           </div>
           <div className="relative flex items-center justify-center">
@@ -552,7 +537,7 @@ export function AntigravityHero({
                 cx="32"
                 cy="32"
                 r="28"
-                className="stroke-amber-400 fill-none transition-all duration-200 ease-out"
+                className="stroke-emerald-400 fill-none transition-all duration-200 ease-out"
                 strokeWidth="2"
                 strokeDasharray="175.9"
                 strokeDashoffset={175.9 - (175.9 * loadProgress) / 100}
@@ -563,7 +548,7 @@ export function AntigravityHero({
               {loadProgress}%
             </span>
           </div>
-          <p className="mt-3 font-mono text-[11px] tracking-[0.25em] text-emerald-300 uppercase">
+          <p className="mt-3 font-mono text-[11px] tracking-[0.25em] text-emerald-400 uppercase">
             CALIBRATING_3D_CORE
           </p>
         </div>
@@ -582,13 +567,13 @@ export function AntigravityHero({
         <div className="w-full pl-[6vw] lg:pl-[8vw] pr-[6vw] lg:pr-[38vw]">
           <div className="max-w-2xl text-left pointer-events-auto">
             {/* Auxiliary Functional Metadata Tag in Widely Spaced Monospace */}
-            <div className="inline-flex items-center gap-2.5 rounded-[4px] border border-white/[0.14] bg-[#080C0E]/85 px-3 py-1 mb-6 backdrop-blur-xl brutalist-card-amber">
+            <div className="inline-flex items-center gap-2.5 rounded-[4px] border border-emerald-500/25 bg-[#06080A]/85 px-3 py-1 mb-6 backdrop-blur-xl brutalist-card-emerald">
               <img
                 src="/petziq-shield-logo.png"
                 alt="Petziq"
                 className="w-3.5 h-3.5 rounded-[2px] object-contain shrink-0"
               />
-              <span className="meta-tag text-amber-300">
+              <span className="meta-tag text-emerald-300">
                 EDITION // 2026.BIO
               </span>
               <span className="text-white/20">|</span>
@@ -613,7 +598,7 @@ export function AntigravityHero({
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
                 onClick={onOrderTag}
-                className="btn-primary rounded-[4px] px-6 py-3 font-mono text-xs uppercase tracking-wider shadow-[0_12px_32px_-6px_rgba(255,140,66,0.4)] transition-all duration-300 hover:scale-[1.02]"
+                className="btn-primary rounded-[4px] px-6 py-3 font-mono text-xs uppercase tracking-wider bg-emerald-400 hover:bg-emerald-300 text-ink-950 font-bold shadow-[0_12px_32px_-6px_rgba(16,185,129,0.35)] transition-all duration-300 hover:scale-[1.02]"
               >
                 <Tag className="h-4 w-4" />
                 Acquire Smart Tag (₹599)
@@ -628,24 +613,24 @@ export function AntigravityHero({
             </div>
 
             {/* Editorial Architectural Metrics Bar with Low-Radius Borders */}
-            <div className="mt-10 grid grid-cols-3 gap-0 border border-white/[0.12] rounded-[4px] bg-[#080C0E]/70 backdrop-blur-md divide-x divide-white/[0.12] max-w-lg">
+            <div className="mt-10 grid grid-cols-3 gap-0 border border-white/[0.12] rounded-[4px] bg-[#06080A]/75 backdrop-blur-md divide-x divide-white/[0.12] max-w-lg">
               <div className="p-3.5 sm:p-4">
-                <p className="font-editorial text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">
+                <p className="font-editorial text-2xl sm:text-3xl font-bold text-white">
                   330
                 </p>
-                <p className="meta-tag text-ink-400 mt-1">PET_TAXA</p>
+                <p className="meta-tag text-emerald-300/80 mt-1">PET_TAXA</p>
               </div>
               <div className="p-3.5 sm:p-4">
-                <p className="font-editorial text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-400">
+                <p className="font-editorial text-2xl sm:text-3xl font-bold text-emerald-300">
                   99
                 </p>
-                <p className="meta-tag text-ink-400 mt-1">FLORA_DOCS</p>
+                <p className="meta-tag text-emerald-300/80 mt-1">FLORA_DOCS</p>
               </div>
               <div className="p-3.5 sm:p-4">
-                <p className="font-editorial text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-cyan-400">
+                <p className="font-editorial text-2xl sm:text-3xl font-bold text-teal-200">
                   0.2s
                 </p>
-                <p className="meta-tag text-ink-400 mt-1">QR_ROUTING</p>
+                <p className="meta-tag text-emerald-300/80 mt-1">QR_ROUTING</p>
               </div>
             </div>
           </div>
@@ -657,7 +642,7 @@ export function AntigravityHero({
         <div className="w-full pr-[6vw] lg:pr-[10vw] pl-[6vw] lg:pl-[44vw] flex justify-end">
           <div
             ref={layer2Ref}
-            className="max-w-lg text-left p-8 sm:p-10 brutalist-card brutalist-card-emerald backdrop-blur-2xl pointer-events-auto transform-gpu will-change-transform relative"
+            className="max-w-lg text-left p-8 sm:p-10 brutalist-card brutalist-card-emerald backdrop-blur-2xl pointer-events-auto transform-gpu will-change-transform relative bg-[#06080A]/90"
           >
             {/* 90-Degree Structural Internal Anchor Lines */}
             <div className="absolute top-0 left-0 w-6 h-px bg-emerald-400" />
@@ -694,14 +679,14 @@ export function AntigravityHero({
           ref={layer3Ref}
           className="container-px w-full text-center max-w-3xl pointer-events-auto transform-gpu will-change-transform"
         >
-          <div className="p-8 sm:p-12 brutalist-card brutalist-card-cyan backdrop-blur-2xl relative">
+          <div className="p-8 sm:p-12 brutalist-card brutalist-card-sage backdrop-blur-2xl relative bg-[#06080A]/90">
             {/* 90-Degree Structural Internal Anchor Lines */}
-            <div className="absolute top-0 left-0 w-8 h-px bg-cyan-400" />
-            <div className="absolute top-0 left-0 w-px h-8 bg-cyan-400" />
-            <div className="absolute bottom-0 right-0 w-8 h-px bg-cyan-400" />
-            <div className="absolute bottom-0 right-0 w-px h-8 bg-cyan-400" />
+            <div className="absolute top-0 left-0 w-8 h-px bg-teal-400" />
+            <div className="absolute top-0 left-0 w-px h-8 bg-teal-400" />
+            <div className="absolute bottom-0 right-0 w-8 h-px bg-teal-400" />
+            <div className="absolute bottom-0 right-0 w-px h-8 bg-teal-400" />
 
-            <span className="meta-tag text-cyan-300">
+            <span className="meta-tag text-emerald-300">
               HARDWARE_SPECIFICATION // MIL_SPEC
             </span>
 
@@ -716,7 +701,7 @@ export function AntigravityHero({
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <button
                 onClick={onOrderTag}
-                className="btn-primary rounded-[4px] px-7 py-3 font-mono text-xs uppercase tracking-wider bg-gradient-to-r from-brand-500 via-teal-500 to-cyan-500 hover:from-brand-400 hover:to-cyan-400 shadow-[0_16px_36px_-8px_rgba(0,240,255,0.4)] transition-all hover:scale-[1.02]"
+                className="btn-primary rounded-[4px] px-7 py-3 font-mono text-xs uppercase tracking-wider bg-emerald-400 hover:bg-emerald-300 text-ink-950 font-bold shadow-[0_16px_36px_-8px_rgba(16,185,129,0.35)] transition-all hover:scale-[1.02]"
               >
                 Customize Shape, Color & Pet Name &rarr;
               </button>

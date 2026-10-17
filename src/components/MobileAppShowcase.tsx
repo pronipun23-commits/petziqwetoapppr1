@@ -133,11 +133,11 @@ export function MobileAppShowcase() {
 
               {/* Bento Grid Layout Inside Mobile App */}
               <div className="space-y-3.5">
-                {/* Bento Card 1: Warm Terracotta-Gold Pet Health Circular Ring */}
-                <div className="rounded-3xl border border-amber-500/25 bg-gradient-to-br from-amber-950/20 via-[#11171C]/90 to-[#0B0F12] p-4 glass shadow-[0_4px_24px_rgba(245,158,11,0.12)]">
+                {/* Bento Card 1: Emerald Pet Health Circular Ring with Isolated Warning Alert */}
+                <div className="rounded-2xl border border-emerald-500/25 bg-[#0D1216]/95 p-4 glass shadow-[0_4px_24px_rgba(16,185,129,0.12)]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="p-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                      <span className="p-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                         <PawPrint className="w-3.5 h-3.5" />
                       </span>
                       <div>
@@ -151,7 +151,7 @@ export function MobileAppShowcase() {
                   </div>
 
                   <div className="flex items-center gap-4">
-                    {/* High-Fidelity SVG Circular Progress Ring */}
+                    {/* SVG Circular Progress Ring in Emerald */}
                     <div className="relative flex items-center justify-center w-20 h-20 shrink-0">
                       <svg className="w-20 h-20 -rotate-90" viewBox="0 0 72 72">
                         <circle
@@ -159,22 +159,22 @@ export function MobileAppShowcase() {
                           cy="36"
                           r="30"
                           className="stroke-white/10 fill-none"
-                          strokeWidth="5"
+                          strokeWidth="4"
                         />
                         <circle
                           cx="36"
                           cy="36"
                           r="30"
-                          className="stroke-amber-400 fill-none"
-                          strokeWidth="5"
+                          className="stroke-emerald-400 fill-none"
+                          strokeWidth="4"
                           strokeDasharray="188.5"
                           strokeDashoffset="37.7" // 80% complete
                           strokeLinecap="round"
                         />
                       </svg>
                       <div className="absolute flex flex-col items-center">
-                        <span className="text-sm font-bold font-display text-white">94%</span>
-                        <span className="text-[8px] font-mono text-amber-300/90 uppercase">Vitality</span>
+                        <span className="text-sm font-bold font-editorial text-white">94%</span>
+                        <span className="text-[8px] font-mono text-emerald-400 uppercase">Vitality</span>
                       </div>
                     </div>
 
@@ -188,70 +188,69 @@ export function MobileAppShowcase() {
                         <span className="font-mono text-white font-semibold">480g Salmon</span>
                       </div>
                       <div className="flex justify-between items-center text-ink-300">
-                        <span>Next Heartworm Pill:</span>
-                        <span className="font-mono text-amber-300 font-semibold">In 3 Days</span>
+                        <span>Next Booster:</span>
+                        <span className="font-mono text-emerald-300 font-semibold">In 3 Days</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Bento Card 2: Smooth Neon-Green Wave Graph Tracking Plant Soil Moisture */}
-                <div className="rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-[#11171C]/90 to-[#0B0F12] p-4 glass shadow-[0_4px_24px_rgba(16,185,129,0.14)]">
+                {/* Bento Card 2: Smooth Emerald Wave Graph Tracking Plant Soil Moisture with Isolated Amber Alert */}
+                <div className="rounded-2xl border border-emerald-500/25 bg-[#0D1216]/95 p-4 glass shadow-[0_4px_24px_rgba(16,185,129,0.12)]">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="p-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                        <Droplet className="w-3.5 h-3.5 text-cyan-300" />
+                        <Droplet className="w-3.5 h-3.5" />
                       </span>
                       <div>
-                        <h4 className="text-xs font-bold text-white">Monstera Deliciosa</h4>
-                        <p className="text-[10px] text-ink-400 font-mono">Living Room Window • 420 Lux</p>
+                        <h4 className="text-xs font-bold text-white">Boston Fern</h4>
+                        <p className="text-[10px] text-ink-400 font-mono">Balcony Shelf • 510 Lux</p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                      Optimal 68%
-                    </span>
+                    {/* Functional Amber Alert Highlight: Water the Fern */}
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[10px] font-mono shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      <span>Water Needed</span>
+                    </div>
                   </div>
 
-                  {/* Smooth Neon Wave SVG Graph */}
+                  {/* Smooth Emerald Wave SVG Graph */}
                   <div className="relative pt-2">
                     <svg className="w-full h-16 overflow-visible" viewBox="0 0 300 70" preserveAspectRatio="none">
                       <defs>
-                        <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
-                          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+                        <linearGradient id="waveGradientEmerald" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
-                      {/* Gradient Fill under wave */}
                       <path
                         d="M0,45 C50,20 100,55 150,30 C200,10 250,40 300,25 L300,70 L0,70 Z"
-                        fill="url(#waveGradient)"
+                        fill="url(#waveGradientEmerald)"
                       />
-                      {/* Crisp Glowing Neon Wave Stroke */}
                       <path
                         d="M0,45 C50,20 100,55 150,30 C200,10 250,40 300,25"
                         fill="none"
                         stroke="#10b981"
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                         strokeLinecap="round"
-                        className="drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                        className="drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]"
                       />
-                      {/* Current Telemetry Data Point Node */}
-                      <circle cx="300" cy="25" r="4.5" fill="#34d399" className="animate-ping" opacity="0.75" />
-                      <circle cx="300" cy="25" r="4" fill="#06b6d4" stroke="#fff" strokeWidth="1.5" />
+                      <circle cx="300" cy="25" r="4" fill="#34d399" className="animate-ping" opacity="0.75" />
+                      <circle cx="300" cy="25" r="3.5" fill="#10b981" stroke="#fff" strokeWidth="1" />
                     </svg>
                     <div className="flex justify-between items-center text-[9px] font-mono text-ink-400 mt-1">
-                      <span>Mon (48%)</span>
-                      <span>Wed (62%)</span>
-                      <span>Fri (54%)</span>
-                      <span className="text-emerald-300 font-bold">Now (68%)</span>
+                      <span>Mon (42%)</span>
+                      <span>Wed (38%)</span>
+                      <span>Fri (31%)</span>
+                      <span className="text-amber-300 font-bold">Now (22% Refill)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Bento Card 3: Dual Micro Indicators (Hardware Collar + Sunlight Lux) */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-cyan-500/25 bg-[#11171C]/90 p-3.5 glass">
-                    <div className="flex items-center gap-1.5 text-cyan-300 text-[10px] font-mono uppercase">
+                  <div className="rounded-xl border border-emerald-500/25 bg-[#0D1216]/95 p-3.5 glass">
+                    <div className="flex items-center gap-1.5 text-emerald-300 text-[10px] font-mono uppercase">
                       <Shield className="w-3.5 h-3.5" />
                       <span>Smart Tag</span>
                     </div>
@@ -259,9 +258,9 @@ export function MobileAppShowcase() {
                     <p className="text-[10px] text-emerald-400 mt-0.5">Laser QR Synced</p>
                   </div>
 
-                  <div className="rounded-2xl border border-amber-500/25 bg-[#11171C]/90 p-3.5 glass">
-                    <div className="flex items-center gap-1.5 text-amber-300 text-[10px] font-mono uppercase">
-                      <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="rounded-xl border border-emerald-500/25 bg-[#0D1216]/95 p-3.5 glass">
+                    <div className="flex items-center gap-1.5 text-emerald-300 text-[10px] font-mono uppercase">
+                      <Sun className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Photoperiod</span>
                     </div>
                     <p className="mt-1 text-sm font-bold text-white">6.2 hrs / day</p>
