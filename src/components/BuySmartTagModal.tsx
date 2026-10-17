@@ -8,13 +8,18 @@ import { generateTagId, getTagPublicUrl } from '@/lib/tagUtils';
 import { QRCodeDisplay } from '@/components/QRCodeDisplay';
 import type { TagShape, TagColor } from '@/components/TagProductPreview';
 
+export type TargetStage = 'puppy' | 'adult' | 'bundle';
+export type TagSize = '35 mm' | '50 mm' | '60 mm';
+
 export interface BuySmartTagModalProps {
   isOpen: boolean;
   onClose: () => void;
   petName: string;
   shape: TagShape;
   color: TagColor;
-  price: number;
+  initialStage?: TargetStage;
+  initialDogSize?: 'medium' | 'large';
+  price?: number;
   shippingFee?: number;
   tagPrice?: number;
   userId?: string | null;
@@ -33,9 +38,9 @@ export function BuySmartTagModal({
   petName: initialPetName,
   shape,
   color,
-  price,
+  initialStage = 'adult',
+  initialDogSize = 'medium',
   shippingFee = 49,
-  tagPrice = 399,
   userId,
   userEmail,
   onOrderSuccess,
@@ -43,6 +48,10 @@ export function BuySmartTagModal({
   const [step, setStep] = useState<'info' | 'shipping' | 'success'>('info');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Stage & Size selection state
+  const [targetStage, setTargetStage] = useState<TargetStage>(initialStage);
+  const [dogSizeVariant, setDogSizeVariant] = useState<'medium' | 'large'>(initialDogSize);
 
   // Pet information state
   const [petName, setPetName] = useState(initialPetName || '');
@@ -57,6 +66,17 @@ export function BuySmartTagModal({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Computed pricing and tag size
+  const tagPrice = targetStage === 'bundle' ? 648 : 324;
+  const totalPrice = tagPrice + shippingFee;
+
+  const tagSize: TagSize =
+    targetStage === 'puppy'
+      ? '35 mm'
+      : targetStage === 'adult'
+      ? (dogSizeVariant === 'large' ? '60 mm' : '50 mm')
+      : '35 mm + 50 mm (Bundle)';
 
   // Shipping information state
   const [shippingName, setShippingName] = useState('');
@@ -111,6 +131,13 @@ export function BuySmartTagModal({
       const randNum = Math.floor(100000 + Math.random() * 900000);
       const orderNumber = `PZO-${randNum}`;
 
+      const stageLabel =
+        targetStage === 'puppy'
+          ? 'Puppy (35 mm)'
+          : targetStage === 'adult'
+          ? `Adult Dog (${tagSize})`
+          : 'Puppy + Adult Bundle (35 mm + 50 mm)';
+
       // 2. Insert smart_tag_orders
       const orderPayload = {
         order_number: orderNumber,
@@ -123,12 +150,12 @@ export function BuySmartTagModal({
         state: state.trim(),
         postal_code: postalCode.trim(),
         country: 'India',
-        quantity: 1,
-        amount: price,
+        quantity: targetStage === 'bundle' ? 2 : 1,
+        amount: totalPrice,
         payment_status: 'pending', // Pending: Admin will contact client by phone for payment
         shipping_status: 'processing',
         user_id: userId || null,
-        notes: `Smart Tag Shape: ${shape}, Color: ${color}, Pet: ${petName.trim()} (${species})`,
+        notes: `Smart Tag Stage: ${stageLabel}, Size: ${tagSize}, Shape: ${shape}, Color: ${color}, Pet: ${petName.trim()} (${species})`,
       };
 
       const { data: orderData, error: orderErr } = await supabase
@@ -148,6 +175,8 @@ export function BuySmartTagModal({
         species,
         breed: breed.trim(),
         gender,
+        target_stage: targetStage,
+        tag_size: tagSize,
         identification_notes: [
           microchipNumber.trim() ? `Microchip: ${microchipNumber.trim()}` : '',
           allergiesNotes.trim() ? `Medical / Allergies: ${allergiesNotes.trim()}` : '',
@@ -309,12 +338,12 @@ export function BuySmartTagModal({
               <h2 className="font-display text-xl font-bold text-ink-50">
                 {step === 'success' ? 'Smart Tag Ordered!' : 'Order Petziq Smart Tag'}
               </h2>
-              <span className="rounded-full bg-brand-500/15 border border-brand-500/30 px-2.5 py-0.5 text-[10px] font-semibold text-brand-300">
-                ₹{price}
+              <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                ₹{totalPrice}
               </span>
             </div>
             <p className="text-xs text-ink-300 mt-0.5">
-              {step === 'info' && 'Step 1 of 2: Fill in pet details encoded into the Smart Tag'}
+              {step === 'info' && 'Step 1 of 2: Select tag stage & size, and fill in pet details'}
               {step === 'shipping' && 'Step 2 of 2: Shipping & delivery details'}
               {step === 'success' && 'QR code generated and order placed in Admin Dashboard'}
             </p>
@@ -328,12 +357,117 @@ export function BuySmartTagModal({
           </div>
         )}
 
-        {/* Step 1: Pet Information */}
+        {/* Step 1: Pet Information & Stage/Size Selector */}
         {step === 'info' && (
           <form onSubmit={handleNextToShipping} className="mt-6 space-y-4">
+            {/* Who is the Smart Tag for? Section */}
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-300 flex items-center gap-2">
+                  <Shield className="h-3.5 w-3.5 text-emerald-400" />
+                  Who is the Smart Tag for?
+                </h3>
+                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                  Size: {tagSize}
+                </span>
+              </div>
+              <p className="text-xs text-ink-300 mb-3">
+                Select your pet's life stage. We automatically calibrate the tag to the optimal size for their collar.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {/* Option 1: Puppy */}
+                <button
+                  type="button"
+                  onClick={() => setTargetStage('puppy')}
+                  className={`flex flex-col text-left p-3 rounded-xl border transition-all ${
+                    targetStage === 'puppy'
+                      ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                      : 'border-white/10 bg-white/[0.02] text-ink-300 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-semibold text-xs text-ink-50">Puppy</span>
+                    <span className="font-mono text-xs font-bold text-emerald-400">₹324</span>
+                  </div>
+                  <span className="text-[11px] text-ink-400 mt-1 font-mono">Size: 35 mm</span>
+                  <span className="text-[10px] text-emerald-300/80 mt-0.5">Lightweight for young pups</span>
+                </button>
+
+                {/* Option 2: Adult Dog */}
+                <button
+                  type="button"
+                  onClick={() => setTargetStage('adult')}
+                  className={`flex flex-col text-left p-3 rounded-xl border transition-all ${
+                    targetStage === 'adult'
+                      ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                      : 'border-white/10 bg-white/[0.02] text-ink-300 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-semibold text-xs text-ink-50">Adult Dog</span>
+                    <span className="font-mono text-xs font-bold text-emerald-400">₹324</span>
+                  </div>
+                  <span className="text-[11px] text-ink-400 mt-1 font-mono">
+                    Size: {dogSizeVariant === 'large' ? '60 mm' : '50 mm'}
+                  </span>
+                  <span className="text-[10px] text-emerald-300/80 mt-0.5">Optimal everyday collar fit</span>
+                </button>
+
+                {/* Option 3: Puppy + Adult Bundle */}
+                <button
+                  type="button"
+                  onClick={() => setTargetStage('bundle')}
+                  className={`flex flex-col text-left p-3 rounded-xl border transition-all ${
+                    targetStage === 'bundle'
+                      ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                      : 'border-white/10 bg-white/[0.02] text-ink-300 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-semibold text-xs text-ink-50">Puppy + Adult</span>
+                    <span className="font-mono text-xs font-bold text-emerald-400">₹648</span>
+                  </div>
+                  <span className="text-[11px] text-ink-400 mt-1 font-mono">35 mm + 50 mm</span>
+                  <span className="text-[10px] text-emerald-300/80 mt-0.5">Both stages included (2 Tags)</span>
+                </button>
+              </div>
+
+              {/* Dog size fine-tuning when Adult is selected */}
+              {targetStage === 'adult' && (
+                <div className="mt-3 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
+                  <span className="text-ink-300">Dog breed size calibration:</span>
+                  <div className="inline-flex items-center gap-1.5 rounded-lg bg-black/40 p-1 border border-white/10">
+                    <button
+                      type="button"
+                      onClick={() => setDogSizeVariant('medium')}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition ${
+                        dogSizeVariant === 'medium'
+                          ? 'bg-emerald-500 text-ink-950 font-bold'
+                          : 'text-ink-300 hover:text-white'
+                      }`}
+                    >
+                      Adult / Medium (50 mm)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDogSizeVariant('large')}
+                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition ${
+                        dogSizeVariant === 'large'
+                          ? 'bg-emerald-500 text-ink-950 font-bold'
+                          : 'text-ink-300 hover:text-white'
+                      }`}
+                    >
+                      Very Large Dog (60 mm)
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-brand-300 flex items-center gap-2 mb-3">
-                <PawPrint className="h-3.5 w-3.5" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-300 flex items-center gap-2 mb-3">
+                <PawPrint className="h-3.5 w-3.5 text-emerald-400" />
                 Pet Identification
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -634,24 +768,33 @@ export function BuySmartTagModal({
             {/* Price breakdown */}
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-xs space-y-2">
               <div className="flex justify-between text-ink-300">
-                <span>1x Petziq Smart Tag ({shape}, {color}) for {petName}</span>
-                <span className="text-ink-400 line-through">₹705</span>
+                <span>
+                  {targetStage === 'bundle' ? '2x' : '1x'} Petziq Smart Tag ({shape}, {color}) —{' '}
+                  <span className="text-emerald-300 font-medium">
+                    {targetStage === 'puppy'
+                      ? 'Puppy (35 mm)'
+                      : targetStage === 'adult'
+                      ? `Adult Dog (${tagSize})`
+                      : 'Puppy + Adult Bundle (35 mm + 50 mm)'}
+                  </span>
+                </span>
+                <span className="font-semibold text-ink-100">₹{tagPrice}</span>
               </div>
-              <div className="flex justify-between text-amber-300">
-                <span>Launch Discount (15% OFF)</span>
-                <span className="font-semibold">-₹106 (₹{tagPrice})</span>
+              <div className="flex justify-between text-ink-300">
+                <span>Selected Tag Dimension</span>
+                <span className="font-mono text-emerald-400 font-semibold">{tagSize}</span>
               </div>
               <div className="flex justify-between text-ink-300">
                 <span>Delivery & Handling Fee</span>
                 <span className="font-semibold text-ink-100">₹{shippingFee}</span>
               </div>
               <div className="flex justify-between text-ink-300">
-                <span>Automated QR Generation & Hosted Pet Profile</span>
-                <span className="font-semibold text-brand-300">INCLUDED</span>
+                <span>Laser Engraving & Lifetime Hosted QR Profile</span>
+                <span className="font-semibold text-emerald-400">INCLUDED</span>
               </div>
               <div className="border-t border-white/[0.08] pt-2 flex justify-between text-sm font-bold text-ink-50">
                 <span>Total Amount</span>
-                <span>₹{price}</span>
+                <span className="text-emerald-300">₹{totalPrice}</span>
               </div>
             </div>
 
@@ -677,7 +820,7 @@ export function BuySmartTagModal({
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Confirm & Place Order (₹{price})
+                    Confirm & Place Order (₹{totalPrice})
                   </>
                 )}
               </button>

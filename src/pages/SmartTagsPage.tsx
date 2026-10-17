@@ -107,6 +107,10 @@ const TAG_COLOR_SWATCHES: Record<TagColor, string> = {
   gold: 'linear-gradient(135deg,#fde68a,#d97706)',
 };
 
+// Tag target stage and dog size types
+export type TargetStage = 'puppy' | 'adult' | 'bundle';
+export type DogSizeVariant = 'medium' | 'large';
+
 export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps) {
   const { session } = useAuth();
   const { isFullAdmin, isMarketingAdmin, isAdmin } = useAdmin();
@@ -114,6 +118,10 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
   const [qrPreviewTag, setQrPreviewTag] = useState<SmartTag | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [posterIndex, setPosterIndex] = useState(0);
+
+  // Tag target stage & dog size selection
+  const [targetStage, setTargetStage] = useState<TargetStage>('adult');
+  const [dogSizeVariant, setDogSizeVariant] = useState<DogSizeVariant>('medium');
 
   // Tag customizer state — drives the live product preview only.
   const [petName, setPetName] = useState('');
@@ -125,6 +133,20 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
   const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [trackingOrderNum, setTrackingOrderNum] = useState<string>('');
+
+  // Dynamic pricing: ₹324 for single stage, ₹648 for bundle (both)
+  const tagPrice = targetStage === 'bundle' ? 648 : 324;
+  const totalPrice = tagPrice + SHIPPING_FEE;
+
+  // Selected tag size string
+  const tagSizeLabel =
+    targetStage === 'puppy'
+      ? '35 mm'
+      : targetStage === 'adult'
+        ? dogSizeVariant === 'large'
+          ? '60 mm'
+          : '50 mm'
+        : '35 mm + 50 mm';
 
   const handleBuyClick = () => {
     setIsBuyModalOpen(true);
@@ -611,6 +633,101 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
           <div className="grid gap-8 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
             {/* Customization controls — first in DOM so they lead on mobile */}
             <div className="space-y-6">
+              {/* Who is the Smart Tag for? */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-300">
+                    Who is the Smart Tag for?
+                  </p>
+                  <span className="text-[11px] font-semibold text-brand-300">
+                    Size: {tagSizeLabel}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setTargetStage('puppy')}
+                    className={`flex flex-col items-start p-3 rounded-2xl border text-left transition-all ${
+                      targetStage === 'puppy'
+                        ? 'border-brand-500/60 bg-brand-500/10 shadow-glow-blue ring-1 ring-brand-500/30'
+                        : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-xs font-bold text-ink-100">Puppy</span>
+                      <span className="text-xs font-bold text-brand-300">₹324</span>
+                    </div>
+                    <span className="text-[11px] text-brand-400 mt-1 font-medium">Tag Size: 35 mm</span>
+                    <span className="text-[10px] text-ink-400 mt-0.5">Lightweight for young pups</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTargetStage('adult')}
+                    className={`flex flex-col items-start p-3 rounded-2xl border text-left transition-all ${
+                      targetStage === 'adult'
+                        ? 'border-brand-500/60 bg-brand-500/10 shadow-glow-blue ring-1 ring-brand-500/30'
+                        : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-xs font-bold text-ink-100">Adult Dog</span>
+                      <span className="text-xs font-bold text-brand-300">₹324</span>
+                    </div>
+                    <span className="text-[11px] text-brand-400 mt-1 font-medium">
+                      Tag Size: {dogSizeVariant === 'large' ? '60 mm' : '50 mm'}
+                    </span>
+                    <span className="text-[10px] text-ink-400 mt-0.5">Medium to large breeds</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTargetStage('bundle')}
+                    className={`flex flex-col items-start p-3 rounded-2xl border text-left transition-all relative overflow-hidden ${
+                      targetStage === 'bundle'
+                        ? 'border-brand-500/60 bg-brand-500/10 shadow-glow-blue ring-1 ring-brand-500/30'
+                        : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-xs font-bold text-ink-100">Puppy + Adult</span>
+                      <span className="text-xs font-bold text-brand-300">₹648</span>
+                    </div>
+                    <span className="text-[11px] text-brand-400 mt-1 font-medium">Both Tags (35 + 50 mm)</span>
+                    <span className="text-[10px] text-ink-400 mt-0.5">Complete lifetime bundle</span>
+                  </button>
+                </div>
+
+                {/* Sub-selector for Adult Dog size */}
+                {targetStage === 'adult' && (
+                  <div className="mt-2.5 flex items-center gap-2 p-2 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <span className="text-[11px] text-ink-300 font-medium pl-1">Dog Size:</span>
+                    <button
+                      type="button"
+                      onClick={() => setDogSizeVariant('medium')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                        dogSizeVariant === 'medium'
+                          ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40'
+                          : 'text-ink-400 hover:text-ink-200'
+                      }`}
+                    >
+                      Adult / Medium (50 mm)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDogSizeVariant('large')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                        dogSizeVariant === 'large'
+                          ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40'
+                          : 'text-ink-400 hover:text-ink-200'
+                      }`}
+                    >
+                      Very Large Dog (60 mm)
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label
                   htmlFor="tag-pet-name"
@@ -741,10 +858,10 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
               <div className="mt-4 flex items-center justify-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/25 bg-brand-500/10 px-3 py-1.5 text-xs font-semibold text-brand-300">
                   <Clock className="h-3.5 w-3.5" />
-                  ₹{TAG_PRICE} · Launch price
+                  ₹{tagPrice} · {targetStage === 'bundle' ? 'Puppy + Adult Bundle' : 'Single Stage'}
                 </span>
-                <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-semibold text-amber-300">
-                  15% OFF Launch Discount
+                <span className="inline-flex items-center rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1.5 text-[11px] font-semibold text-brand-300">
+                  Size: {tagSizeLabel}
                 </span>
               </div>
               <p className="mt-3 text-center text-[11px] text-ink-500">
@@ -756,6 +873,16 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
           {/* Order summary + purchase path */}
           <div className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 sm:p-6">
             <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">Target</p>
+                <p className="mt-0.5 font-display font-bold text-ink-50 capitalize">
+                  {targetStage === 'bundle' ? 'Puppy + Adult' : targetStage === 'puppy' ? 'Puppy' : 'Adult Dog'}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">Tag Size</p>
+                <p className="mt-0.5 font-display font-bold text-brand-300">{tagSizeLabel}</p>
+              </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">Pet name</p>
                 <p className="mt-0.5 font-display font-bold text-ink-50">{petName.trim() || 'Not set'}</p>
@@ -774,18 +901,19 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
               </div>
               <div className="ml-auto text-right">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-                  Original Price
+                  Price
                 </p>
-                <p className="mt-0.5 font-display text-sm line-through text-ink-400">₹705</p>
-                <p className="font-display text-2xl font-bold text-ink-50">₹{TAG_PRICE}</p>
-                <p className="text-[11px] font-semibold text-amber-300">15% OFF Applied</p>
+                <p className="font-display text-2xl font-bold text-ink-50">₹{tagPrice}</p>
+                <p className="text-[11px] font-semibold text-brand-300">
+                  {targetStage === 'bundle' ? '2-Tag Lifetime Package' : 'Single Tag Package'}
+                </p>
               </div>
             </div>
 
             <div className="mt-4 space-y-1.5 border-t border-white/[0.06] pt-4 text-xs text-ink-300">
               <div className="flex items-center justify-between">
-                <span>Special Offer</span>
-                <span className="font-semibold text-amber-300">15% Discount Applied</span>
+                <span>Smart Tag ({targetStage === 'bundle' ? 'Puppy + Adult' : targetStage === 'puppy' ? 'Puppy (35 mm)' : `Adult (${tagSizeLabel})`})</span>
+                <span className="font-semibold text-ink-100">₹{tagPrice}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Delivery & Handling Fee</span>
@@ -793,7 +921,7 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-ink-200">Total</span>
-                <span className="font-display text-base font-bold text-ink-50">₹{TAG_PRICE + SHIPPING_FEE}</span>
+                <span className="font-display text-base font-bold text-ink-50">₹{totalPrice}</span>
               </div>
               <p className="pt-1 text-[11px] text-ink-500">
                 One-time Smart Tag purchase — not a subscription.
@@ -807,10 +935,10 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
                 className="btn-primary w-full max-w-md justify-center shadow-glow-blue transition-all duration-300 hover:scale-[1.02]"
               >
                 <Tag className="h-4 w-4" />
-                Buy Smart Tag Now — ₹{TAG_PRICE + SHIPPING_FEE}
+                Buy Smart Tag Now — ₹{totalPrice}
               </button>
               <p className="text-center text-[11px] text-ink-400">
-                ₹{TAG_PRICE} (15% OFF) + ₹{SHIPPING_FEE} Delivery. QR is generated instantly with your pet's details!
+                ₹{tagPrice} Smart Tag + ₹{SHIPPING_FEE} Delivery. QR is generated instantly with your pet's details!
               </p>
             </div>
           </div>
@@ -824,9 +952,11 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
         petName={petName}
         shape={shape}
         color={color}
-        price={TAG_PRICE + SHIPPING_FEE}
+        initialStage={targetStage}
+        initialDogSize={dogSizeVariant}
+        price={totalPrice}
         shippingFee={SHIPPING_FEE}
-        tagPrice={TAG_PRICE}
+        tagPrice={tagPrice}
         userId={session?.user?.id}
         userEmail={session?.user?.email}
         onOrderSuccess={(order) => {

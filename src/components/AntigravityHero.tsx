@@ -601,7 +601,7 @@ export function AntigravityHero({
                 className="btn-primary rounded-[4px] px-6 py-3 font-mono text-xs uppercase tracking-wider bg-emerald-400 hover:bg-emerald-300 text-ink-950 font-bold shadow-[0_12px_32px_-6px_rgba(16,185,129,0.35)] transition-all duration-300 hover:scale-[1.02]"
               >
                 <Tag className="h-4 w-4" />
-                Acquire Smart Tag (₹599)
+                Acquire Smart Tag (From ₹324)
               </button>
               <button
                 onClick={() => onNavigate('/explore')}
