@@ -222,8 +222,7 @@ export function AntigravityHero({
             },
           });
 
-          // Phase 1 (0 -> 35% Entrance to Inward Sweep):
-          // Model rotates dynamically while camera tracks inward along a sweeping curve
+          // Phase 1 (0% -> 33.3%): Camera sweeps inward along a curve with organic spring floating idle
           tl.to(
             modelTarget,
             {
@@ -235,8 +234,8 @@ export function AntigravityHero({
               cameraX: isMobile ? 0 : 0.15,
               cameraY: 0.12,
               shadowOpacity: 0.55,
-              keyHue: 0.42, // Shift toward emerald mint
-              fillHue: 0.08, // Shift fill toward terracotta
+              keyHue: 0.42, // Shift toward botanical mint emerald
+              fillHue: 0.08, // Shift fill toward terracotta gold
               rimHue: 0.52,
               keyIntensity: 4.8,
               fillIntensity: 3.6,
@@ -244,8 +243,7 @@ export function AntigravityHero({
             },
             0
           )
-          // Phase 2 (35% -> 70% Exploded Detail Rotation):
-          // Camera tracks laterally, pivoting model across complete reverse angle to expose craft details
+          // Phase 2 (33.3% -> 66.6%): Camera tracks laterally and rotates to expose geometric detail
           .to(
             modelTarget,
             {
@@ -259,16 +257,15 @@ export function AntigravityHero({
               shadowOpacity: 0.65,
               keyHue: 0.52, // Shift key toward cyber neon cyan
               fillHue: 0.44, // Shift fill toward botanical mint
-              rimHue: 0.12, // Vibrant gold halo
+              rimHue: 0.07, // Terracotta gold rim halo
               keyIntensity: 5.0,
               fillIntensity: 3.4,
               rimIntensity: 4.6,
               ease: 'none',
             },
-            0.35
+            0.333
           )
-          // Phase 3 (70% -> 100% Dashboard Pivot Alignment):
-          // Camera aligns orthogonally as canvas settles behind oncoming data showcase
+          // Phase 3 (66.6% -> 100%): Scene aligns orthogonally to stage model behind oncoming panels
           .to(
             modelTarget,
             {
@@ -280,15 +277,15 @@ export function AntigravityHero({
               cameraX: 0,
               cameraY: 0,
               shadowOpacity: 0.8,
-              keyHue: 0.07, // Return to warm sunset gold
-              fillHue: 0.44, // Emerald mint
-              rimHue: 0.51, // Cyan
+              keyHue: 0.07, // Terracotta gold
+              fillHue: 0.44, // Mint emerald
+              rimHue: 0.51, // Cyber cyan
               keyIntensity: 4.4,
               fillIntensity: 3.2,
               rimIntensity: 4.0,
               ease: 'none',
             },
-            0.7
+            0.666
           );
 
           // Dynamic Ambient Aurora Gradient Mesh Parallax
