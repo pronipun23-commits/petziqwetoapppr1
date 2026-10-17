@@ -483,49 +483,52 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       >
         <div className="container-px w-full">
           <div className="max-w-xl text-left pointer-events-auto">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300 mb-4 backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-              <span>Biophilic Cyber-Minimalism</span>
+            {/* Apple-tier Minimalist Pill Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#0B0F12]/60 px-4 py-1.5 text-xs font-medium text-white mb-6 backdrop-blur-xl shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+              <span className="flex h-2 w-2 rounded-full bg-gradient-to-r from-amber-400 to-emerald-400 animate-pulse" />
+              <span className="font-mono uppercase tracking-widest text-[11px] text-amber-300">Biophilic Cyber-Minimalism</span>
+              <span className="text-white/30">|</span>
+              <span className="text-ink-300 text-[11px]">Companion Ecosystem</span>
             </div>
 
-            <h1 ref={headlineRef} className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
+            <h1 ref={headlineRef} className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.06]">
               A smarter voice for the pets you love most.
             </h1>
 
-            <p className="mt-6 text-base sm:text-lg leading-relaxed text-ink-300">
-              Laser-engraved Smart Tag hardware integrated with real-time care intelligence, husbandry encyclopedias, and instant emergency QR profiles.
+            <p className="mt-6 text-base sm:text-lg leading-relaxed text-ink-200 font-normal">
+              Merging living botanical care with laser-engraved Smart Tag hardware, automated vaccination passports, and instant smartphone emergency routing.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
                 onClick={onOrderTag}
-                className="btn-primary text-base shadow-glow transition-transform hover:scale-[1.02]"
+                className="btn-primary text-base shadow-[0_0_28px_rgba(20,184,166,0.45)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_36px_rgba(20,184,166,0.6)]"
               >
                 <Tag className="h-4 w-4" />
                 Order Smart Tag (₹599)
               </button>
               <button
                 onClick={() => onNavigate('/explore')}
-                className="btn-ghost text-base inline-flex items-center gap-2 border border-emerald-500/20 text-emerald-300 hover:border-emerald-500/40"
+                className="btn-ghost text-base inline-flex items-center gap-2 border border-emerald-500/25 bg-emerald-500/[0.04] text-emerald-300 hover:border-emerald-400/50 hover:bg-emerald-500/10 transition-all duration-300"
               >
                 Explore 330 Breeds
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Pillar Stats */}
-            <div className="mt-10 grid grid-cols-3 gap-4 border-t border-white/[0.08] pt-6">
+            {/* Editorial Glassmorphic Metric Bar */}
+            <div className="mt-10 grid grid-cols-3 gap-4 border-t border-white/[0.12] pt-6 backdrop-blur-sm">
               <div>
-                <p className="font-display text-2xl font-bold text-amber-300">330</p>
-                <p className="text-xs text-ink-400 mt-0.5">Pet Breeds</p>
+                <p className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">330</p>
+                <p className="text-xs text-ink-300 mt-0.5 tracking-wide">Pet Breeds</p>
               </div>
               <div>
-                <p className="font-display text-2xl font-bold text-emerald-400">99</p>
-                <p className="text-xs text-ink-400 mt-0.5">Plant Guides</p>
+                <p className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-400">99</p>
+                <p className="text-xs text-ink-300 mt-0.5 tracking-wide">Plant Guides</p>
               </div>
               <div>
-                <p className="font-display text-2xl font-bold text-cyan-400">Instant</p>
-                <p className="text-xs text-ink-400 mt-0.5">Emergency QR</p>
+                <p className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-cyan-400">Instant</p>
+                <p className="text-xs text-ink-300 mt-0.5 tracking-wide">Emergency QR</p>
               </div>
             </div>
           </div>
@@ -537,23 +540,23 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         <div className="container-px w-full flex justify-end">
           <div
             ref={layer2Ref}
-            className="max-w-md text-left p-6 sm:p-8 rounded-3xl border border-emerald-500/20 bg-[#0B0F12]/80 backdrop-blur-xl shadow-2xl glass pointer-events-auto transform-gpu will-change-transform"
+            className="max-w-md text-left p-7 sm:p-9 rounded-3xl border border-white/[0.16] bg-[#0B0F12]/85 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6),0_0_30px_rgba(16,185,129,0.15)] glass pointer-events-auto transform-gpu will-change-transform"
           >
-            <span className="chip border-emerald-500/30 text-emerald-300 bg-emerald-500/10 text-xs">
-              <Shield className="h-3.5 w-3.5" />
+            <span className="chip border-emerald-400/30 text-emerald-300 bg-emerald-500/10 text-xs px-3 py-1 font-mono uppercase tracking-wider">
+              <Shield className="h-3.5 w-3.5 text-emerald-400" />
               Direct Scan Routing
             </span>
             <h2 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white leading-tight">
               Instant Finder Protection. No App Needed.
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-ink-300">
+            <p className="mt-3 text-sm leading-relaxed text-ink-200">
               When anyone scans your pet’s physical collar tag with any smartphone camera, they are routed to your pet’s emergency profile with immediate call and WhatsApp options.
             </p>
-            <div className="mt-5 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs text-ink-400">
-              <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Laser-etched precision QR
+            <div className="mt-6 pt-4 border-t border-white/[0.1] flex items-center justify-between text-xs text-ink-300">
+              <span className="flex items-center gap-1.5 text-emerald-300 font-medium">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Laser-etched precision QR
               </span>
-              <span>Waterproof Acrylic</span>
+              <span className="font-mono text-[11px] text-ink-400">Waterproof Acrylic</span>
             </div>
           </div>
         </div>
@@ -565,16 +568,19 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
           ref={layer3Ref}
           className="container-px w-full text-center max-w-2xl pointer-events-auto transform-gpu will-change-transform"
         >
-          <div className="p-8 sm:p-10 rounded-3xl border border-cyan-500/20 bg-[#0B0F12]/85 backdrop-blur-2xl shadow-2xl glass">
-            <span className="eyebrow text-cyan-300">Precision Engineering</span>
-            <h2 className="mt-3 section-title text-balance text-gradient">
+          <div className="p-8 sm:p-11 rounded-3xl border border-white/[0.16] bg-[#0B0F12]/90 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.7),0_0_35px_rgba(6,182,212,0.18)] glass">
+            <span className="eyebrow text-cyan-300 font-mono tracking-widest uppercase text-xs">Precision Engineering</span>
+            <h2 className="mt-3 section-title text-balance text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-teal-200">
               Crafted for lifetime companionship
             </h2>
-            <p className="mt-3 text-sm sm:text-base leading-relaxed text-ink-300 max-w-lg mx-auto">
-              Every Petziq Smart Tag is cut from aircraft-grade acrylic and laser engraved for lifetime readability.
+            <p className="mt-3 text-sm sm:text-base leading-relaxed text-ink-200 max-w-lg mx-auto">
+              Every Petziq Smart Tag is cut from aircraft-grade acrylic and laser engraved with micro-precision for lifetime durability and instant optical legibility.
             </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <button onClick={onOrderTag} className="btn-primary text-sm sm:text-base">
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <button
+                onClick={onOrderTag}
+                className="btn-primary text-sm sm:text-base bg-gradient-to-r from-brand-500 via-teal-500 to-cyan-500 hover:from-brand-400 hover:to-cyan-400 shadow-[0_0_28px_rgba(20,184,166,0.5)] transition-all hover:scale-[1.03]"
+              >
                 Customize Shape, Color & Pet Name &rarr;
               </button>
             </div>
