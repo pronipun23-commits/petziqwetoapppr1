@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { Logo } from '@/components/Logo';
 
 interface AuthModalProps {
   open: boolean;
@@ -125,10 +126,8 @@ export function AuthModal({ open, onClose, featureLabel }: AuthModalProps) {
       <div className="relative z-10 w-full max-w-md animate-scale-in">
         <div className="card-surface p-7 sm:p-8">
           <div className="mb-6 flex items-start justify-between">
-            <div className="flex items-center gap-2.5">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand-400 via-teal-400 to-ocean-400 text-white shadow-glow">
-                <PawPrint className="h-5 w-5" strokeWidth={2.5} />
-              </span>
+            <div className="flex items-center gap-3">
+              <Logo size={40} />
               <div>
                 <h2 className="font-display text-lg font-semibold text-ink-50">
                   {mode === 'login' ? 'Welcome back' : 'Join Petziq'}

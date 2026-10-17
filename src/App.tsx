@@ -7,6 +7,7 @@ import FloatingShapes from '@/components/FloatingShapes';
 import { AppNav } from '@/components/AppNav';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { Logo } from '@/components/Logo';
 import { ToastContainer, useToasts } from '@/components/Toast';
 import { LandingPage } from '@/pages/LandingPage';
 import { ExplorePage } from '@/pages/ExplorePage';
@@ -233,14 +234,8 @@ function App() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <img
-            src="/Gemini_Generated_Image_uyaczluyaczluyac.png"
-            alt="Petziq"
-            width={56}
-            height={56}
-            className="rounded-2xl animate-float-slow"
-          />
-          <p className="text-sm text-ink-300">Loading Petziq…</p>
+          <Logo size={64} withWordmark />
+          <p className="text-sm font-mono text-ink-300">Loading Petziq…</p>
         </div>
       </div>
     );

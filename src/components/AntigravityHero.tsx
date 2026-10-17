@@ -437,9 +437,16 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         }}
       />
 
-      {/* Premium Minimal Loading Screen Overlay with Circular Progress Indicator */}
+      {/* Premium Minimal Loading Screen Overlay with Circular Progress Indicator & Brand Shield */}
       {!modelLoaded && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0B0F12]/95 backdrop-blur-md transition-opacity duration-500 pointer-events-none">
+          <div className="mb-4">
+            <img
+              src="/petziq-shield-logo.png"
+              alt="Petziq Shield"
+              className="w-12 h-12 rounded-xl object-contain shadow-glow animate-pulse"
+            />
+          </div>
           <div className="relative flex items-center justify-center">
             {/* SVG Circular Progress Ring */}
             <svg className="h-14 w-14 -rotate-90 transform" viewBox="0 0 64 64">
@@ -483,9 +490,13 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
       >
         <div className="container-px w-full">
           <div className="max-w-xl text-left pointer-events-auto">
-            {/* Apple-tier Minimalist Pill Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#0B0F12]/60 px-4 py-1.5 text-xs font-medium text-white mb-6 backdrop-blur-xl shadow-[0_0_20px_rgba(245,158,11,0.15)]">
-              <span className="flex h-2 w-2 rounded-full bg-gradient-to-r from-amber-400 to-emerald-400 animate-pulse" />
+            {/* Apple-tier Minimalist Pill Badge with Brand Shield */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#0B0F12]/60 px-3.5 py-1.5 text-xs font-medium text-white mb-6 backdrop-blur-xl shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+              <img
+                src="/petziq-shield-logo.png"
+                alt="Petziq"
+                className="w-4 h-4 rounded object-contain shrink-0"
+              />
               <span className="font-mono uppercase tracking-widest text-[11px] text-amber-300">Biophilic Cyber-Minimalism</span>
               <span className="text-white/30">|</span>
               <span className="text-ink-300 text-[11px]">Companion Ecosystem</span>

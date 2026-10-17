@@ -77,9 +77,9 @@ export function MobileAppShowcase() {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <img
-                      src="/Gemini_Generated_Image_uyaczluyaczluyac.png"
-                      alt="Petziq User"
-                      className="w-10 h-10 rounded-2xl object-cover border border-white/20 shadow-md"
+                      src="/petziq-shield-logo.png"
+                      alt="Petziq Shield"
+                      className="w-10 h-10 rounded-2xl object-contain bg-[#0B0F12] p-1 border border-white/20 shadow-md"
                     />
                     <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0B0F12]" />
                   </div>
@@ -296,3 +296,4 @@ export function MobileAppShowcase() {
     </section>
   );
 }
+
