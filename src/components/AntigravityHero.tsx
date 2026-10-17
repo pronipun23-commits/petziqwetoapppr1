@@ -42,20 +42,19 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
     const isTablet = width >= 768 && width < 1024;
     const isTouchViewport = width < 1024;
 
-    // --- 1. Scene & Deep Obsidian Charcoal Canvas Background ---
+    // --- 1. Scene with Transparent Canvas for Rich Background Mesh ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0f12);
 
     // Responsive camera initialization
     const initialFov = isMobile ? 52 : isTablet ? 46 : 40;
     const camera = new THREE.PerspectiveCamera(initialFov, width / height, 0.1, 100);
     camera.position.set(0, 0, isMobile ? 4.9 : 4.0);
 
-    // --- 2. Ultra High-Efficiency WebGL Renderer (Zero Heavy Stencils / Zero Shadows) ---
+    // --- 2. Ultra High-Efficiency WebGL Renderer ---
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: false, // Disabling MSAA guarantees rock-solid 60 FPS on mobile and integrated GPUs
-      alpha: false,
+      antialias: false,
+      alpha: true, // Transparent canvas lets luminous background gradients shine through
       powerPreference: 'high-performance',
       stencil: false,
       depth: true,
@@ -232,6 +231,18 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
             rimHue: 0.22,
             ease: 'none',
           }, 0.5);
+
+          // Dynamic Ambient Background Glow Parallax (Rich Sunset Amber -> Botanical Emerald -> Cyber Cyan)
+          if (glowMeshRef.current) {
+            tl.to(glowMeshRef.current, {
+              background: 'radial-gradient(circle at 75% 35%, rgba(16, 185, 129, 0.32) 0%, rgba(6, 182, 212, 0.22) 40%, rgba(11, 15, 18, 0) 75%)',
+              ease: 'none',
+            }, 0)
+            .to(glowMeshRef.current, {
+              background: 'radial-gradient(circle at 45% 65%, rgba(245, 158, 11, 0.30) 0%, rgba(139, 92, 246, 0.24) 45%, rgba(11, 15, 18, 0) 80%)',
+              ease: 'none',
+            }, 0.5);
+          }
 
           // Card reveal transitions
           if (layer2Ref.current) {
@@ -422,7 +433,7 @@ export function AntigravityHero({ onNavigate, onOrderTag }: AntigravityHeroProps
         className="fixed inset-0 pointer-events-none transition-all duration-700 z-0"
         style={{
           background:
-            'radial-gradient(circle at 65% 25%, rgba(245, 158, 11, 0.16) 0%, rgba(16, 185, 129, 0.14) 40%, rgba(11, 15, 18, 0) 70%)',
+            'radial-gradient(circle at 65% 25%, rgba(245, 158, 11, 0.28) 0%, rgba(16, 185, 129, 0.24) 40%, rgba(6, 182, 212, 0.14) 65%, transparent 85%)',
         }}
       />
 

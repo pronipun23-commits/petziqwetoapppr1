@@ -154,10 +154,10 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
         {/* Bento Grid layout: 3-column desktop -> 2-column tablet -> 1-column mobile */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Bento Card 1: 330 Pet Breeds Deep Intelligence (Span 2 col on Desktop) */}
-          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl">
-            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-brand-400/10 blur-3xl transition group-hover:bg-brand-400/20" />
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-brand-300 uppercase tracking-widest">
-              <PawPrint className="h-4 w-4" />
+          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-950/20 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-amber-400/40 hover:shadow-[0_0_35px_rgba(245,158,11,0.18)]">
+            <div className="absolute top-0 right-0 h-56 w-56 rounded-full bg-amber-500/15 blur-3xl transition group-hover:bg-amber-500/25 pointer-events-none" />
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-300 uppercase tracking-widest">
+              <PawPrint className="h-4 w-4 text-amber-400" />
               <span>Taxonomic Database</span>
             </div>
             <h3 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white">
@@ -168,22 +168,22 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
             </p>
             <div className="mt-7 flex flex-wrap gap-2.5">
               {['14 Categorical Taxonomy', 'Lifespan & Energy Metrics', 'Nutritional Restrictions'].map((pill) => (
-                <span key={pill} className="rounded-full bg-white/[0.04] border border-white/[0.08] px-3 py-1 text-xs text-ink-200">
+                <span key={pill} className="rounded-full bg-amber-500/10 border border-amber-500/25 px-3 py-1 text-xs text-amber-200">
                   {pill}
                 </span>
               ))}
             </div>
             <button
               onClick={() => onNavigate('/explore')}
-              className="mt-8 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-brand-300 transition"
+              className="mt-8 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 group-hover:text-amber-200 transition"
             >
               Explore 330 Breeds <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
 
           {/* Bento Card 2: Botanical 99 Plant Hydration Guard */}
-          <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-2xl">
-            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-emerald-500/10 blur-3xl transition group-hover:bg-emerald-500/20" />
+          <div className="group relative overflow-hidden rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-[0_0_35px_rgba(16,185,129,0.2)]">
+            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl transition group-hover:bg-emerald-500/30 pointer-events-none" />
             <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400 uppercase tracking-widest">
               <Sprout className="h-4 w-4" />
               <span>Flora Sanctuary</span>
@@ -194,24 +194,25 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
             <p className="mt-3 text-sm leading-relaxed text-ink-300">
               Photoperiod lux ranges, soil moisture thresholds, and pet toxicity filters across succulents, monsteras, and ficus trees.
             </p>
-            <div className="mt-6 flex items-center justify-between rounded-2xl bg-white/[0.03] border border-white/[0.06] p-3.5 text-xs">
-              <div className="flex items-center gap-2 text-ink-200">
-                <Droplet className="h-4 w-4 text-cyan-400" />
+            <div className="mt-6 flex items-center justify-between rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-3.5 text-xs">
+              <div className="flex items-center gap-2 text-emerald-200">
+                <Droplet className="h-4 w-4 text-cyan-400 animate-pulse" />
                 <span>Hydration Telemetry</span>
               </div>
               <span className="font-mono text-emerald-400 font-bold">Optimal</span>
             </div>
             <button
               onClick={() => onNavigate('/plants')}
-              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-emerald-300 transition"
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300 group-hover:text-emerald-200 transition"
             >
               Browse Plants <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
 
           {/* Bento Card 3: Instant Emergency Finder Tag */}
-          <div className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl">
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-300 uppercase tracking-widest">
+          <div className="group relative overflow-hidden rounded-3xl border border-cyan-500/25 bg-gradient-to-br from-cyan-950/20 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-[0_0_35px_rgba(6,182,212,0.2)]">
+            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-cyan-500/15 blur-3xl transition group-hover:bg-cyan-500/25 pointer-events-none" />
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-cyan-300 uppercase tracking-widest">
               <Shield className="h-4 w-4" />
               <span>Smart Hardware</span>
             </div>
@@ -221,22 +222,23 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
             <p className="mt-3 text-sm leading-relaxed text-ink-300">
               Laser-engraved aerospace acrylic tags that connect lost pets with owners in seconds without any app download needed by finders.
             </p>
-            <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between text-xs">
-              <span className="text-ink-400 font-mono">PZ-HARDWARE</span>
+            <div className="mt-6 pt-4 border-t border-cyan-500/20 flex items-center justify-between text-xs">
+              <span className="text-cyan-300/80 font-mono">PZ-HARDWARE</span>
               <span className="text-emerald-400 font-semibold">100% Waterproof</span>
             </div>
             <button
               onClick={() => onNavigate('/smart-tags')}
-              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-white group-hover:text-brand-300 transition"
+              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-300 group-hover:text-cyan-200 transition"
             >
               Order Hardware <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
 
           {/* Bento Card 4: Clinical Triage & Care Schedules (Span 2 col on Desktop) */}
-          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-white/[0.12] bg-gradient-to-br from-ink-850/80 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl">
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-brand-300 uppercase tracking-widest">
-              <Activity className="h-4 w-4" />
+          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-violet-500/25 bg-gradient-to-br from-violet-950/20 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-violet-400/40 hover:shadow-[0_0_35px_rgba(139,92,246,0.18)]">
+            <div className="absolute top-0 right-0 h-56 w-56 rounded-full bg-violet-500/15 blur-3xl transition group-hover:bg-violet-500/25 pointer-events-none" />
+            <div className="flex items-center gap-2.5 text-xs font-semibold text-violet-300 uppercase tracking-widest">
+              <Activity className="h-4 w-4 text-violet-400" />
               <span>Preventative Husbandry</span>
             </div>
             <h3 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white">
@@ -246,16 +248,16 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
               Educational behavioral solvers and synchronized daily checklists for meal portions, joint supplements, flea medication, and vet booster milestones.
             </p>
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-xs">
-                <span className="text-ink-400 text-[11px]">Vaccines</span>
+              <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-3 text-xs">
+                <span className="text-violet-300 text-[11px]">Vaccines</span>
                 <p className="font-bold text-white mt-0.5">Automated Sync</p>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-xs">
-                <span className="text-ink-400 text-[11px]">Toxicity Guard</span>
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs">
+                <span className="text-amber-300 text-[11px]">Toxicity Guard</span>
                 <p className="font-bold text-white mt-0.5">Instant Alert</p>
               </div>
-              <div className="col-span-2 sm:col-span-1 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-xs">
-                <span className="text-ink-400 text-[11px]">Reminders</span>
+              <div className="col-span-2 sm:col-span-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs">
+                <span className="text-emerald-300 text-[11px]">Reminders</span>
                 <p className="font-bold text-white mt-0.5">Push & Calendar</p>
               </div>
             </div>
@@ -342,17 +344,20 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
             </button>
           </div>
 
-          {/* Tier 2: Companion Pro (Highlighted Hero Card) */}
-          <div className="relative rounded-3xl border-2 border-white/30 bg-gradient-to-b from-ink-850 via-ink-900 to-ink-950 p-8 flex flex-col justify-between glass shadow-2xl">
+          {/* Tier 2: Companion Pro (Highlighted Hero Card with Radiant Gradient Border & Glow) */}
+          <div className="relative rounded-3xl border-2 border-emerald-400/50 bg-gradient-to-b from-emerald-950/30 via-ink-900/90 to-ink-950 p-8 flex flex-col justify-between glass shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
             {/* Best Value Badge */}
-            <div className="absolute -top-3.5 right-8 rounded-full bg-gradient-to-r from-brand-300 to-white px-3.5 py-1 text-[11px] font-bold text-ink-950 shadow-md">
-              Most Popular
+            <div className="absolute -top-3.5 right-8 rounded-full bg-gradient-to-r from-amber-400 via-emerald-400 to-cyan-400 p-[1px] shadow-lg">
+              <span className="block rounded-full bg-ink-950 px-3.5 py-1 text-[11px] font-bold text-white">
+                ★ Most Popular
+              </span>
             </div>
 
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-brand-300">Companion Pro Ecosystem</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Companion Pro Ecosystem</span>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-display text-4xl font-extrabold text-white">
+                <span className="font-display text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-emerald-200 to-teal-300">
                   {billingCycle === 'yearly' ? '₹149' : '₹199'}
                 </span>
                 <span className="text-xs text-ink-400">/ month</span>
@@ -361,7 +366,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
                 Full digital medical history, automated booster alerts, and synchronized collar tags.
               </p>
 
-              <div className="mt-8 space-y-3 border-t border-white/[0.08] pt-6 text-xs text-ink-100">
+              <div className="mt-8 space-y-3 border-t border-emerald-500/20 pt-6 text-xs text-ink-100">
                 {[
                   'All 330 Breeds + 99 Plant Guides Included',
                   'Smart Collar Tag (Laser Acrylic) Included',
@@ -372,7 +377,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
                 ].map((feat) => (
                   <div key={feat} className="flex items-center gap-2.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                    <span className="font-medium">{feat}</span>
+                    <span className="font-medium text-ink-100">{feat}</span>
                   </div>
                 ))}
               </div>
@@ -380,7 +385,7 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
 
             <button
               onClick={() => onNavigate('/smart-tags')}
-              className="mt-8 btn-primary w-full justify-center py-3.5 text-xs font-bold shadow-glow hover:scale-[1.02]"
+              className="mt-8 btn-primary w-full justify-center py-3.5 text-xs font-bold bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-ink-950 shadow-[0_0_25px_rgba(16,185,129,0.4)] hover:scale-[1.02]"
             >
               Get Companion Pro + Free Collar Tag &rarr;
             </button>
