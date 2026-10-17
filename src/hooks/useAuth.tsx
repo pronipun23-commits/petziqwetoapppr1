@@ -502,7 +502,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { error: null, method: 'firebase_sms' };
           }
           console.error('Firebase Phone Auth error:', res.error);
-          return { error: res.error || 'Failed to dispatch SMS via Firebase.', method: 'firebase_sms' };
+          return { error: res.error || 'Failed to dispatch SMS to the provided number.', method: 'firebase_sms' };
         }
 
         // 2. Supabase SMS provider (if Twilio or MessageBird configured in Supabase dashboard)
@@ -519,28 +519,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               return { error: null, method: 'supabase_sms' };
             }
 
-            console.warn('Supabase signInWithOtp error:', error.message);
+            return { error: error.message || 'Failed to dispatch SMS to your phone.' };
           } catch (e: any) {
-            console.warn('Supabase signInWithOtp caught:', e?.message);
+            return { error: e?.message || 'Failed to dispatch SMS to your phone.' };
           }
         }
 
-        // 3. Fallback: High-protection local cryptographic verification fallback
-        const randomValues = new Uint32Array(1);
-        crypto.getRandomValues(randomValues);
-        const generatedOtp = String((randomValues[0] % 900000) + 100000); // 6-digit number
-        const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min TTL
-
-        const otpPayload = {
-          phone: formattedPhone,
-          code: generatedOtp,
-          expiresAt,
-          attempts: 0,
-        };
-
-        sessionStorage.setItem('petziq_active_otp', JSON.stringify(otpPayload));
-
-        return { error: null, demoCode: generatedOtp, method: 'demo' };
+        return { error: 'SMS service is not configured. Please ensure SMS gateway credentials are provided.' };
       } catch (err: any) {
         return { error: err?.message || 'Failed to dispatch verification code.' };
       }
