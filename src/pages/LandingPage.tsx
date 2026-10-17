@@ -141,130 +141,146 @@ export function LandingPage({ onNavigate, onLogin, onSignUp }: LandingPageProps)
       />
 
       {/* =========================================================================
-          3. RESPONSIVE BENTO GRID WITH SPRING PHYSICS & HOVER GLOWS
+          3. RESPONSIVE BENTO GRID WITH ORGANIC BRUTALIST ARCHITECTURE & HOVER GLOWS
           ========================================================================= */}
-      <section className="container-px mt-28 relative z-20">
-        <div className="mx-auto max-w-2xl text-center mb-14">
-          <div className="inline-flex items-center gap-2 rounded-full border border-pink-500/30 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-cyan-500/10 px-4 py-1 text-xs font-bold text-pink-300 mb-3 backdrop-blur-md shadow-[0_0_15px_rgba(236,72,153,0.2)]">
-            <Sparkles className="h-3.5 w-3.5 text-pink-400 animate-spin" style={{ animationDuration: '6s' }} />
-            <span>Vibrant Care Architecture</span>
+      <section className="container-px mt-32 relative z-20">
+        <div className="max-w-3xl text-left mb-16 pl-1 lg:pl-4">
+          <div className="inline-flex items-center gap-2 rounded-[2px] border border-pink-500/30 bg-[#080C0E]/80 px-3 py-1 mb-4 backdrop-blur-md brutalist-card">
+            <Sparkles className="h-3.5 w-3.5 text-pink-400" />
+            <span className="meta-tag text-pink-300">ARCHITECTURE // SYSTEM_03</span>
           </div>
-          <h2 className="mt-2 font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-emerald-300 via-cyan-300 to-purple-300 leading-tight">
-            Designed for living things.
+          <h2 className="font-editorial text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.02]">
+            Engineered for sentient things.
           </h2>
-          <p className="mt-3 text-base text-ink-200 leading-relaxed font-medium">
-            A joyful, cohesive hardware and software ecosystem bridging biometric pet profiles, clinical medication schedules, and botanical moisture telemetry.
+          <p className="mt-4 text-base sm:text-lg text-ink-200 leading-relaxed max-w-xl font-normal">
+            A physical hardware and biometric software continuum unifying taxonomic behavioral solvers, clinical medication reminders, and botanical moisture telemetry.
           </p>
         </div>
 
-        {/* Bento Grid layout: 3-column desktop -> 2-column tablet -> 1-column mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Bento Grid layout: 3-column desktop -> 2-column tablet -> 1-column mobile with sharp 4px brutalist panes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Bento Card 1: 330 Pet Breeds Deep Intelligence (Span 2 col on Desktop) */}
-          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-950/20 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-amber-400/40 hover:shadow-[0_0_35px_rgba(245,158,11,0.18)]">
-            <div className="absolute top-0 right-0 h-56 w-56 rounded-full bg-amber-500/15 blur-3xl transition group-hover:bg-amber-500/25 pointer-events-none" />
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-300 uppercase tracking-widest">
+          <div className="group lg:col-span-2 relative overflow-hidden brutalist-card brutalist-card-amber p-8 sm:p-10 transition-all duration-300 hover:-translate-y-0.5">
+            {/* 90-Degree Structural Internal Anchor Lines */}
+            <div className="absolute top-0 left-0 w-6 h-px bg-amber-400/80" />
+            <div className="absolute top-0 left-0 w-px h-6 bg-amber-400/80" />
+            <div className="absolute top-0 right-0 h-44 w-44 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+            <div className="flex items-center gap-2 text-amber-300">
               <PawPrint className="h-4 w-4 text-amber-400" />
-              <span>Taxonomic Database</span>
+              <span className="meta-tag text-amber-300">TAXONOMIC_DATABASE // 01</span>
             </div>
-            <h3 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white">
+            <h3 className="mt-5 font-editorial text-2xl sm:text-4xl font-bold text-white leading-tight">
               330 Verified Pet Breed Encyclopedias
             </h3>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-300">
-              Structured temperaments, genetic predispositions, exercise quotients, and coat maintenance schedules across dogs, cats, reptiles, and exotic species.
+            <p className="mt-3 max-w-xl text-sm sm:text-base leading-relaxed text-ink-300">
+              Structured temperaments, genetic predispositions, exercise quotients, and coat maintenance schedules across canines, felines, reptiles, and avian species.
             </p>
-            <div className="mt-7 flex flex-wrap gap-2.5">
+            <div className="mt-8 flex flex-wrap gap-2">
               {['14 Categorical Taxonomy', 'Lifespan & Energy Metrics', 'Nutritional Restrictions'].map((pill) => (
-                <span key={pill} className="rounded-full bg-amber-500/10 border border-amber-500/25 px-3 py-1 text-xs text-amber-200">
+                <span key={pill} className="rounded-[2px] bg-amber-500/10 border border-amber-500/30 px-3 py-1 font-mono text-xs text-amber-200">
                   {pill}
                 </span>
               ))}
             </div>
             <button
               onClick={() => onNavigate('/explore')}
-              className="mt-8 inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 group-hover:text-amber-200 transition"
+              className="mt-8 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-amber-300 hover:text-amber-200 transition"
             >
               Explore 330 Breeds <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
 
           {/* Bento Card 2: Botanical 99 Plant Hydration Guard */}
-          <div className="group relative overflow-hidden rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-950/20 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-[0_0_35px_rgba(16,185,129,0.2)]">
-            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl transition group-hover:bg-emerald-500/30 pointer-events-none" />
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-emerald-400 uppercase tracking-widest">
+          <div className="group relative overflow-hidden brutalist-card brutalist-card-emerald p-8 transition-all duration-300 hover:-translate-y-0.5">
+            {/* 90-Degree Structural Internal Anchor Lines */}
+            <div className="absolute top-0 left-0 w-6 h-px bg-emerald-400/80" />
+            <div className="absolute top-0 left-0 w-px h-6 bg-emerald-400/80" />
+            <div className="absolute top-0 right-0 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+
+            <div className="flex items-center gap-2 text-emerald-400">
               <Sprout className="h-4 w-4" />
-              <span>Flora Sanctuary</span>
+              <span className="meta-tag text-emerald-300">FLORA_TELEMETRY // 02</span>
             </div>
-            <h3 className="mt-4 font-display text-xl font-bold text-white">
+            <h3 className="mt-5 font-editorial text-2xl font-bold text-white leading-tight">
               99 Safe Botanical Guides
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-ink-300">
               Photoperiod lux ranges, soil moisture thresholds, and pet toxicity filters across succulents, monsteras, and ficus trees.
             </p>
-            <div className="mt-6 flex items-center justify-between rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-3.5 text-xs">
+            <div className="mt-6 flex items-center justify-between rounded-[2px] bg-emerald-500/10 border border-emerald-500/25 p-3 text-xs">
               <div className="flex items-center gap-2 text-emerald-200">
-                <Droplet className="h-4 w-4 text-cyan-400 animate-pulse" />
-                <span>Hydration Telemetry</span>
+                <Droplet className="h-3.5 w-3.5 text-cyan-400" />
+                <span className="font-mono text-xs">Hydration Telemetry</span>
               </div>
-              <span className="font-mono text-emerald-400 font-bold">Optimal</span>
+              <span className="meta-tag text-emerald-400 text-[10px]">OPTIMAL</span>
             </div>
             <button
               onClick={() => onNavigate('/plants')}
-              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300 group-hover:text-emerald-200 transition"
+              className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-emerald-300 hover:text-emerald-200 transition"
             >
               Browse Plants <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
 
           {/* Bento Card 3: Instant Emergency Finder Tag */}
-          <div className="group relative overflow-hidden rounded-3xl border border-cyan-500/25 bg-gradient-to-br from-cyan-950/20 via-ink-900/90 to-ink-950 p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-[0_0_35px_rgba(6,182,212,0.2)]">
-            <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-cyan-500/15 blur-3xl transition group-hover:bg-cyan-500/25 pointer-events-none" />
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-cyan-300 uppercase tracking-widest">
+          <div className="group relative overflow-hidden brutalist-card brutalist-card-cyan p-8 transition-all duration-300 hover:-translate-y-0.5">
+            {/* 90-Degree Structural Internal Anchor Lines */}
+            <div className="absolute top-0 left-0 w-6 h-px bg-cyan-400/80" />
+            <div className="absolute top-0 left-0 w-px h-6 bg-cyan-400/80" />
+            <div className="absolute top-0 right-0 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+
+            <div className="flex items-center gap-2 text-cyan-300">
               <Shield className="h-4 w-4" />
-              <span>Smart Hardware</span>
+              <span className="meta-tag text-cyan-300">HARDWARE_SYSTEM // 03</span>
             </div>
-            <h3 className="mt-4 font-display text-xl font-bold text-white">
+            <h3 className="mt-5 font-editorial text-2xl font-bold text-white leading-tight">
               Instant Collar QR Routing
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-ink-300">
               Laser-engraved aerospace acrylic tags that connect lost pets with owners in seconds without any app download needed by finders.
             </p>
             <div className="mt-6 pt-4 border-t border-cyan-500/20 flex items-center justify-between text-xs">
-              <span className="text-cyan-300/80 font-mono">PZ-HARDWARE</span>
-              <span className="text-emerald-400 font-semibold">100% Waterproof</span>
+              <span className="meta-tag text-cyan-300/80 text-[10px]">PZ-HARDWARE</span>
+              <span className="font-mono text-emerald-400 text-xs font-semibold">100% Waterproof</span>
             </div>
             <button
               onClick={() => onNavigate('/smart-tags')}
-              className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-300 group-hover:text-cyan-200 transition"
+              className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-cyan-300 hover:text-cyan-200 transition"
             >
               Order Hardware <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
             </button>
           </div>
 
           {/* Bento Card 4: Clinical Triage & Care Schedules (Span 2 col on Desktop) */}
-          <div className="group lg:col-span-2 relative overflow-hidden rounded-3xl border border-violet-500/25 bg-gradient-to-br from-violet-950/20 via-ink-900/90 to-ink-950 p-7 sm:p-9 glass transition-all duration-500 hover:-translate-y-1 hover:border-violet-400/40 hover:shadow-[0_0_35px_rgba(139,92,246,0.18)]">
-            <div className="absolute top-0 right-0 h-56 w-56 rounded-full bg-violet-500/15 blur-3xl transition group-hover:bg-violet-500/25 pointer-events-none" />
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-violet-300 uppercase tracking-widest">
+          <div className="group lg:col-span-2 relative overflow-hidden brutalist-card brutalist-card-violet p-8 sm:p-10 transition-all duration-300 hover:-translate-y-0.5">
+            {/* 90-Degree Structural Internal Anchor Lines */}
+            <div className="absolute top-0 left-0 w-6 h-px bg-violet-400/80" />
+            <div className="absolute top-0 left-0 w-px h-6 bg-violet-400/80" />
+            <div className="absolute top-0 right-0 h-44 w-44 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
+
+            <div className="flex items-center gap-2 text-violet-300">
               <Activity className="h-4 w-4 text-violet-400" />
-              <span>Preventative Husbandry</span>
+              <span className="meta-tag text-violet-300">PREVENTATIVE_CARE // 04</span>
             </div>
-            <h3 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white">
+            <h3 className="mt-5 font-editorial text-2xl sm:text-4xl font-bold text-white leading-tight">
               Symptom Triage & Active Care Checklists
             </h3>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-300">
-              Educational behavioral solvers and synchronized daily checklists for meal portions, joint supplements, flea medication, and vet booster milestones.
+            <p className="mt-3 max-w-xl text-sm sm:text-base leading-relaxed text-ink-300">
+              Educational behavioral solvers and synchronized daily schedules for meal portions, joint supplements, flea medication, and clinical vaccination milestones.
             </p>
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-3 text-xs">
-                <span className="text-violet-300 text-[11px]">Vaccines</span>
-                <p className="font-bold text-white mt-0.5">Automated Sync</p>
+            <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="rounded-[2px] border border-violet-500/20 bg-violet-500/10 p-3.5 text-xs">
+                <span className="meta-tag text-violet-300 text-[10px]">VACCINES</span>
+                <p className="font-bold text-white mt-1">Automated Sync</p>
               </div>
-              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs">
-                <span className="text-amber-300 text-[11px]">Toxicity Guard</span>
-                <p className="font-bold text-white mt-0.5">Instant Alert</p>
+              <div className="rounded-[2px] border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs">
+                <span className="meta-tag text-amber-300 text-[10px]">TOXICITY_GUARD</span>
+                <p className="font-bold text-white mt-1">Instant Alert</p>
               </div>
-              <div className="col-span-2 sm:col-span-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs">
-                <span className="text-emerald-300 text-[11px]">Reminders</span>
-                <p className="font-bold text-white mt-0.5">Push & Calendar</p>
+              <div className="col-span-2 sm:col-span-1 rounded-[2px] border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs">
+                <span className="meta-tag text-emerald-300 text-[10px]">REMINDERS</span>
+                <p className="font-bold text-white mt-1">Push & Calendar</p>
               </div>
             </div>
           </div>

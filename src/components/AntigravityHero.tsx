@@ -309,16 +309,30 @@ export function AntigravityHero({
             );
           }
 
-          // Card reveal transitions with hardware acceleration
+          // Asynchronous velocity tracking across elements:
+          // Large headline shifts upward at a dynamic offset
+          if (headlineRef.current) {
+            tl.to(
+              headlineRef.current,
+              {
+                y: -120,
+                ease: 'none',
+              },
+              0
+            );
+          }
+
+          // Card reveal transitions with hardware acceleration & intentional 150ms lag offset
           if (layer2Ref.current) {
             gsap.fromTo(
               layer2Ref.current,
-              { opacity: 0, y: 30, filter: 'blur(6px)' },
+              { opacity: 0, y: 50, filter: 'blur(8px)' },
               {
                 opacity: 1,
                 y: 0,
                 filter: 'blur(0px)',
-                duration: 0.7,
+                duration: 0.8,
+                delay: 0.15, // 150ms physical separation offset
                 ease: 'power3.out',
                 scrollTrigger: {
                   trigger: layer2Ref.current,
@@ -332,12 +346,13 @@ export function AntigravityHero({
           if (layer3Ref.current) {
             gsap.fromTo(
               layer3Ref.current,
-              { opacity: 0, y: 30, filter: 'blur(6px)' },
+              { opacity: 0, y: 50, filter: 'blur(8px)' },
               {
                 opacity: 1,
                 y: 0,
                 filter: 'blur(0px)',
-                duration: 0.7,
+                duration: 0.8,
+                delay: 0.15, // 150ms physical separation offset
                 ease: 'power3.out',
                 scrollTrigger: {
                   trigger: layer3Ref.current,
@@ -513,14 +528,14 @@ export function AntigravityHero({
         }}
       />
 
-      {/* Premium Minimal Loading Screen Overlay with Circular Progress Indicator */}
+      {/* Luxury Loading Screen Overlay with Architectural Monospace Progress Indicator */}
       {!modelLoaded && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#080C0E]/95 backdrop-blur-md transition-opacity duration-500 pointer-events-none">
           <div className="mb-4">
             <img
               src="/petziq-shield-logo.png"
               alt="Petziq Shield"
-              className="w-12 h-12 rounded-xl object-contain shadow-glow animate-pulse"
+              className="w-12 h-12 rounded object-contain shadow-[0_0_24px_rgba(255,140,66,0.4)] animate-pulse"
             />
           </div>
           <div className="relative flex items-center justify-center">
@@ -531,25 +546,25 @@ export function AntigravityHero({
                 cy="32"
                 r="28"
                 className="stroke-white/10 fill-none"
-                strokeWidth="3"
+                strokeWidth="2"
               />
               <circle
                 cx="32"
                 cy="32"
                 r="28"
                 className="stroke-amber-400 fill-none transition-all duration-200 ease-out"
-                strokeWidth="3"
+                strokeWidth="2"
                 strokeDasharray="175.9"
                 strokeDashoffset={175.9 - (175.9 * loadProgress) / 100}
                 strokeLinecap="round"
               />
             </svg>
-            <span className="absolute font-mono text-xs font-semibold text-white">
+            <span className="absolute font-mono text-xs font-bold text-white tracking-widest">
               {loadProgress}%
             </span>
           </div>
-          <p className="mt-3 text-xs font-mono tracking-widest text-emerald-300 uppercase">
-            Loading Petziq 3D Engine...
+          <p className="mt-3 font-mono text-[11px] tracking-[0.25em] text-emerald-300 uppercase">
+            CALIBRATING_3D_CORE
           </p>
         </div>
       )}
@@ -559,127 +574,149 @@ export function AntigravityHero({
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
 
-      {/* Layer 1: Phase 1 Entrance (0vh - 100vh) */}
+      {/* Layer 1: Phase 1 Entrance (0vh - 100vh) — Asymmetrical Left-Aligned Editorial Architecture */}
       <div
         ref={layer1Ref}
         className="absolute top-0 left-0 w-full h-screen flex items-center z-10 pointer-events-none transform-gpu will-change-transform"
       >
-        <div className="container-px w-full">
-          <div className="max-w-xl text-left pointer-events-auto">
-            {/* Apple-tier Minimalist Pill Badge with Brand Shield */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#080C0E]/70 px-3.5 py-1.5 text-xs font-medium text-white mb-6 backdrop-blur-xl shadow-[0_0_24px_rgba(255,140,66,0.18)]">
+        <div className="w-full pl-[6vw] lg:pl-[8vw] pr-[6vw] lg:pr-[38vw]">
+          <div className="max-w-2xl text-left pointer-events-auto">
+            {/* Auxiliary Functional Metadata Tag in Widely Spaced Monospace */}
+            <div className="inline-flex items-center gap-2.5 rounded-[4px] border border-white/[0.14] bg-[#080C0E]/85 px-3 py-1 mb-6 backdrop-blur-xl brutalist-card-amber">
               <img
                 src="/petziq-shield-logo.png"
                 alt="Petziq"
-                className="w-4 h-4 rounded object-contain shrink-0"
+                className="w-3.5 h-3.5 rounded-[2px] object-contain shrink-0"
               />
-              <span className="font-mono uppercase tracking-widest text-[11px] text-amber-300">
-                Biophilic Cyber-Minimalism
+              <span className="meta-tag text-amber-300">
+                EDITION // 2026.BIO
               </span>
-              <span className="text-white/30">|</span>
-              <span className="text-ink-300 text-[11px]">Companion Ecosystem</span>
+              <span className="text-white/20">|</span>
+              <span className="meta-tag text-ink-300">
+                COMPANION_ECOSYSTEM
+              </span>
             </div>
 
+            {/* Oversized, Tight-Tracked Editorial Serif Headline with Fluid Scaling */}
             <h1
               ref={headlineRef}
-              className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.06]"
+              className="editorial-title font-bold text-white tracking-[-0.035em] text-balance"
             >
-              A smarter voice for the pets you love most.
+              A smarter voice for the pets you hold close.
             </h1>
 
-            <p className="mt-6 text-base sm:text-lg leading-relaxed text-ink-200 font-normal">
-              Merging living botanical care with laser-engraved Smart Tag hardware, automated vaccination passports, and instant smartphone emergency routing.
+            {/* Editorial Lead Paragraph with Negative Overlap Accent */}
+            <p className="mt-6 text-base sm:text-lg leading-relaxed text-ink-200 font-normal max-w-lg">
+              Merging living botanical telemetry with aerospace-grade laser QR hardware, automated health passports, and instantaneous cellular routing.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
                 onClick={onOrderTag}
-                className="btn-primary text-base shadow-[0_0_28px_rgba(20,184,166,0.45)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_36px_rgba(20,184,166,0.6)]"
+                className="btn-primary rounded-[4px] px-6 py-3 font-mono text-xs uppercase tracking-wider shadow-[0_12px_32px_-6px_rgba(255,140,66,0.4)] transition-all duration-300 hover:scale-[1.02]"
               >
                 <Tag className="h-4 w-4" />
-                Order Smart Tag (₹599)
+                Acquire Smart Tag (₹599)
               </button>
               <button
                 onClick={() => onNavigate('/explore')}
-                className="btn-ghost text-base inline-flex items-center gap-2 border border-emerald-500/25 bg-emerald-500/[0.04] text-emerald-300 hover:border-emerald-400/50 hover:bg-emerald-500/10 transition-all duration-300"
+                className="btn-ghost rounded-[4px] px-5 py-3 font-mono text-xs uppercase tracking-wider inline-flex items-center gap-2 border border-emerald-500/30 bg-emerald-500/[0.06] text-emerald-300 hover:border-emerald-400/60 hover:bg-emerald-500/12 transition-all duration-300"
               >
                 Explore 330 Breeds
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
 
-            {/* Editorial Metric Bar */}
-            <div className="mt-10 grid grid-cols-3 gap-4 border-t border-white/[0.12] pt-6 backdrop-blur-sm">
-              <div>
-                <p className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">
+            {/* Editorial Architectural Metrics Bar with Low-Radius Borders */}
+            <div className="mt-10 grid grid-cols-3 gap-0 border border-white/[0.12] rounded-[4px] bg-[#080C0E]/70 backdrop-blur-md divide-x divide-white/[0.12] max-w-lg">
+              <div className="p-3.5 sm:p-4">
+                <p className="font-editorial text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">
                   330
                 </p>
-                <p className="text-xs text-ink-300 mt-0.5 tracking-wide">Pet Breeds</p>
+                <p className="meta-tag text-ink-400 mt-1">PET_TAXA</p>
               </div>
-              <div>
-                <p className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-400">
+              <div className="p-3.5 sm:p-4">
+                <p className="font-editorial text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-400">
                   99
                 </p>
-                <p className="text-xs text-ink-300 mt-0.5 tracking-wide">Plant Guides</p>
+                <p className="meta-tag text-ink-400 mt-1">FLORA_DOCS</p>
               </div>
-              <div>
-                <p className="font-display text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-cyan-400">
-                  Instant
+              <div className="p-3.5 sm:p-4">
+                <p className="font-editorial text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-cyan-400">
+                  0.2s
                 </p>
-                <p className="text-xs text-ink-300 mt-0.5 tracking-wide">Emergency QR</p>
+                <p className="meta-tag text-ink-400 mt-1">QR_ROUTING</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Layer 2: Phase 2 Exploded Detail Rotation (100vh - 200vh) */}
+      {/* Layer 2: Phase 2 Exploded Detail Rotation (100vh - 200vh) — Sharp Brutalist Right-Aligned Glass Pane */}
       <div className="absolute top-[105vh] left-0 w-full h-screen flex items-center justify-end z-10 pointer-events-none transform-gpu will-change-transform">
-        <div className="container-px w-full flex justify-end">
+        <div className="w-full pr-[6vw] lg:pr-[10vw] pl-[6vw] lg:pl-[44vw] flex justify-end">
           <div
             ref={layer2Ref}
-            className="max-w-md text-left p-7 sm:p-9 rounded-3xl border border-white/[0.16] bg-[#080C0E]/85 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6),0_0_30px_rgba(16,185,129,0.15)] glass pointer-events-auto transform-gpu will-change-transform"
+            className="max-w-lg text-left p-8 sm:p-10 brutalist-card brutalist-card-emerald backdrop-blur-2xl pointer-events-auto transform-gpu will-change-transform relative"
           >
-            <span className="chip border-emerald-400/30 text-emerald-300 bg-emerald-500/10 text-xs px-3 py-1 font-mono uppercase tracking-wider">
+            {/* 90-Degree Structural Internal Anchor Lines */}
+            <div className="absolute top-0 left-0 w-6 h-px bg-emerald-400" />
+            <div className="absolute top-0 left-0 w-px h-6 bg-emerald-400" />
+            <div className="absolute bottom-0 right-0 w-6 h-px bg-emerald-400" />
+            <div className="absolute bottom-0 right-0 w-px h-6 bg-emerald-400" />
+
+            <div className="inline-flex items-center gap-2 rounded-[2px] border border-emerald-400/30 text-emerald-300 bg-emerald-500/10 px-2.5 py-1">
               <Shield className="h-3.5 w-3.5 text-emerald-400" />
-              Direct Scan Routing
-            </span>
-            <h2 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-white leading-tight">
-              Instant Finder Protection. No App Needed.
+              <span className="meta-tag text-[10px]">DIRECT_OPTICAL_ROUTING</span>
+            </div>
+
+            <h2 className="mt-4 font-editorial text-2xl sm:text-3xl font-bold text-white leading-tight">
+              Instant finder protection. Zero application barrier.
             </h2>
+
             <p className="mt-3 text-sm leading-relaxed text-ink-200">
-              When anyone scans your pet's physical collar tag with any smartphone camera, they are routed to your pet's emergency profile with immediate call and WhatsApp options.
+              When anyone scans your pet&apos;s physical collar tag with any native smartphone camera, they are routed to your pet&apos;s emergency profile with immediate telephone and WhatsApp routing options.
             </p>
-            <div className="mt-6 pt-4 border-t border-white/[0.1] flex items-center justify-between text-xs text-ink-300">
+
+            <div className="mt-6 pt-4 border-t border-white/[0.1] flex items-center justify-between text-xs">
               <span className="flex items-center gap-1.5 text-emerald-300 font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Laser-etched precision QR
               </span>
-              <span className="font-mono text-[11px] text-ink-400">Waterproof Acrylic</span>
+              <span className="meta-tag text-ink-400 text-[10px]">WATERPROOF_ACRYLIC</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Layer 3: Phase 3 Dashboard Pivot (200vh - 300vh) */}
+      {/* Layer 3: Phase 3 Dashboard Pivot (200vh - 300vh) — Sharp Architectural Hero Card with Multi-Layered Drop Shadows */}
       <div className="absolute top-[205vh] left-0 w-full h-[85vh] flex items-center justify-center z-10 pointer-events-none transform-gpu will-change-transform">
         <div
           ref={layer3Ref}
-          className="container-px w-full text-center max-w-2xl pointer-events-auto transform-gpu will-change-transform"
+          className="container-px w-full text-center max-w-3xl pointer-events-auto transform-gpu will-change-transform"
         >
-          <div className="p-8 sm:p-11 rounded-3xl border border-white/[0.16] bg-[#080C0E]/90 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.7),0_0_35px_rgba(0,240,255,0.18)] glass">
-            <span className="eyebrow text-cyan-300 font-mono tracking-widest uppercase text-xs">
-              Precision Engineering
+          <div className="p-8 sm:p-12 brutalist-card brutalist-card-cyan backdrop-blur-2xl relative">
+            {/* 90-Degree Structural Internal Anchor Lines */}
+            <div className="absolute top-0 left-0 w-8 h-px bg-cyan-400" />
+            <div className="absolute top-0 left-0 w-px h-8 bg-cyan-400" />
+            <div className="absolute bottom-0 right-0 w-8 h-px bg-cyan-400" />
+            <div className="absolute bottom-0 right-0 w-px h-8 bg-cyan-400" />
+
+            <span className="meta-tag text-cyan-300">
+              HARDWARE_SPECIFICATION // MIL_SPEC
             </span>
-            <h2 className="mt-3 section-title text-balance text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-teal-200">
-              Crafted for lifetime companionship
+
+            <h2 className="mt-3 font-editorial text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
+              Crafted for lifetime companionship.
             </h2>
-            <p className="mt-3 text-sm sm:text-base leading-relaxed text-ink-200 max-w-lg mx-auto">
+
+            <p className="mt-4 text-sm sm:text-base leading-relaxed text-ink-200 max-w-xl mx-auto">
               Every Petziq Smart Tag is cut from aircraft-grade acrylic and laser engraved with micro-precision for lifetime durability and instant optical legibility.
             </p>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <button
                 onClick={onOrderTag}
-                className="btn-primary text-sm sm:text-base bg-gradient-to-r from-brand-500 via-teal-500 to-cyan-500 hover:from-brand-400 hover:to-cyan-400 shadow-[0_0_28px_rgba(20,184,166,0.5)] transition-all hover:scale-[1.03]"
+                className="btn-primary rounded-[4px] px-7 py-3 font-mono text-xs uppercase tracking-wider bg-gradient-to-r from-brand-500 via-teal-500 to-cyan-500 hover:from-brand-400 hover:to-cyan-400 shadow-[0_16px_36px_-8px_rgba(0,240,255,0.4)] transition-all hover:scale-[1.02]"
               >
                 Customize Shape, Color & Pet Name &rarr;
               </button>
