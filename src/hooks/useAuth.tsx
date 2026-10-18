@@ -442,9 +442,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userId = state.user?.id || state.profile?.id || 'current';
 
         if (isSupabaseConfigured) {
-          const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
-          if (error) {
-            console.warn('Supabase update profile error, updating local state:', error.message);
+          const schemaMissingColumns = sessionStorage.getItem('petziq_schema_no_phone') === 'true';
+          const remoteUpdates = { ...updates };
+          if (schemaMissingColumns) {
+            delete (remoteUpdates as any).phone;
+            delete (remoteUpdates as any).date_of_birth;
+          }
+
+          if (Object.keys(remoteUpdates).length > 0) {
+            const { error } = await supabase.from('profiles').update(remoteUpdates).eq('id', userId);
+            if (error) {
+              if (error.message?.includes('phone') || error.message?.includes('column') || (error as any).code === '42703') {
+                sessionStorage.setItem('petziq_schema_no_phone', 'true');
+              } else {
+                console.warn('Supabase update profile error, updating local state:', error.message);
+              }
+            }
           }
         }
 
@@ -555,17 +568,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: 'Please enter the complete 6-digit verification code.' };
         }
 
-        // 1. Try Firebase verification first if Firebase is configured
+        // 1. Check active session OTP (e.g. WhatsApp verification) first
+        const rawOtp = sessionStorage.getItem('petziq_active_otp');
+        if (rawOtp) {
+          try {
+            const activeOtp = JSON.parse(rawOtp);
+
+            // Check expiration (10 min TTL)
+            if (Date.now() > activeOtp.expiresAt) {
+              sessionStorage.removeItem('petziq_active_otp');
+              return { error: 'Verification code has expired. Please request a new code.' };
+            }
+
+            // Check attempts limit (Max 3 failed attempts defense)
+            if (activeOtp.attempts >= 3) {
+              sessionStorage.removeItem('petziq_active_otp');
+              return { error: 'Too many incorrect attempts. For your security, this code was locked.' };
+            }
+
+            if (activeOtp.code !== cleanToken) {
+              activeOtp.attempts += 1;
+              sessionStorage.setItem('petziq_active_otp', JSON.stringify(activeOtp));
+              const remaining = 3 - activeOtp.attempts;
+              return { error: `Invalid code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.` };
+            }
+
+            // Verified successfully! Invalidate one-time token immediately
+            sessionStorage.removeItem('petziq_active_otp');
+            await updateProfile({ phone: cleanDigits });
+            return { error: null };
+          } catch {
+            sessionStorage.removeItem('petziq_active_otp');
+          }
+        }
+
+        // 2. Fallback to Firebase verification if active
         if (isFirebaseConfigured) {
           const fbRes = await verifyFirebasePhoneOtp(cleanToken);
           if (fbRes.success) {
             await updateProfile({ phone: cleanDigits });
             return { error: null };
           }
-          console.warn('Firebase verifyPhoneOtp error:', fbRes.error);
         }
 
-        // 2. Try Supabase verifyOtp
+        // 3. Fallback to Supabase SMS verifyOtp if active
         if (isSupabaseConfigured) {
           try {
             const { error } = await supabase.auth.verifyOtp({
@@ -578,44 +624,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               await updateProfile({ phone: cleanDigits });
               return { error: null };
             }
-            console.warn('Supabase verifyOtp error:', error.message);
-          } catch (e: any) {
-            console.warn('Supabase verifyOtp caught:', e?.message);
+          } catch {
+            // ignore
           }
         }
 
-        // 3. Check cryptographic local OTP payload with attempt limits
-        const rawOtp = sessionStorage.getItem('petziq_active_otp');
-        if (!rawOtp) {
-          return { error: 'No active verification code found. Please request a new code.' };
-        }
-
-        const activeOtp = JSON.parse(rawOtp);
-
-        // Check expiration (5 min TTL)
-        if (Date.now() > activeOtp.expiresAt) {
-          sessionStorage.removeItem('petziq_active_otp');
-          return { error: 'Verification code has expired. Please request a new code.' };
-        }
-
-        // Check attempts limit (Max 3 failed attempts defense)
-        if (activeOtp.attempts >= 3) {
-          sessionStorage.removeItem('petziq_active_otp');
-          return { error: 'Too many incorrect attempts. For your security, this code was locked.' };
-        }
-
-        if (activeOtp.code !== cleanToken) {
-          activeOtp.attempts += 1;
-          sessionStorage.setItem('petziq_active_otp', JSON.stringify(activeOtp));
-          const remaining = 3 - activeOtp.attempts;
-          return { error: `Invalid code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.` };
-        }
-
-        // Verified successfully! Invalidate one-time token immediately
-        sessionStorage.removeItem('petziq_active_otp');
-        await updateProfile({ phone: cleanDigits });
-
-        return { error: null };
+        return { error: 'Invalid verification code. Please check and try again.' };
       } catch (err: any) {
         return { error: err?.message || 'Verification failed.' };
       }
