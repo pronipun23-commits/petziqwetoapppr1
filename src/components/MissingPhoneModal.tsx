@@ -115,8 +115,6 @@ export function MissingPhoneModal() {
     }
   };
 
-  const [whatsappCode, setWhatsappCode] = useState<string>('');
-
   const handleStartWhatsAppVerification = () => {
     const clean = phone.replace(/\D/g, '');
     if (clean.length < 10) {
@@ -126,7 +124,6 @@ export function MissingPhoneModal() {
     setError(null);
     // Generate secure 6-digit verification pin
     const randomPin = Math.floor(100000 + Math.random() * 900000).toString();
-    setWhatsappCode(randomPin);
 
     // Save session storage active pin for instant match
     const payload = {
@@ -262,11 +259,26 @@ export function MissingPhoneModal() {
               </button>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs text-ink-300">
-              <p className="font-semibold text-emerald-400">Security Passkey Dispatched</p>
-              <p className="text-[11px] text-ink-400 mt-0.5">
-                Check your WhatsApp message or SMS for your 6-digit verification code and enter it below.
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-ink-200 space-y-1.5">
+              <p className="font-semibold text-emerald-300 flex items-center gap-1.5">
+                <Phone className="h-3.5 w-3.5" /> WhatsApp Opened
               </p>
+              <p className="text-[12px] text-ink-300 leading-relaxed">
+                We opened WhatsApp with your pre-filled 6-digit passkey in the chat input. Check the 6-digit number in that message, then enter it below.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const clean = phone.replace(/\D/g, '');
+                  const stored = sessionStorage.getItem('petziq_active_otp');
+                  const code = stored ? JSON.parse(stored).code : '';
+                  const msg = encodeURIComponent(`Hello Petziq! Please verify my Petziq Companion mobile number (+91 ${clean}). My Security Passkey is: ${code}`);
+                  window.open(`https://wa.me/919600154689?text=${msg}`, '_blank');
+                }}
+                className="text-emerald-400 hover:text-emerald-300 underline font-medium text-[11px] pt-1 inline-block"
+              >
+                Re-open WhatsApp chat &rarr;
+              </button>
             </div>
 
             {/* 6 Digit Inputs */}

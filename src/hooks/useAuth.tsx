@@ -58,15 +58,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(
     async (userId: string): Promise<Profile | null> => {
-      // First attempt query with full fields
-      let res = await supabase
-        .from('profiles')
-        .select('id, full_name, pet_name, created_at, role, phone, date_of_birth')
-        .eq('id', userId)
-        .maybeSingle();
+      // Check if schema was previously detected to lack phone/date_of_birth
+      const schemaMissingColumns = sessionStorage.getItem('petziq_schema_no_phone') === 'true';
 
-      // If schema is missing phone or date_of_birth in Supabase, gracefully fallback to core profile
-      if (res.error && (res.error.message.includes('column') || res.error.message.includes('phone') || res.error.code === '42703')) {
+      let res;
+      if (!schemaMissingColumns) {
+        res = await supabase
+          .from('profiles')
+          .select('id, full_name, pet_name, created_at, role, phone, date_of_birth')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (res.error) {
+          sessionStorage.setItem('petziq_schema_no_phone', 'true');
+          res = await supabase
+            .from('profiles')
+            .select('id, full_name, pet_name, created_at, role')
+            .eq('id', userId)
+            .maybeSingle();
+        }
+      } else {
         res = await supabase
           .from('profiles')
           .select('id, full_name, pet_name, created_at, role')
