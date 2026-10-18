@@ -73,54 +73,23 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
       ? 'Rising Keeper'
       : 'Novice Companion';
 
-  // Load and seed initial community chat
+  // Load community chat without fake dummy datasets
   useEffect(() => {
     try {
       const raw = localStorage.getItem('petziq_community_messages');
       if (raw) {
-        setMessages(JSON.parse(raw));
+        const parsed: ChatMessage[] = JSON.parse(raw);
+        // Clean out any historical dummy records
+        const realMessages = parsed.filter(
+          (m) => m.id !== 'msg-1' && m.id !== 'msg-2' && m.sender_name !== 'Aarav & Bruno' && m.sender_name !== 'Ananya & Luna'
+        );
+        setMessages(realMessages);
+        localStorage.setItem('petziq_community_messages', JSON.stringify(realMessages));
       } else {
-        const seedMessages: ChatMessage[] = [
-          {
-            id: 'ann-1',
-            sender_id: 'admin-1',
-            sender_name: 'Petziq Team',
-            sender_rank: 'Verified Admin',
-            sender_xp: 5000,
-            is_admin: true,
-            is_announcement: true,
-            content: 'Welcome to the Petziq Cozy Pet Community! Share stories, swap training tips, and celebrate your pets. For everyone\'s safety, phone numbers, addresses, and private IPs are filtered automatically.',
-            likes: 18,
-            timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
-          },
-          {
-            id: 'msg-1',
-            sender_id: 'user-2',
-            sender_name: 'Aarav & Bruno',
-            sender_rank: 'Master Guardian',
-            sender_xp: 1480,
-            is_admin: false,
-            content: 'Bruno just learned to high-five today after 2 weeks of patience! What treats do your dogs go crazy for?',
-            likes: 9,
-            timestamp: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
-          },
-          {
-            id: 'msg-2',
-            sender_id: 'user-3',
-            sender_name: 'Ananya & Luna',
-            sender_rank: 'Expert Keeper',
-            sender_xp: 920,
-            is_admin: false,
-            content: 'Dehydrated chicken liver strips worked like magic for Luna during her recall training! Highly recommend.',
-            likes: 6,
-            timestamp: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-          },
-        ];
-        setMessages(seedMessages);
-        localStorage.setItem('petziq_community_messages', JSON.stringify(seedMessages));
+        setMessages([]);
       }
     } catch {
-      // ignore
+      setMessages([]);
     }
   }, []);
 

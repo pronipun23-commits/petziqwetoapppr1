@@ -48,46 +48,22 @@ export function ScrapbookPage({ onNavigate }: ScrapbookPageProps) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [description, setDescription] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-
-  // Load memories from localStorage
+  // Load memories from localStorage without dummy seeds
   useEffect(() => {
     try {
       const raw = localStorage.getItem('petziq_pet_memories');
       if (raw) {
-        setMemories(JSON.parse(raw));
+        const parsed: Memory[] = JSON.parse(raw);
+        const real = parsed.filter((m) => m.id !== 'sample-1' && m.id !== 'sample-2');
+        setMemories(real);
+        localStorage.setItem('petziq_pet_memories', JSON.stringify(real));
       } else {
-        // Sample starter memories if user has pets
-        const initialSamples: Memory[] = [
-          {
-            id: 'sample-1',
-            pet_id: pets[0]?.id || 'p-1',
-            pet_name: pets[0]?.name || 'Companion',
-            title: 'Welcome Home Day!',
-            category: 'birthday',
-            date: new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString().slice(0, 10),
-            description: 'The first day you walked through our door and stole all of our hearts.',
-            photo_url: null,
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: 'sample-2',
-            pet_id: pets[0]?.id || 'p-1',
-            pet_name: pets[0]?.name || 'Companion',
-            title: 'First Sunshine Walk in the Park',
-            category: 'first_walk',
-            date: new Date(Date.now() - 45 * 24 * 3600 * 1000).toISOString().slice(0, 10),
-            description: 'Chasing squirrels and sniffing every single blade of grass with pure joy.',
-            photo_url: null,
-            created_at: new Date().toISOString(),
-          },
-        ];
-        setMemories(initialSamples);
-        localStorage.setItem('petziq_pet_memories', JSON.stringify(initialSamples));
+        setMemories([]);
       }
     } catch {
-      // ignore
+      setMemories([]);
     }
-  }, [pets]);
+  }, []);
 
   const handleSaveMemory = (e: React.FormEvent) => {
     e.preventDefault();

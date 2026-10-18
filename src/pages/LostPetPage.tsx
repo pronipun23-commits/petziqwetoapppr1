@@ -69,22 +69,9 @@ export function LostPetPage({ onNavigate }: LostPetPageProps) {
         }
       });
 
-      // If empty, provide a clean verified sample demonstration
-      if (merged.length === 0) {
-        merged.push({
-          id: 'demo-1',
-          tag_id: tags[0]?.tag_id || 'PZ-SAMPLE',
-          pet_name: tags[0]?.name || 'Bruno',
-          scanned_at: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
-          location_name: 'Near Indiranagar Metro Station, 100ft Road',
-          finder_name: 'Rohan Sharma',
-          finder_phone: '+91 98450 12345',
-          finder_message: 'Found him resting outside Blue Tokai Coffee. He is wearing the Petziq tag, safe with us!',
-          status: 'reported',
-        });
-      }
-
-      setScanRecords(merged);
+      // Clean out historical demo records
+      const realMerged = merged.filter((m) => m.id !== 'demo-1' && m.finder_name !== 'Rohan Sharma');
+      setScanRecords(realMerged);
     } catch {
       // ignore
     }
