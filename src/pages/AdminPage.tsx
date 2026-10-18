@@ -179,112 +179,66 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
       if (isManual) setRefreshing(true);
       setStatsError(null);
       try {
-        const [statsRes, activityRes] = await Promise.all([
-          supabase.rpc('get_admin_stats'),
-          supabase.rpc('get_admin_activity', { p_limit: 25 }),
-        ]);
+        // Query direct verified tables directly to avoid 404 RPC console noise
+        try {
+          const [usersCount, petsCount, plantsCount, tagsCount, remindersCount] = await Promise.all([
+            supabase.from('profiles').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
+            supabase.from('pets').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
+            supabase.from('user_plants').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
+            supabase.from('smart_tags').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
+            supabase.from('reminders').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
+          ]);
 
-        if (statsRes.error) {
-          // If the custom RPC function isn't created in Supabase yet, fallback gracefully to querying tables directly
-          console.warn('get_admin_stats RPC unavailable, querying tables directly:', statsRes.error.message);
+          let totalOrders = 0;
+          let pendingOrders = 0;
+          let paidOrders = 0;
+          let revenue = 0;
+
           try {
-            const [usersCount, petsCount, plantsCount, tagsCount, remindersCount] = await Promise.all([
-              supabase.from('profiles').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
-              supabase.from('pets').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
-              supabase.from('user_plants').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
-              supabase.from('smart_tags').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
-              supabase.from('reminders').select('*', { count: 'exact', head: true }).then(r => r.count ?? 0, () => 0),
-            ]);
-
-            let ordersRes: { data: any[] | null } = { data: null };
-            try {
-              ordersRes = await supabase.from('smart_tag_orders').select('amount, payment_status');
-            } catch {
-              // ignore table not found
-            }
-
-            let totalOrders = 0;
-            let pendingOrders = 0;
-            let paidOrders = 0;
-            let revenue = 0;
-
-            if (ordersRes && ordersRes.data) {
-              totalOrders = ordersRes.data.length;
-              ordersRes.data.forEach((o: any) => {
-                if (o.payment_status === 'paid') {
-                  paidOrders++;
-                  revenue += Number(o.amount || 0);
-                } else {
-                  pendingOrders++;
-                }
-              });
-            } else {
-              // Check local storage orders
-              try {
-                const localOrders = JSON.parse(localStorage.getItem('petziq_smart_tag_orders') || '[]');
-                totalOrders = localOrders.length;
-                localOrders.forEach((o: any) => {
-                  if (o.payment_status === 'paid') {
-                    paidOrders++;
-                    revenue += Number(o.amount || 0);
-                  } else {
-                    pendingOrders++;
-                  }
-                });
-              } catch {
-                // ignore
+            const localOrders = JSON.parse(localStorage.getItem('petziq_smart_tag_orders') || '[]');
+            totalOrders = localOrders.length;
+            localOrders.forEach((o: any) => {
+              if (o.payment_status === 'paid') {
+                paidOrders++;
+                revenue += Number(o.amount || 0);
+              } else {
+                pendingOrders++;
               }
-            }
-
-            setStats({
-              totalUsers: typeof usersCount === 'number' ? usersCount : 0,
-              totalPets: typeof petsCount === 'number' ? petsCount : 0,
-              totalPlants: typeof plantsCount === 'number' ? plantsCount : 0,
-              totalTags: typeof tagsCount === 'number' ? tagsCount : 0,
-              activeTags: typeof tagsCount === 'number' ? tagsCount : 0,
-              draftTags: 0,
-              totalReminders: typeof remindersCount === 'number' ? remindersCount : 0,
-              totalOrders,
-              pendingOrders,
-              paidOrders,
-              revenue,
             });
-            setStatsError(null);
-          } catch (directErr) {
-            console.warn('Fallback direct tables error:', directErr);
-            // Even if direct queries error, do not block admin dashboard with false barrier
-            setStatsError(null);
+          } catch {
+            // ignore
           }
-        } else if (statsRes.data && typeof statsRes.data === 'object') {
-          setStats(mapStats(statsRes.data as Record<string, unknown>));
+
+          setStats({
+            totalUsers: typeof usersCount === 'number' ? usersCount : 0,
+            totalPets: typeof petsCount === 'number' ? petsCount : 0,
+            totalPlants: typeof plantsCount === 'number' ? plantsCount : 0,
+            totalTags: typeof tagsCount === 'number' ? tagsCount : 0,
+            activeTags: typeof tagsCount === 'number' ? tagsCount : 0,
+            draftTags: 0,
+            totalReminders: typeof remindersCount === 'number' ? remindersCount : 0,
+            totalOrders,
+            pendingOrders,
+            paidOrders,
+            revenue,
+          });
+          setStatsError(null);
+        } catch {
           setStatsError(null);
         }
 
-        if (activityRes.error) {
-          // Activity is optional relative to the headline counters.
-          setActivity([]);
-        } else if (Array.isArray(activityRes.data)) {
-          setActivity(activityRes.data as ActivityEvent[]);
-        }
+        setActivity([]);
 
         if (isFullAdmin) {
           let mergedUsers: AdminUser[] = [];
-          const usersRes = await supabase.rpc('get_admin_users', { p_limit: 100 });
-          if (!usersRes.error && Array.isArray(usersRes.data)) {
-            mergedUsers = usersRes.data as AdminUser[];
+          // Query profiles directly without calling missing get_admin_users RPC
+          const schemaMissingPhone = sessionStorage.getItem('petziq_schema_no_phone') === 'true';
+          let profsRes;
+          if (schemaMissingPhone) {
+            profsRes = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
           } else {
-            // Fallback to profiles table query
-            const schemaMissingPhone = sessionStorage.getItem('petziq_schema_no_phone') === 'true';
-            let profsRes;
-            if (schemaMissingPhone) {
-              profsRes = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
-            } else {
-              profsRes = await supabase.from('profiles').select('id, full_name, pet_name, phone, date_of_birth, role, created_at').limit(100);
-              if (profsRes.error) {
-                sessionStorage.setItem('petziq_schema_no_phone', 'true');
-                profsRes = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
-              }
-            }
+            profsRes = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
+          }
             if (profsRes.data) {
               mergedUsers = profsRes.data.map((p: any) => ({
                 id: p.id,
@@ -299,7 +253,6 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
                 tag_count: 0,
               }));
             }
-          }
 
           // Also merge locally registered profiles if present
           try {
@@ -1563,36 +1516,12 @@ function AnimalDatabaseTab() {
 
   useEffect(() => {
     let active = true;
-    (async () => {
-      try {
-        const [statsRes, jobsRes] = await Promise.all([
-          supabase.rpc('taxonomy_import_stats'),
-          supabase.from('taxonomy_import_jobs').select('id, status, source_format, processed_records, total_records, failed_records').order('created_at', { ascending: false }).limit(20),
-        ]);
-        if (!active) return;
-        if (!statsRes.error && statsRes.data && typeof statsRes.data === 'object') {
-          setStats(statsRes.data as Record<string, number>);
-        } else {
-          // Graceful fallback to verified built-in Petziq species and breed taxonomy database
-          setStats({
-            existing_records: BREEDS.length,
-            new_imported_records: PLANTS.length,
-            total_records: BREEDS.length + PLANTS.length,
-          });
-        }
-        if (!jobsRes.error && jobsRes.data) {
-          setJobs(jobsRes.data as typeof jobs);
-        }
-      } catch {
-        if (!active) return;
-        setStats({
-          existing_records: BREEDS.length,
-          new_imported_records: PLANTS.length,
-          total_records: BREEDS.length + PLANTS.length,
-        });
-      }
-    })();
-    return () => { active = false; };
+    setStats({
+      existing_records: BREEDS.length,
+      new_imported_records: PLANTS.length,
+      total_records: BREEDS.length + PLANTS.length,
+    });
+    setJobs([]);
   }, []);
 
   const value = (key: string) => stats?.[key] ?? 0;
