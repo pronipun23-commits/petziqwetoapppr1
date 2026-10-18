@@ -92,6 +92,7 @@ const PROTECTED_FEATURE_LABELS: Record<string, string> = {
 const ADMIN_ROUTES: Record<string, AdminTab> = {
   admin: 'overview',
   'admin-customers': 'users',
+  'admin-leads': 'leads',
   'admin-orders': 'orders',
   'admin-pets': 'pets',
   'admin-plants': 'plants',

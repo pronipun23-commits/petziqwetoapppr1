@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Shield, Users, PawPrint, Sprout, Tag, Settings, BarChart3, Database,
   ArrowRight, Lock, Home, RefreshCw, Activity, Bell, Clock, QrCode, Download,
+  Mail, MessageSquare, Check, Trash2, Phone,
 } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/lib/supabase';
@@ -18,6 +19,7 @@ interface AdminPageProps {
 export type AdminTab =
   | 'overview'
   | 'users'
+  | 'leads'
   | 'orders'
   | 'pets'
   | 'plants'
@@ -30,6 +32,7 @@ export type AdminTab =
 const FULL_ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Shield }[] = [
   { id: 'overview', label: 'Overview', icon: Home },
   { id: 'users', label: 'Customers', icon: Users },
+  { id: 'leads', label: 'Inquiries & Leads', icon: Mail },
   { id: 'orders', label: 'Orders', icon: Tag },
   { id: 'pets', label: 'Pets', icon: PawPrint },
   { id: 'plants', label: 'Plants', icon: Sprout },
@@ -42,6 +45,7 @@ const FULL_ADMIN_TABS: { id: AdminTab; label: string; icon: typeof Shield }[] = 
 
 const MARKETING_TABS: { id: AdminTab; label: string; icon: typeof Shield }[] = [
   { id: 'overview', label: 'Overview', icon: Home },
+  { id: 'leads', label: 'Inquiries & Leads', icon: Mail },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'team', label: 'Team', icon: Shield },
 ];
@@ -270,9 +274,16 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
             mergedUsers = usersRes.data as AdminUser[];
           } else {
             // Fallback to profiles table query
-            let profsRes = await supabase.from('profiles').select('id, full_name, pet_name, phone, date_of_birth, role, created_at').limit(100);
-            if (profsRes.error && (profsRes.error.message.includes('column') || profsRes.error.message.includes('phone') || profsRes.error.code === '42703')) {
+            const schemaMissingPhone = sessionStorage.getItem('petziq_schema_no_phone') === 'true';
+            let profsRes;
+            if (schemaMissingPhone) {
               profsRes = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
+            } else {
+              profsRes = await supabase.from('profiles').select('id, full_name, pet_name, phone, date_of_birth, role, created_at').limit(100);
+              if (profsRes.error) {
+                sessionStorage.setItem('petziq_schema_no_phone', 'true');
+                profsRes = await supabase.from('profiles').select('id, full_name, pet_name, role, created_at').limit(100);
+              }
             }
             if (profsRes.data) {
               mergedUsers = profsRes.data.map((p: any) => ({
@@ -504,6 +515,9 @@ export function AdminPage({ onNavigate, initialTab = 'overview' }: AdminPageProp
           )}
           {activeTab === 'users' && isFullAdmin && (
             <UsersTab users={users} loading={loading} />
+          )}
+          {activeTab === 'leads' && (
+            <LeadsTab />
           )}
           {activeTab === 'orders' && isFullAdmin && (
             <OrdersTab />
@@ -1600,6 +1614,182 @@ function AnimalDatabaseTab() {
       <div className="card-surface overflow-hidden">
         <div className="border-b border-white/[0.06] px-5 py-4"><h3 className="font-display text-lg font-semibold text-ink-50">Import Jobs</h3></div>
         {jobs.length === 0 ? <p className="p-5 text-sm text-ink-400">No external import jobs in progress. Built-in animal and plant database is active and serving the application.</p> : <div className="divide-y divide-white/[0.06]">{jobs.map((job) => <div key={job.id} className="flex flex-wrap items-center gap-3 px-5 py-4 text-sm"><span className="rounded-full bg-brand-500/10 px-2.5 py-1 text-brand-200">{job.status}</span><span className="text-ink-300">{job.source_format.toUpperCase()}</span><span className="text-ink-400">{job.processed_records} / {job.total_records} processed</span><span className="text-amber-200">{job.failed_records} failed</span></div>)}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ── Leads & Quick Inquiries Tab ── */
+function LeadsTab() {
+  const [leads, setLeads] = useState<any[]>([]);
+
+  const loadLeads = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('petziq_lead_inquiries') || '[]');
+      setLeads(stored);
+    } catch {
+      setLeads([]);
+    }
+  };
+
+  useEffect(() => {
+    loadLeads();
+  }, []);
+
+  const handleToggleContacted = (index: number) => {
+    try {
+      const updated = [...leads];
+      updated[index] = {
+        ...updated[index],
+        contacted: !updated[index].contacted,
+        contactedAt: !updated[index].contacted ? new Date().toISOString() : undefined,
+      };
+      setLeads(updated);
+      localStorage.setItem('petziq_lead_inquiries', JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleDeleteLead = (index: number) => {
+    if (!confirm('Are you sure you want to delete this lead inquiry?')) return;
+    try {
+      const updated = leads.filter((_, i) => i !== index);
+      setLeads(updated);
+      localStorage.setItem('petziq_lead_inquiries', JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="font-display text-xl font-semibold text-ink-50">Quick Inquiries & Leads</h2>
+          <p className="mt-1 text-sm text-ink-400">
+            Prospects who submitted the Quick Lead & Quote Form. Reach out directly via WhatsApp, Phone, or Email.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/20">
+            {leads.length} Inquir{leads.length === 1 ? 'y' : 'ies'}
+          </span>
+          <button
+            onClick={loadLeads}
+            className="btn-secondary py-1.5 px-3 text-xs"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div className="card-surface overflow-hidden">
+        {leads.length === 0 ? (
+          <div className="p-8 text-center">
+            <Mail className="h-10 w-10 text-ink-500 mx-auto mb-3" />
+            <h4 className="font-display text-base font-semibold text-ink-100">No Lead Inquiries Yet</h4>
+            <p className="mt-1 text-xs text-ink-400 max-w-sm mx-auto">
+              Customer inquiries submitted via the Contact or Get a Free Quote form will show up right here with instant callback tools.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-white/[0.06]">
+            {leads.map((lead, idx) => {
+              const cleanPhone = (lead.phone || '').replace(/\D/g, '');
+              const waUrl = cleanPhone ? `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hello ${lead.name || 'there'}! This is the Petziq team following up on your inquiry.`)}` : '#';
+
+              return (
+                <div key={idx} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition">
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="font-display text-base font-bold text-ink-50">{lead.name || 'Anonymous Prospect'}</span>
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                        lead.contacted 
+                          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
+                          : 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                      }`}>
+                        {lead.contacted ? 'Contacted' : 'Needs Follow-up'}
+                      </span>
+                      <span className="rounded-full bg-white/[0.06] px-2.5 py-0.5 text-[10px] text-brand-300 border border-white/5">
+                        {lead.topic || 'General Inquiry'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-300">
+                      {lead.phone && (
+                        <span className="flex items-center gap-1 font-mono">
+                          <Phone className="h-3 w-3 text-ink-400" />
+                          {lead.phone}
+                        </span>
+                      )}
+                      {lead.email && (
+                        <span className="flex items-center gap-1">
+                          <Mail className="h-3 w-3 text-ink-400" />
+                          {lead.email}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-ink-500">
+                        {lead.date ? new Date(lead.date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Recent'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+                    {cleanPhone && (
+                      <a
+                        href={waUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 text-xs font-medium transition inline-flex items-center gap-1.5"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        WhatsApp
+                      </a>
+                    )}
+                    {lead.phone && (
+                      <a
+                        href={`tel:${lead.phone}`}
+                        className="rounded-lg bg-brand-500/15 hover:bg-brand-500/25 text-brand-300 border border-brand-500/30 px-3 py-1.5 text-xs font-medium transition inline-flex items-center gap-1.5"
+                      >
+                        <Phone className="h-3.5 w-3.5" />
+                        Call
+                      </a>
+                    )}
+                    {lead.email && (
+                      <a
+                        href={`mailto:${lead.email}?subject=Petziq%20Follow-up%20re:%20${encodeURIComponent(lead.topic || 'Inquiry')}`}
+                        className="rounded-lg bg-ocean-500/15 hover:bg-ocean-500/25 text-ocean-300 border border-ocean-500/30 px-3 py-1.5 text-xs font-medium transition inline-flex items-center gap-1.5"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        Email
+                      </a>
+                    )}
+                    <button
+                      onClick={() => handleToggleContacted(idx)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition inline-flex items-center gap-1.5 ${
+                        lead.contacted
+                          ? 'border-white/10 text-ink-300 hover:bg-white/5'
+                          : 'bg-emerald-400 text-ink-950 font-bold hover:bg-emerald-300 border-transparent'
+                      }`}
+                      title={lead.contacted ? 'Mark as pending' : 'Mark as contacted'}
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                      {lead.contacted ? 'Done' : 'Mark Done'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteLead(idx)}
+                      className="rounded-lg p-1.5 text-ink-400 hover:text-red-400 hover:bg-red-500/10 transition"
+                      title="Delete lead inquiry"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -95,6 +95,12 @@ export function parseRoute(path: string): {
   } else if (segments[0] === 'tag') {
     page = 'tag';
     if (segments[1]) params.tagId = segments[1];
+  } else if (segments[0] === 'scrapbook') {
+    page = 'scrapbook';
+  } else if (segments[0] === 'lost-pet') {
+    page = 'lost-pet';
+  } else if (segments[0] === 'community') {
+    page = 'community';
   } else if (segments[0] === 'admin') {
     if (segments.length === 1) {
       page = 'admin';
@@ -106,6 +112,8 @@ export function parseRoute(path: string): {
       if (segments[2]) params.tagId = segments[2];
     } else if (segments[1] === 'customers') {
       page = 'admin-customers';
+    } else if (segments[1] === 'leads' || segments[1] === 'inquiries') {
+      page = 'admin-leads';
     } else if (segments[1] === 'pets') {
       page = 'admin-pets';
     } else if (segments[1] === 'plants') {

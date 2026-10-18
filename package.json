@@ -12,8 +12,6 @@
     "typecheck:all": "tsc -b --noEmit"
   },
   "dependencies": {
-    "@firebase/app": "^0.16.3",
-    "@firebase/auth": "^1.13.7",
     "@studio-freight/lenis": "^1.0.42",
     "@supabase/supabase-js": "^2.57.4",
     "@types/three": "^0.186.0",

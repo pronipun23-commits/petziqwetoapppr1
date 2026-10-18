@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { Plus, PawPrint, Loader2, Trash2, Pencil, X, AlertCircle, Camera, Award, Sparkles } from 'lucide-react';
 import { usePets, type Pet } from '@/hooks/usePets';
 import { useTaxonomySearch } from '@/hooks/useTaxonomySearch';
