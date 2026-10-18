@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserProgress } from '@/hooks/useUserProgress';
 import { SectionHeader, EmptyState } from '@/components/ui';
 
 interface Reminder {
@@ -112,6 +113,8 @@ export function RemindersPage() {
   const overdue = active.filter((r) => isOverdue(r.due_at));
   const upcoming = active.filter((r) => isUpcoming(r.due_at));
 
+  const { recordCareTask } = useUserProgress();
+
   const markComplete = async (id: string) => {
     const nowIso = new Date().toISOString();
     setReminders((prev) =>
@@ -119,6 +122,9 @@ export function RemindersPage() {
         r.id === id ? { ...r, is_completed: true, completed_at: nowIso } : r,
       ),
     );
+    // Real XP & Care Streak boost on completing care task
+    await recordCareTask();
+
     await supabase
       .from('reminders')
       .update({ is_completed: true, completed_at: nowIso, updated_at: nowIso })

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Plus, Sprout, Loader2, Trash2, Pencil, X, AlertCircle, Camera, Droplets, MapPin } from 'lucide-react';
 import { useUserPlants, type UserPlant } from '@/hooks/useUserPlants';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserProgress } from '@/hooks/useUserProgress';
 import { supabase } from '@/lib/supabase';
 import { EmptyState } from '@/components/ui';
 import { useToasts, ToastContainer } from '@/components/Toast';
@@ -34,6 +35,7 @@ const EMPTY_FORM: PlantForm = {
 export function MyPlantsPage({ onRequireAuth }: MyPlantsPageProps) {
   const { session } = useAuth();
   const { plants, loading, addPlant, updatePlant, deletePlant } = useUserPlants();
+  const { checkAndAwardAchievements } = useUserProgress();
   const { toasts, dismiss, showToast } = useToasts();
   const [showForm, setShowForm] = useState(false);
   const [editingPlant, setEditingPlant] = useState<UserPlant | null>(null);
@@ -147,7 +149,8 @@ export function MyPlantsPage({ onRequireAuth }: MyPlantsPageProps) {
         setSaving(false);
         return;
       }
-      showToast('success', `${form.name} added to your plant collection!`);
+      showToast('success', `${form.name} added to your plant collection! +50 XP Milestone Achieved!`);
+      checkAndAwardAchievements({ plants: plants.length + 1 });
       setSaving(false);
       closeForm();
     }
