@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import {
   Home, PawPrint, Sprout, Trophy, Bell,
   Heart, User, LogOut, Menu, X, Search,
