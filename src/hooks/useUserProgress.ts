@@ -129,37 +129,40 @@ export function useUserProgress() {
   }, [session]);
 
   const checkAndAwardAchievements = useCallback(
-    async (metrics: { pets?: number; plants?: number }) => {
+    async (metrics: { pets?: number; plants?: number; memories?: number; tags?: number; community?: number }) => {
       if (!session) return;
       const updated = { ...progress };
-      if (metrics.pets !== undefined) {
-        ACHIEVEMENTS.filter((a) => a.metric === 'pets').forEach((a) => {
-          if (metrics.pets! >= a.threshold && !updated.achievements.includes(a.id)) {
+      let xpBonus = 0;
+
+      const checkMetric = (metricName: 'pets' | 'plants' | 'memories' | 'tags' | 'community', count: number, rewardXp: number) => {
+        ACHIEVEMENTS.filter((a) => a.metric === metricName).forEach((a) => {
+          if (count >= a.threshold && !updated.achievements.includes(a.id)) {
             updated.achievements = [...updated.achievements, a.id];
-            updated.xp += 50;
+            xpBonus += rewardXp;
           }
         });
-      }
-      if (metrics.plants !== undefined) {
-        ACHIEVEMENTS.filter((a) => a.metric === 'plants').forEach((a) => {
-          if (metrics.plants! >= a.threshold && !updated.achievements.includes(a.id)) {
-            updated.achievements = [...updated.achievements, a.id];
-            updated.xp += 50;
-          }
-        });
-      }
+      };
+
+      if (metrics.pets !== undefined) checkMetric('pets', metrics.pets, 50);
+      if (metrics.plants !== undefined) checkMetric('plants', metrics.plants, 50);
+      if (metrics.memories !== undefined) checkMetric('memories', metrics.memories, 75);
+      if (metrics.tags !== undefined) checkMetric('tags', metrics.tags, 100);
+      if (metrics.community !== undefined) checkMetric('community', metrics.community, 50);
+
+      updated.xp += xpBonus;
       const allAchievements = checkAchievements(updated);
       updated.achievements = allAchievements;
 
-      const { error: updateError } = await supabase
-        .from('user_progress')
-        .update({
-          xp: updated.xp,
-          achievements: updated.achievements,
-        })
-        .eq('user_id', session.user.id);
-      if (updateError) {
-        console.error('checkAndAwardAchievements update error:', updateError.message);
+      try {
+        await supabase
+          .from('user_progress')
+          .update({
+            xp: updated.xp,
+            achievements: updated.achievements,
+          })
+          .eq('user_id', session.user.id);
+      } catch (err: any) {
+        console.warn('checkAndAwardAchievements update:', err?.message);
       }
 
       setProgress(updated);

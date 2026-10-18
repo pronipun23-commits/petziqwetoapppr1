@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
 import {
   Home, PawPrint, Sprout, Trophy, Bell,
   Heart, User, LogOut, Menu, X, Search,
   BookOpen, Compass, Apple, Tag, HelpCircle, Mail, Shield, Sparkles,
+  Camera, MessageCircle, AlertTriangle, Settings,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -12,19 +12,20 @@ import { Logo } from './Logo';
 interface AppNavProps {
   currentPath: string;
   onNavigate: (path: string) => void;
+  onOpenAccountModal?: () => void;
 }
 
 const NAV_ITEMS = [
   { label: 'Home', path: '/dashboard', icon: Home },
   { label: 'My Pets', path: '/my-pets', icon: PawPrint },
+  { label: 'Scrapbook', path: '/scrapbook', icon: Camera },
+  { label: 'Smart Tags', path: '/smart-tags', icon: Tag },
+  { label: 'Lost Pet Radar', path: '/lost-pet', icon: AlertTriangle },
+  { label: 'Community', path: '/community', icon: MessageCircle },
   { label: 'My Plants', path: '/my-plants', icon: Sprout },
   { label: 'Explore', path: '/explore', icon: Compass },
-  { label: 'Plants', path: '/plants', icon: Sprout },
   { label: 'Reminders', path: '/reminders', icon: Bell },
   { label: 'Care Guides', path: '/care', icon: BookOpen },
-  { label: 'Food Guide', path: '/food', icon: Apple },
-  { label: 'Blog', path: '/blog', icon: BookOpen },
-  { label: 'Smart Tags', path: '/smart-tags', icon: Tag },
   { label: 'Favorites', path: '/favorites', icon: Heart },
   { label: 'Progress', path: '/progress', icon: Trophy },
   { label: 'Admin', path: '/admin', icon: Shield },
@@ -33,9 +34,9 @@ const NAV_ITEMS = [
 const MOBILE_NAV = [
   { label: 'Home', path: '/dashboard', icon: Home },
   { label: 'Pets', path: '/my-pets', icon: PawPrint },
-  { label: 'Smart Tags', path: '/smart-tags', icon: Tag },
-  { label: 'Plants', path: '/my-plants', icon: Sprout },
-  { label: 'Explore', path: '/explore', icon: Compass },
+  { label: 'Scrapbook', path: '/scrapbook', icon: Camera },
+  { label: 'Lounge', path: '/community', icon: MessageCircle },
+  { label: 'Tags', path: '/smart-tags', icon: Tag },
   { label: 'More', path: '#more', icon: Menu },
 ];
 
@@ -100,6 +101,13 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
             About
           </button>
           <button
+            onClick={onOpenAccountModal}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10 hover:text-emerald-200"
+          >
+            <Settings className="h-4.5 w-4.5" style={{ width: 18, height: 18 }} />
+            Customize Account
+          </button>
+          <button
             onClick={() => onNavigate('/contact')}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-300 transition hover:bg-white/[0.06] hover:text-ink-50"
           >
@@ -120,14 +128,19 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
             <LogOut className="h-4.5 w-4.5" style={{ width: 18, height: 18 }} />
             Sign Out
           </button>
-          <div className="mt-2 flex items-center gap-3 rounded-xl bg-white/[0.05] px-3 py-2.5">
+          <div
+            onClick={onOpenAccountModal}
+            className="mt-2 flex items-center gap-3 rounded-xl bg-white/[0.05] px-3 py-2.5 cursor-pointer hover:bg-white/[0.08] transition"
+            title="Click to customize account"
+          >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 via-teal-400 to-ocean-400 text-xs font-bold text-white">
               {firstName.charAt(0).toUpperCase()}
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-ink-50">{profile?.full_name ?? 'User'}</p>
               <p className="truncate text-[10px] text-ink-400">{profile?.pet_name ? `${profile.pet_name}'s human` : 'Pet owner'}</p>
             </div>
+            <Settings className="h-3.5 w-3.5 text-ink-400" />
           </div>
         </div>
       </aside>
@@ -221,6 +234,13 @@ export function AppNav({ currentPath, onNavigate }: AppNavProps) {
                   <span className="text-xs font-medium">{item.label}</span>
                 </button>
               ))}
+              <button
+                onClick={() => { if (onOpenAccountModal) onOpenAccountModal(); setMoreOpen(false); }}
+                className="flex flex-col items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-emerald-300 transition hover:bg-emerald-500/20"
+              >
+                <Settings className="h-5 w-5" />
+                <span className="text-xs font-medium">Account</span>
+              </button>
               <button
                 onClick={() => { onNavigate('/about'); setMoreOpen(false); }}
                 className="flex flex-col items-center gap-2 rounded-xl border border-white/[0.08] p-3 text-ink-200 transition hover:bg-white/[0.06]"

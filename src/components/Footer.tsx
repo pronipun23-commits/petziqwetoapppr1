@@ -40,12 +40,13 @@ export function Footer({ onNavigate }: FooterProps) {
             <ul className="mt-4 space-y-2.5 text-sm">
               {[
                 { label: 'Find a Pet (QR Scan)', path: '/find-pet' },
-                { label: 'All Breeds', path: '/explore' },
-                { label: 'Categories', path: '/categories' },
-                { label: 'Care Guides', path: '/care' },
+                { label: 'Lost Pet Radar', path: '/lost-pet' },
+                { label: 'Pet Memories Scrapbook', path: '/scrapbook' },
+                { label: 'Pet Lovers Community', path: '/community' },
                 { label: 'Smart Tags', path: '/smart-tags' },
+                { label: 'All Breeds', path: '/explore' },
+                { label: 'Care Guides', path: '/care' },
                 { label: 'Blog', path: '/blog' },
-                { label: 'Favorites', path: '/favorites' },
               ].map((l) => (
                 <li key={l.path}>
                   <button

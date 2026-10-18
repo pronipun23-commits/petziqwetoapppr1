@@ -35,8 +35,12 @@ import { SmartTagsPage } from '@/pages/SmartTagsPage';
 import { SmartTagCreatePage } from '@/pages/SmartTagCreatePage';
 import { TagProfilePage } from '@/pages/TagProfilePage';
 import { FindPetPage } from '@/pages/FindPetPage';
+import { ScrapbookPage } from '@/pages/ScrapbookPage';
+import { LostPetPage } from '@/pages/LostPetPage';
+import { CommunityPage } from '@/pages/CommunityPage';
 import { AdminPage, type AdminTab } from '@/pages/AdminPage';
 import { MissingPhoneModal } from '@/components/MissingPhoneModal';
+import { AccountModal } from '@/components/AccountModal';
 import { LegalModal, CookieConsentBanner, type LegalModalType } from '@/components/LegalModals';
 import type { CategoryId } from '@/data/types';
 
@@ -123,6 +127,9 @@ const RENDERED_PAGES = new Set([
   'smart-tags-edit',
   'find-pet',
   'tag',
+  'scrapbook',
+  'lost-pet',
+  'community',
 ]);
 
 function App() {
@@ -134,6 +141,7 @@ function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authFeatureLabel, setAuthFeatureLabel] = useState<string | undefined>();
   const [legalModal, setLegalModal] = useState<LegalModalType>(null);
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
 
   const { page, params } = useMemo(() => parseRoute(path), [path]);
 
@@ -252,7 +260,13 @@ function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <FloatingShapes />
-      {showAppNav && <AppNav currentPath={path} onNavigate={navigateWithAuth} />}
+      {showAppNav && (
+        <AppNav
+          currentPath={path}
+          onNavigate={navigateWithAuth}
+          onOpenAccountModal={() => setAccountModalOpen(true)}
+        />
+      )}
       {showLegacyNav && (
         <Navbar
           currentPath={path}
@@ -398,6 +412,15 @@ function App() {
           {page === 'find-pet' && (
             <FindPetPage onNavigate={navigateWithAuth} />
           )}
+          {page === 'scrapbook' && (
+            <ScrapbookPage onNavigate={navigateWithAuth} />
+          )}
+          {page === 'lost-pet' && (
+            <LostPetPage onNavigate={navigateWithAuth} />
+          )}
+          {page === 'community' && (
+            <CommunityPage onNavigate={navigateWithAuth} />
+          )}
           {page === 'tag' && (
             <TagProfilePage tagId={params.tagId ?? ''} onNavigate={navigateWithAuth} />
           )}
@@ -422,6 +445,11 @@ function App() {
       />
 
       <MissingPhoneModal />
+
+      <AccountModal
+        isOpen={accountModalOpen}
+        onClose={() => setAccountModalOpen(false)}
+      />
 
       <LegalModal type={legalModal} onClose={() => setLegalModal(null)} />
 

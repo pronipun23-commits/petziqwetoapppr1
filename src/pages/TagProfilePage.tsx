@@ -116,28 +116,43 @@ export function TagProfilePage({ tagId, onNavigate }: TagProfilePageProps) {
     fetchTag();
   }, [tagId]);
 
-  // Log scan event so owner is notified
+  // Log scan event with geolocation so owner is notified with real location
   const logScanEvent = async (scannedTag: SmartTag) => {
     try {
-      const scanEvent = {
-        tag_id: scannedTag.tag_id,
-        pet_name: scannedTag.name,
-        scanned_at: new Date().toISOString(),
-        user_agent: navigator.userAgent,
+      const recordScan = (coords?: { latitude: number; longitude: number }) => {
+        const scanEvent = {
+          tag_id: scannedTag.tag_id,
+          pet_name: scannedTag.name,
+          scanned_at: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+          location_name: coords
+            ? `GPS: ${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`
+            : 'QR Tag Scanned by Mobile Device',
+          lat: coords?.latitude,
+          lng: coords?.longitude,
+        };
+
+        const rawScans = localStorage.getItem('petziq_tag_scans') || '[]';
+        const scans = JSON.parse(rawScans);
+        scans.unshift(scanEvent);
+        localStorage.setItem('petziq_tag_scans', JSON.stringify(scans.slice(0, 50)));
+
+        supabase.from('activity_events').insert({
+          event_type: 'tag_scanned',
+          description: `Smart Tag for ${scannedTag.name} (${scannedTag.tag_id}) was scanned.`,
+          metadata: scanEvent,
+        }).then(() => {}, () => {});
       };
 
-      // Store in local scan logs
-      const rawScans = localStorage.getItem('petziq_tag_scans') || '[]';
-      const scans = JSON.parse(rawScans);
-      scans.unshift(scanEvent);
-      localStorage.setItem('petziq_tag_scans', JSON.stringify(scans.slice(0, 50)));
-
-      // If database available, record scan
-      await supabase.from('activity_events').insert({
-        event_type: 'tag_scanned',
-        description: `Smart Tag for ${scannedTag.name} (${scannedTag.tag_id}) was scanned.`,
-        metadata: scanEvent,
-      });
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => recordScan({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+          () => recordScan(),
+          { timeout: 5000, maximumAge: 60000 }
+        );
+      } else {
+        recordScan();
+      }
     } catch {
       // ignore
     }
@@ -582,8 +597,22 @@ export function TagProfilePage({ tagId, onNavigate }: TagProfilePageProps) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-ink-300 mb-1">
-                    Current Location / Sighting Spot
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-ink-300 mb-1 flex items-center justify-between">
+                    <span>Current Location / Sighting Spot</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(
+                            (pos) => setFinderLocation(`GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`),
+                            () => alert('Please enable location permission or type your landmark.')
+                          );
+                        }
+                      }}
+                      className="text-emerald-400 hover:text-emerald-300 text-[10px] lowercase tracking-normal flex items-center gap-1"
+                    >
+                      <MapPin className="h-3 w-3" /> auto-detect GPS
+                    </button>
                   </label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
@@ -591,7 +620,7 @@ export function TagProfilePage({ tagId, onNavigate }: TagProfilePageProps) {
                       type="text"
                       value={finderLocation}
                       onChange={(e) => setFinderLocation(e.target.value)}
-                      placeholder="e.g. Central Park near the fountain"
+                      placeholder="e.g. Central Park near fountain or auto-detect"
                       className="input-field text-sm pl-9"
                     />
                   </div>

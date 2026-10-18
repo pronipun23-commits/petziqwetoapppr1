@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
-import { Plus, PawPrint, Loader2, Trash2, Pencil, X, AlertCircle, Camera } from 'lucide-react';
+import { Plus, PawPrint, Loader2, Trash2, Pencil, X, AlertCircle, Camera, Award, Sparkles } from 'lucide-react';
 import { usePets, type Pet } from '@/hooks/usePets';
 import { useTaxonomySearch } from '@/hooks/useTaxonomySearch';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserProgress } from '@/hooks/useUserProgress';
 import { supabase } from '@/lib/supabase';
 import { EmptyState } from '@/components/ui';
 import { useToasts, ToastContainer } from '@/components/Toast';
@@ -30,6 +30,7 @@ const EMPTY_FORM: PetForm = { name: '', species: 'Dog', breed: '', age: '', gend
 export function MyPetsPage({ onNavigate, onRequireAuth }: MyPetsPageProps) {
   const { session } = useAuth();
   const { pets, loading, addPet, updatePet, deletePet } = usePets();
+  const { checkAndAwardAchievements } = useUserProgress();
   const { toasts, dismiss, showToast } = useToasts();
   const [showForm, setShowForm] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
@@ -151,7 +152,8 @@ export function MyPetsPage({ onNavigate, onRequireAuth }: MyPetsPageProps) {
         setSaving(false);
         return;
       }
-      showToast('success', `${form.name} added to your pet family!`);
+      showToast('success', `${form.name} added to your pet family! +50 XP Milestone Achieved!`);
+      checkAndAwardAchievements({ pets: pets.length + 1 });
       setSaving(false);
       closeForm();
     }

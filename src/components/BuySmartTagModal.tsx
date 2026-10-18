@@ -24,6 +24,7 @@ export interface BuySmartTagModalProps {
   tagPrice?: number;
   userId?: string | null;
   userEmail?: string | null;
+  initialPhotoPreview?: string | null;
   onOrderSuccess: (order: {
     orderNumber: string;
     tagId: string;
@@ -43,6 +44,7 @@ export function BuySmartTagModal({
   shippingFee = 49,
   userId,
   userEmail,
+  initialPhotoPreview = null,
   onOrderSuccess,
 }: BuySmartTagModalProps) {
   const [step, setStep] = useState<'info' | 'shipping' | 'success'>('info');
@@ -63,7 +65,7 @@ export function BuySmartTagModal({
   const [contactEmail, setContactEmail] = useState(userEmail || '');
   const [microchipNumber, setMicrochipNumber] = useState('');
   const [allergiesNotes, setAllergiesNotes] = useState('');
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(initialPhotoPreview);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

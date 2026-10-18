@@ -108,5 +108,5 @@ export interface Achievement {
   description: string;
   icon: string;
   threshold: number;
-  metric: 'pets' | 'plants' | 'tasks' | 'streak' | 'xp';
+  metric: 'pets' | 'plants' | 'tasks' | 'streak' | 'xp' | 'memories' | 'tags' | 'community';
 }

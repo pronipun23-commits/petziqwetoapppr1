@@ -13,10 +13,10 @@ interface NavbarProps {
 const LINKS = [
   { label: 'Home', path: '/' },
   { label: 'Find a Pet', path: '/find-pet' },
-  { label: 'Explore', path: '/explore' },
-  { label: 'Plants', path: '/plants' },
   { label: 'Smart Tags', path: '/smart-tags' },
-  { label: 'Blog', path: '/blog' },
+  { label: 'Scrapbook', path: '/scrapbook' },
+  { label: 'Community', path: '/community' },
+  { label: 'Explore', path: '/explore' },
   { label: 'About', path: '/about' },
 ];
 

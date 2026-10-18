@@ -188,24 +188,104 @@ export function LegalModal({ type, onClose }: LegalModalProps) {
 
           {type === 'contact' && (
             <div className="space-y-4">
-              <p>We are here to help! Reach out directly through any of our official channels:</p>
+              <p className="text-xs sm:text-sm text-ink-300">
+                We are here to help! Reach out directly through official channels or submit your request below for an instant response:
+              </p>
+
               <div className="grid gap-3 sm:grid-cols-2">
                 <a
                   href="mailto:petziq.team@gmail.com"
-                  className="rounded-xl border border-white/10 bg-white/[0.03] p-4 hover:border-brand-500/30 transition block"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 hover:border-brand-500/30 transition block"
                 >
-                  <p className="text-xs font-semibold text-ink-400 uppercase">Email Us</p>
-                  <p className="text-sm font-semibold text-brand-300 mt-1">petziq.team@gmail.com</p>
-                  <p className="text-xs text-ink-400 mt-1">Response time within 24 hours</p>
+                  <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider">Email Us</p>
+                  <p className="text-xs sm:text-sm font-semibold text-brand-300 mt-0.5">petziq.team@gmail.com</p>
+                  <p className="text-[10px] text-ink-500 mt-0.5">Reply within 24 hours</p>
                 </a>
                 <a
                   href="tel:+919876543210"
-                  className="rounded-xl border border-white/10 bg-white/[0.03] p-4 hover:border-brand-500/30 transition block"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 hover:border-brand-500/30 transition block"
                 >
-                  <p className="text-xs font-semibold text-ink-400 uppercase">Customer Line</p>
-                  <p className="text-sm font-semibold text-teal-300 mt-1">+91 98765 43210</p>
-                  <p className="text-xs text-ink-400 mt-1">Mon–Sat, 9am–7pm IST</p>
+                  <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider">Customer Line</p>
+                  <p className="text-xs sm:text-sm font-semibold text-teal-300 mt-0.5">+91 98765 43210</p>
+                  <p className="text-[10px] text-ink-500 mt-0.5">Mon–Sat, 9am–7pm IST</p>
                 </a>
+              </div>
+
+              {/* Lead Capture Form */}
+              <div className="rounded-2xl border border-white/10 bg-ink-950/40 p-4 space-y-3">
+                <h5 className="text-xs font-bold uppercase tracking-wider text-ink-100 flex items-center justify-between">
+                  <span>Quick Lead Inquiry</span>
+                  <span className="text-[10px] text-emerald-400 font-normal">Encrypted & Confidential</span>
+                </h5>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formEl = e.currentTarget;
+                    const data = new FormData(formEl);
+                    const lead = {
+                      name: data.get('name'),
+                      email: data.get('email'),
+                      phone: data.get('phone'),
+                      topic: data.get('topic'),
+                      date: new Date().toISOString(),
+                    };
+                    const existing = JSON.parse(localStorage.getItem('petziq_lead_inquiries') || '[]');
+                    existing.unshift(lead);
+                    localStorage.setItem('petziq_lead_inquiries', JSON.stringify(existing));
+                    alert('Thank you! Our expert team has received your inquiry and will contact you promptly.');
+                    formEl.reset();
+                  }}
+                  className="space-y-2.5 text-xs"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      name="name"
+                      type="text"
+                      placeholder="Your Full Name"
+                      required
+                      className="input-field text-xs py-2"
+                    />
+                    <input
+                      name="phone"
+                      type="tel"
+                      placeholder="Your Mobile Number"
+                      required
+                      className="input-field text-xs py-2 font-mono"
+                    />
+                  </div>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Your Email Address"
+                    required
+                    className="input-field text-xs py-2"
+                  />
+                  <select name="topic" className="input-field text-xs py-2 text-ink-200">
+                    <option value="Smart Tag Order Quote">Smart Tag Order & Customization Quote</option>
+                    <option value="Talk to Care Expert">Talk to Pet Care Expert</option>
+                    <option value="Bulk / Shelter Tag Inquiry">Bulk / NGO / Shelter Smart Tags</option>
+                    <option value="General Support">General Support</option>
+                  </select>
+
+                  <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                    <button
+                      type="submit"
+                      className="btn-primary flex-1 justify-center py-2.5 text-xs font-bold bg-emerald-400 hover:bg-emerald-300 text-ink-950"
+                    >
+                      Get a Free Quote
+                    </button>
+                    <a
+                      href="tel:+919876543210"
+                      className="btn-secondary justify-center py-2.5 text-xs text-center"
+                    >
+                      Talk to an Expert
+                    </a>
+                  </div>
+
+                  <p className="text-[10px] text-ink-500 text-center pt-1 leading-relaxed">
+                    Privacy Reassurance: We never sell or share your contact info. Essential cookies & strict encryption only.
+                  </p>
+                </form>
               </div>
             </div>
           )}
@@ -284,7 +364,31 @@ export function CookieConsentBanner({ onOpenModal }: { onOpenModal: (type: Legal
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
+      <div className="mt-3 flex items-center gap-3 text-[11px] text-ink-400">
+        <button
+          onClick={() => onOpenModal('privacy')}
+          className="text-brand-300 hover:text-brand-200 underline"
+        >
+          Privacy Policy
+        </button>
+        <span>·</span>
+        <button
+          onClick={() => onOpenModal('cookies')}
+          className="text-brand-300 hover:text-brand-200 underline"
+        >
+          Cookies Policy
+        </button>
+        <span>·</span>
+        <a href="#/smart-tags" className="text-ink-300 hover:text-white transition">
+          Smart Tags
+        </a>
+        <span>·</span>
+        <a href="#/contact" className="text-ink-300 hover:text-white transition">
+          Contact Support
+        </a>
+      </div>
+
+      <div className="mt-3.5 flex flex-wrap items-center gap-2 pt-2.5 border-t border-white/10">
         <button
           onClick={acceptAll}
           className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-teal-500 py-2 px-3 text-xs font-semibold text-white hover:opacity-95 transition"

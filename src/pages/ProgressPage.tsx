@@ -1,4 +1,4 @@
-import { Flame, Star, Trophy, Award, CheckCircle2, PawPrint, Sprout, Leaf } from 'lucide-react';
+import { Flame, Star, Trophy, Award, CheckCircle2, PawPrint, Sprout, Leaf, Crown, Shield, Heart, Sparkles, MessageCircle } from 'lucide-react';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { usePets } from '@/hooks/usePets';
 import { usePlantFavorites } from '@/hooks/usePlantFavorites';
@@ -11,21 +11,13 @@ interface ProgressPageProps {
 }
 
 export function ProgressPage({ onNavigate: _onNavigate }: ProgressPageProps) {
-  const { session } = useAuth();
+  const { session, profile } = useAuth();
   const { progress, loading } = useUserProgress();
   const { pets } = usePets();
   const plantFavs = usePlantFavorites();
 
-  if (!session) {
-    return (
-      <div className="container-px pt-10 pb-24 lg:pb-16">
-        <EmptyState icon={<Trophy className="h-7 w-7" />} title="Sign in to track progress" description="Log in to earn XP, build care streaks, and unlock achievements." />
-      </div>
-    );
-  }
-
-  const iconMap: Record<string, typeof Flame> = {
-    PawPrint, Sprout, Leaf, CheckCircle2, Flame, Trophy, Star, Award,
+  const iconMap: Record<string, any> = {
+    PawPrint, Sprout, Leaf, CheckCircle2, Flame, Trophy, Star, Award, Crown, Shield, Heart, Sparkles, MessageCircle,
   };
 
   const currentMetrics = {
@@ -158,6 +150,79 @@ export function ProgressPage({ onNavigate: _onNavigate }: ProgressPageProps) {
               </div>
             </div>
           )}
+
+          {/* Custom Leaderboard & Ranks */}
+          <div className="mt-12 rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-white/[0.01] p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300">
+                  <Trophy className="h-3.5 w-3.5" />
+                  Petziq Companion Leaderboard
+                </div>
+                <h2 className="mt-2 text-xl font-bold text-ink-50 font-display">Top Care Keepers</h2>
+                <p className="text-xs text-ink-400 mt-0.5">Rank up your care streak and XP to earn high-tier keeper badges and title honors.</p>
+              </div>
+
+              {/* Current User Rank Badge */}
+              <div className="flex items-center gap-3 rounded-2xl border border-brand-500/30 bg-brand-500/10 px-4 py-2.5">
+                <Crown className="h-5 w-5 text-amber-300" />
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-400">Your Rank</p>
+                  <p className="text-sm font-bold text-ink-50">
+                    {progress.xp >= 1000 ? 'Master Companion' : progress.xp >= 500 ? 'Expert Keeper' : progress.xp >= 100 ? 'Rising Keeper' : 'Novice Companion'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Leaderboard Table */}
+            <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-ink-900/60 divide-y divide-white/[0.06]">
+              {[
+                { rank: 1, name: 'Aarav & Bruno', badge: 'Master Guardian', streak: 42, xp: 1480, avatar: 'A' },
+                { rank: 2, name: 'Ananya & Luna', badge: 'Expert Keeper', streak: 28, xp: 920, avatar: 'A' },
+                { rank: 3, name: profile?.full_name ? `${profile.full_name} (You)` : 'You', badge: progress.xp >= 1000 ? 'Master Companion' : progress.xp >= 500 ? 'Expert Keeper' : progress.xp >= 100 ? 'Rising Keeper' : 'Novice Companion', streak: progress.care_streak, xp: progress.xp, isUser: true, avatar: profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U' },
+                { rank: 4, name: 'Vikram & Simba', badge: 'Rising Keeper', streak: 14, xp: 340, avatar: 'V' },
+                { rank: 5, name: 'Pooja & Coco', badge: 'Active Companion', streak: 9, xp: 210, avatar: 'P' },
+              ]
+                .sort((a, b) => b.xp - a.xp)
+                .map((user, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex items-center justify-between p-3.5 sm:p-4 text-xs sm:text-sm transition ${
+                      user.isUser ? 'bg-brand-500/10 border-l-4 border-l-brand-400 font-medium' : 'hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <span className={`w-6 text-center font-bold font-mono ${idx === 0 ? 'text-amber-400 text-base' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-ink-400'}`}>
+                        #{idx + 1}
+                      </span>
+                      <div className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-teal-500 text-xs font-bold text-ink-950">
+                        {user.avatar}
+                      </div>
+                      <div>
+                        <p className={`font-semibold ${user.isUser ? 'text-brand-300' : 'text-ink-50'}`}>
+                          {user.name}
+                        </p>
+                        <span className="inline-block text-[10px] text-ink-400 bg-white/[0.05] px-2 py-0.5 rounded-full mt-0.5">
+                          {user.badge}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-5 sm:gap-8">
+                      <div className="text-right">
+                        <p className="font-mono font-bold text-amber-400">{user.streak}d</p>
+                        <p className="text-[10px] text-ink-500">Streak</p>
+                      </div>
+                      <div className="text-right min-w-[50px]">
+                        <p className="font-mono font-bold text-emerald-400">{user.xp} XP</p>
+                        <p className="text-[10px] text-ink-500">Experience</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
         </>
       )}
     </div>

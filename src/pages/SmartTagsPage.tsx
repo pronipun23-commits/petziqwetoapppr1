@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import {
   Tag, QrCode, Shield, ShieldCheck, Sparkles, ArrowRight, Bell, Plus,
   PawPrint, Sprout, Trash2, Pencil, Copy, CheckCircle2,
-  Clock, ExternalLink, Bone, Heart, Square, Check, Crown, Package,
+  Clock, ExternalLink, Bone, Heart, Square, Check, Crown, Package, Camera, Image as ImageIcon,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useSmartTags, type SmartTag, type TagStatus } from '@/hooks/useSmartTags';
+import { useUserProgress } from '@/hooks/useUserProgress';
 import { QRCodeDisplay } from '@/components/QRCodeDisplay';
 import {
   TagProductPreview,
@@ -115,6 +116,7 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
   const { session } = useAuth();
   const { isFullAdmin, isMarketingAdmin, isAdmin } = useAdmin();
   const { tags, loading, error, deleteTag } = useSmartTags();
+  const { checkAndAwardAchievements } = useUserProgress();
   const [qrPreviewTag, setQrPreviewTag] = useState<SmartTag | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [posterIndex, setPosterIndex] = useState(0);
@@ -125,6 +127,7 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
 
   // Tag customizer state — drives the live product preview only.
   const [petName, setPetName] = useState('');
+  const [petPhotoPreview, setPetPhotoPreview] = useState<string | null>(null);
   const [shape, setShape] = useState<TagShape>('round');
   const [color, setColor] = useState<TagColor>('black');
   const [side, setSide] = useState<'front' | 'back'>('front');
@@ -754,6 +757,47 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
                 </p>
               </div>
 
+              {/* Photo of Pet Section */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-300">
+                  Photo of Pet (Profile & Identification)
+                </label>
+                <div className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-3.5">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-ink-800 flex items-center justify-center">
+                    {petPhotoPreview ? (
+                      <img src={petPhotoPreview} alt="Pet preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <PawPrint className="h-7 w-7 text-ink-500" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-ink-200">
+                      {petPhotoPreview ? 'Pet photo attached' : 'Attach your pet\'s picture'}
+                    </p>
+                    <p className="text-[11px] text-ink-400 mt-0.5">
+                      Shown instantly to anyone who scans your Smart Tag QR code.
+                    </p>
+                    <label className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.05] px-2.5 py-1 text-xs font-semibold text-brand-300 hover:bg-white/[0.08] cursor-pointer transition">
+                      <Camera className="h-3.5 w-3.5" />
+                      {petPhotoPreview ? 'Change Photo' : 'Upload Photo'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => setPetPhotoPreview(ev.target?.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-300">Shape</p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -966,9 +1010,11 @@ export function SmartTagsPage({ onNavigate, onRequireAuth }: SmartTagsPageProps)
         tagPrice={tagPrice}
         userId={session?.user?.id}
         userEmail={session?.user?.email}
+        initialPhotoPreview={petPhotoPreview}
         onOrderSuccess={(order) => {
           fetchUserOrders();
           setTrackingOrderNum(order.orderNumber);
+          checkAndAwardAchievements({ tags: 1 });
         }}
       />
 
