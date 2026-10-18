@@ -41,7 +41,7 @@ const MOBILE_NAV = [
   { label: 'More', path: '#more', icon: Menu },
 ];
 
-export function AppNav({ currentPath, onNavigate }: AppNavProps) {
+export function AppNav({ currentPath, onNavigate, onOpenAccountModal }: AppNavProps) {
   const { profile, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   // Admin functionality is not exposed in navigation to non-admin accounts.
