@@ -162,8 +162,28 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'community_messages' },
-        () => {
-          fetchMessages();
+        (payload) => {
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            const updatedRow: any = payload.new;
+            setMessages((prev) =>
+              prev.map((msg) => {
+                if (msg.id === updatedRow.id) {
+                  const reactionsMap: Record<string, string[]> = updatedRow.reactions || {};
+                  const heartUsers = reactionsMap.heart || [];
+                  return {
+                    ...msg,
+                    content: updatedRow.content,
+                    likes: Math.max(updatedRow.likes || 0, heartUsers.length),
+                    reactions: reactionsMap,
+                    liked_by_me: heartUsers.includes(currentUserId),
+                  };
+                }
+                return msg;
+              })
+            );
+          } else {
+            fetchMessages();
+          }
         }
       )
       .subscribe();
