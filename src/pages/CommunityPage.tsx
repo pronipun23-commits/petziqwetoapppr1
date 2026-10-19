@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   MessageCircle, Heart, Send, Sparkles, Shield, AlertCircle,
-  Trophy, Crown, Star, Flame, Users, Bell, Trash2, Pin
+  Trophy, Crown, Star, Flame, Users, Bell, Trash2, Pin, Smile
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -11,6 +11,22 @@ import { supabase } from '@/lib/supabase';
 interface CommunityPageProps {
   onNavigate: (path: string) => void;
 }
+
+export type ReactionType = 'heart' | 'laugh' | 'paw' | 'fire' | 'celebrate';
+
+export interface ReactionItem {
+  type: ReactionType;
+  emoji: string;
+  label: string;
+}
+
+export const AVAILABLE_REACTIONS: ReactionItem[] = [
+  { type: 'heart', emoji: '❤️', label: 'Love' },
+  { type: 'paw', emoji: '🐾', label: 'Paw-some' },
+  { type: 'laugh', emoji: '😂', label: 'Haha' },
+  { type: 'fire', emoji: '🔥', label: 'Super' },
+  { type: 'celebrate', emoji: '🎉', label: 'Celebrate' },
+];
 
 export interface ChatMessage {
   id: string;
@@ -22,6 +38,7 @@ export interface ChatMessage {
   is_announcement?: boolean;
   content: string;
   likes: number;
+  reactions?: Record<string, string[]>; // mapping of reactionType -> array of user_ids who reacted
   liked_by_me?: boolean;
   timestamp: string;
 }
@@ -63,6 +80,9 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
   const [inputText, setInputText] = useState('');
   const [isAnnouncement, setIsAnnouncement] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
+  const [activeReactionPicker, setActiveReactionPicker] = useState<string | null>(null);
+
+  const currentUserId = session?.user?.id || 'anon';
 
   // Compute User Rank based on XP
   const userRank =
@@ -89,25 +109,34 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
 
         if (!error && data && data.length > 0) {
           if (isMounted) {
-            const mapped: ChatMessage[] = data.map((d: any) => ({
-              id: d.id,
-              sender_id: d.sender_id || '',
-              sender_name: d.sender_name || 'Pet Companion',
-              sender_rank: d.sender_rank || 'Novice Companion',
-              sender_xp: d.sender_xp || 0,
-              is_admin: Boolean(d.is_admin),
-              is_announcement: Boolean(d.is_announcement),
-              content: d.content,
-              likes: d.likes || 0,
-              timestamp: d.created_at,
-            }));
+            const mapped: ChatMessage[] = data.map((d: any) => {
+              const reactionsMap: Record<string, string[]> = d.reactions || {};
+              const heartUsers = reactionsMap.heart || [];
+              const isLiked = heartUsers.includes(currentUserId);
+              const totalHeartLikes = Math.max(d.likes || 0, heartUsers.length);
+
+              return {
+                id: d.id,
+                sender_id: d.sender_id || '',
+                sender_name: d.sender_name || 'Pet Companion',
+                sender_rank: d.sender_rank || 'Novice Companion',
+                sender_xp: d.sender_xp || 0,
+                is_admin: Boolean(d.is_admin),
+                is_announcement: Boolean(d.is_announcement),
+                content: d.content,
+                likes: totalHeartLikes,
+                reactions: reactionsMap,
+                liked_by_me: isLiked,
+                timestamp: d.created_at,
+              };
+            });
             setMessages(mapped);
             localStorage.setItem('petziq_community_messages', JSON.stringify(mapped));
             return;
           }
         }
       } catch {
-        // If table is pending or connection fails, fallback to local storage
+        // Fallback to local storage if table query fails
       }
 
       // Fallback: local storage
@@ -143,7 +172,7 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
       isMounted = false;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [currentUserId]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +189,7 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
     const messageId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const newMessage: ChatMessage = {
       id: messageId,
-      sender_id: session?.user?.id || 'anon',
+      sender_id: currentUserId,
       sender_name: profile?.full_name || 'Pet Companion',
       sender_rank: isAdmin ? 'Petziq Admin' : userRank,
       sender_xp: progress.xp,
@@ -168,6 +197,13 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
       is_announcement: Boolean(isAdmin && isAnnouncement),
       content: clean,
       likes: 0,
+      reactions: {
+        heart: [],
+        paw: [],
+        laugh: [],
+        fire: [],
+        celebrate: [],
+      },
       timestamp: new Date().toISOString(),
     };
 
@@ -186,7 +222,7 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
     try {
       await supabase.from('community_messages').insert({
         id: newMessage.id,
-        sender_id: session?.user?.id || null,
+        sender_id: currentUserId !== 'anon' ? currentUserId : null,
         sender_name: newMessage.sender_name,
         sender_rank: newMessage.sender_rank,
         sender_xp: newMessage.sender_xp,
@@ -194,6 +230,7 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
         is_announcement: newMessage.is_announcement,
         content: newMessage.content,
         likes: 0,
+        reactions: newMessage.reactions,
         created_at: newMessage.timestamp,
       });
     } catch (err) {
@@ -201,27 +238,54 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
     }
   };
 
-  const handleLike = async (id: string) => {
-    let nextLikes = 0;
+  // Toggle specific emoji reaction or heart like
+  const handleToggleReaction = async (messageId: string, reactionType: ReactionType) => {
+    let updatedReactions: Record<string, string[]> = {};
+    let totalHeartLikes = 0;
+
     const updated = messages.map((m) => {
-      if (m.id === id) {
-        const liked = !m.liked_by_me;
-        nextLikes = liked ? m.likes + 1 : Math.max(0, m.likes - 1);
+      if (m.id === messageId) {
+        const curReactions: Record<string, string[]> = { ...(m.reactions || {}) };
+        const usersList: string[] = Array.isArray(curReactions[reactionType]) ? [...curReactions[reactionType]] : [];
+        const alreadyReacted = usersList.includes(currentUserId);
+
+        if (alreadyReacted) {
+          curReactions[reactionType] = usersList.filter((u) => u !== currentUserId);
+        } else {
+          curReactions[reactionType] = [...usersList, currentUserId];
+        }
+
+        const isHeart = reactionType === 'heart';
+        const heartCount = curReactions.heart?.length || 0;
+        totalHeartLikes = heartCount;
+
+        updatedReactions = curReactions;
+
         return {
           ...m,
-          liked_by_me: liked,
-          likes: nextLikes,
+          reactions: curReactions,
+          likes: heartCount,
+          liked_by_me: isHeart ? !alreadyReacted : m.liked_by_me,
         };
       }
       return m;
     });
+
     setMessages(updated);
     localStorage.setItem('petziq_community_messages', JSON.stringify(updated));
+    setActiveReactionPicker(null);
 
+    // Persist to Supabase
     try {
-      await supabase.from('community_messages').update({ likes: nextLikes }).eq('id', id);
+      await supabase
+        .from('community_messages')
+        .update({
+          reactions: updatedReactions,
+          likes: totalHeartLikes,
+        })
+        .eq('id', messageId);
     } catch {
-      // Ignore background like error
+      // Local cache already updated
     }
   };
 
@@ -384,18 +448,82 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
               {msg.content}
             </p>
 
-            <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center gap-4 text-xs">
+            {/* Reactions and Likes Bar */}
+            <div className="mt-4 pt-3 border-t border-white/[0.04] flex flex-wrap items-center gap-2 text-xs">
+              {/* Primary Heart Like Button */}
               <button
-                onClick={() => handleLike(msg.id)}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition ${
+                onClick={() => handleToggleReaction(msg.id, 'heart')}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
                   msg.liked_by_me
-                    ? 'text-pink-400 bg-pink-500/15'
-                    : 'text-ink-400 hover:text-pink-300 hover:bg-white/[0.04]'
+                    ? 'text-pink-400 bg-pink-500/15 border border-pink-500/30'
+                    : 'text-ink-400 hover:text-pink-300 hover:bg-white/[0.04] border border-transparent'
                 }`}
+                title="Like with love"
               >
-                <Heart className={`h-3.5 w-3.5 ${msg.liked_by_me ? 'fill-current' : ''}`} />
+                <Heart className={`h-3.5 w-3.5 ${msg.liked_by_me ? 'fill-current text-pink-400' : ''}`} />
                 <span>{msg.likes}</span>
               </button>
+
+              {/* Other Active Emoji Reactions */}
+              {AVAILABLE_REACTIONS.filter((r) => r.type !== 'heart').map((item) => {
+                const users = msg.reactions?.[item.type] || [];
+                const count = users.length;
+                if (count === 0) return null;
+                const isReactedByMe = users.includes(currentUserId);
+
+                return (
+                  <button
+                    key={item.type}
+                    onClick={() => handleToggleReaction(msg.id, item.type)}
+                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs transition border ${
+                      isReactedByMe
+                        ? 'bg-brand-500/20 border-brand-500/40 text-brand-300 font-semibold'
+                        : 'bg-white/[0.04] border-white/[0.08] text-ink-300 hover:bg-white/[0.08]'
+                    }`}
+                    title={`${item.label} (${count})`}
+                  >
+                    <span>{item.emoji}</span>
+                    <span className="font-mono text-[11px]">{count}</span>
+                  </button>
+                );
+              })}
+
+              {/* Reaction Picker Popover Trigger */}
+              <div className="relative ml-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveReactionPicker(activeReactionPicker === msg.id ? null : msg.id)
+                  }
+                  className="inline-flex items-center gap-1 text-ink-400 hover:text-ink-200 hover:bg-white/[0.05] rounded-lg px-2 py-1 text-xs transition"
+                  title="React with emojis"
+                >
+                  <Smile className="h-3.5 w-3.5" />
+                  <span className="text-[11px]">React</span>
+                </button>
+
+                {/* Emoji Selection Bar */}
+                {activeReactionPicker === msg.id && (
+                  <div className="absolute left-0 bottom-full mb-2 z-20 flex items-center gap-1 bg-ink-900/95 border border-white/15 backdrop-blur-md rounded-full px-2.5 py-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                    {AVAILABLE_REACTIONS.map((item) => {
+                      const userReacted = (msg.reactions?.[item.type] || []).includes(currentUserId);
+                      return (
+                        <button
+                          key={item.type}
+                          type="button"
+                          onClick={() => handleToggleReaction(msg.id, item.type)}
+                          className={`p-1.5 rounded-full hover:scale-125 transition text-base ${
+                            userReacted ? 'bg-white/20' : 'hover:bg-white/10'
+                          }`}
+                          title={item.label}
+                        >
+                          {item.emoji}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}
