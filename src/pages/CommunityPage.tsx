@@ -6,6 +6,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { supabase } from '@/lib/supabase';
 
 interface CommunityPageProps {
   onNavigate: (path: string) => void;
@@ -73,27 +74,78 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
       ? 'Rising Keeper'
       : 'Novice Companion';
 
-  // Load community chat without fake dummy datasets
+  // Load community chat from Supabase (shared across all accounts) with fallback to localStorage
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('petziq_community_messages');
-      if (raw) {
-        const parsed: ChatMessage[] = JSON.parse(raw);
-        // Clean out any historical dummy records
-        const realMessages = parsed.filter(
-          (m) => m.id !== 'msg-1' && m.id !== 'msg-2' && m.sender_name !== 'Aarav & Bruno' && m.sender_name !== 'Ananya & Luna'
-        );
-        setMessages(realMessages);
-        localStorage.setItem('petziq_community_messages', JSON.stringify(realMessages));
-      } else {
-        setMessages([]);
+    let isMounted = true;
+
+    async function fetchMessages() {
+      try {
+        // Query shared Supabase database
+        const { data, error } = await supabase
+          .from('community_messages')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (!error && data && data.length > 0) {
+          if (isMounted) {
+            const mapped: ChatMessage[] = data.map((d: any) => ({
+              id: d.id,
+              sender_id: d.sender_id || '',
+              sender_name: d.sender_name || 'Pet Companion',
+              sender_rank: d.sender_rank || 'Novice Companion',
+              sender_xp: d.sender_xp || 0,
+              is_admin: Boolean(d.is_admin),
+              is_announcement: Boolean(d.is_announcement),
+              content: d.content,
+              likes: d.likes || 0,
+              timestamp: d.created_at,
+            }));
+            setMessages(mapped);
+            localStorage.setItem('petziq_community_messages', JSON.stringify(mapped));
+            return;
+          }
+        }
+      } catch {
+        // If table is pending or connection fails, fallback to local storage
       }
-    } catch {
-      setMessages([]);
+
+      // Fallback: local storage
+      try {
+        const raw = localStorage.getItem('petziq_community_messages');
+        if (raw && isMounted) {
+          const parsed: ChatMessage[] = JSON.parse(raw);
+          const realMessages = parsed.filter(
+            (m) => m.id !== 'msg-1' && m.id !== 'msg-2' && m.sender_name !== 'Aarav & Bruno' && m.sender_name !== 'Ananya & Luna'
+          );
+          setMessages(realMessages);
+        }
+      } catch {
+        if (isMounted) setMessages([]);
+      }
     }
+
+    fetchMessages();
+
+    // Setup Supabase Realtime channel for live instant messages across accounts
+    const channel = supabase
+      .channel('public:community_messages')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'community_messages' },
+        () => {
+          fetchMessages();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
     setWarning(null);
@@ -105,8 +157,9 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
       setWarning('For your safety, phone numbers, IP addresses, or home street locations have been filtered.');
     }
 
+    const messageId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const newMessage: ChatMessage = {
-      id: `chat-${Date.now()}`,
+      id: messageId,
       sender_id: session?.user?.id || 'anon',
       sender_name: profile?.full_name || 'Pet Companion',
       sender_rank: isAdmin ? 'Petziq Admin' : userRank,
@@ -118,38 +171,71 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
       timestamp: new Date().toISOString(),
     };
 
+    // Optimistically update UI & localStorage
     const updated = [newMessage, ...messages];
     setMessages(updated);
     localStorage.setItem('petziq_community_messages', JSON.stringify(updated));
 
+    setInputText('');
+    setIsAnnouncement(false);
+
     // Award community milestone XP
     checkAndAwardAchievements({ community: 1 });
 
-    setInputText('');
-    setIsAnnouncement(false);
+    // Sync to Supabase table
+    try {
+      await supabase.from('community_messages').insert({
+        id: newMessage.id,
+        sender_id: session?.user?.id || null,
+        sender_name: newMessage.sender_name,
+        sender_rank: newMessage.sender_rank,
+        sender_xp: newMessage.sender_xp,
+        is_admin: newMessage.is_admin,
+        is_announcement: newMessage.is_announcement,
+        content: newMessage.content,
+        likes: 0,
+        created_at: newMessage.timestamp,
+      });
+    } catch (err) {
+      console.warn('Community message saved locally, awaiting cloud sync:', err);
+    }
   };
 
-  const handleLike = (id: string) => {
+  const handleLike = async (id: string) => {
+    let nextLikes = 0;
     const updated = messages.map((m) => {
       if (m.id === id) {
         const liked = !m.liked_by_me;
+        nextLikes = liked ? m.likes + 1 : Math.max(0, m.likes - 1);
         return {
           ...m,
           liked_by_me: liked,
-          likes: liked ? m.likes + 1 : Math.max(0, m.likes - 1),
+          likes: nextLikes,
         };
       }
       return m;
     });
     setMessages(updated);
     localStorage.setItem('petziq_community_messages', JSON.stringify(updated));
+
+    try {
+      await supabase.from('community_messages').update({ likes: nextLikes }).eq('id', id);
+    } catch {
+      // Ignore background like error
+    }
   };
 
-  const handleDeleteMessage = (id: string) => {
+  const handleDeleteMessage = async (id: string) => {
     if (!isAdmin) return;
     const updated = messages.filter((m) => m.id !== id);
     setMessages(updated);
     localStorage.setItem('petziq_community_messages', JSON.stringify(updated));
+
+    try {
+      await supabase.from('community_messages').delete().eq('id', id);
+    } catch {
+      // Ignore background delete error
+    }
   };
 
   return (
